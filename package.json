@@ -3,7 +3,8 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "npm": "^8.17.0"
+    "npm": "^8.17.0",
+    "typescript": "^4.7.4"
   },
   "name": "ft_transcendence",
   "version": "1.0.0",
