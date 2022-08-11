@@ -1,0 +1,31 @@
+############### DOCKERS ##################
+services:
+
+## PostgreSQL database ##
+  postgres:
+    container_name: postgres
+    image: postgres:transcendence
+    networks:
+      - network
+    volumes:
+      - database:/var/lib/postgresql/data
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+
+############### NETWORKS ##################
+
+networks:
+  network:
+
+
+############### VOLUMES ##################
+
+volumes:
+  database:
+    driver_opts:
+      type: none
+      device: ./data
+      o: bind
