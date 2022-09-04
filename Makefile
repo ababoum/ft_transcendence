@@ -1,10 +1,13 @@
-TSFILES = app.ts
+TSFILES = src/app.ts
 
-JSFILES = app.js
+JSFILES = dist/app.js
 
 
 
 all: $(JSFILES)
 
 $(JSFILES): $(TSFILES)
-	tsc $(TSFILES)
+	tsc
+
+start:
+	npm start

@@ -36,4 +36,14 @@ console.log(combine(2, 3));
 console.log(combine('2', '3'));
 console.log(combine(2, '3'));
 
+// button 
 
+const button = document.querySelector('button');
+
+if (button) {
+	button.addEventListener("click", clickHandler);
+}
+
+function clickHandler () {
+	console.log("Prout !\n");
+}
