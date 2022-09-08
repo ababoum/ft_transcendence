@@ -1,19 +1,24 @@
+version: '3.1'
+
+
 ############### DOCKERS ##################
 services:
 
 ## PostgreSQL database ##
   postgres:
     container_name: postgres
-    image: postgres:transcendence
+    image: postgres
     networks:
       - network
-    volumes:
-      - database:/var/lib/postgresql/data
+    # volumes:
+    #   - database:/var/lib/postgresql/data
     restart: always
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "8080:8080"
+      - '5432:5432'
 
 ############### NETWORKS ##################
 
@@ -23,9 +28,9 @@ networks:
 
 ############### VOLUMES ##################
 
-volumes:
-  database:
-    driver_opts:
-      type: none
-      device: ./data
-      o: bind
+# volumes:
+#   database:
+#     driver_opts:
+#       type: none
+#       device: ./data
+#       o: bind

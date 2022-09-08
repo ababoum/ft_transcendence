@@ -1,7 +1,7 @@
-import {Controller, Get} from '@nestjs/common';
+import {Body, Controller, Get, Post} from '@nestjs/common';
 import {User} from '../user';
 
-@Controller('user')
+@Controller('users')
 export class UsersController {
 
 	private users = [
@@ -14,4 +14,9 @@ export class UsersController {
     getUsers() {
         return this.users;
     }
+
+	@Post('create')
+	createUser(@Body() user: User) {
+		this.users.push(user);
+	}
 }
