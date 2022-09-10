@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './modules/users.module';
+import { UsersModule } from './module/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import entities from './typeorm';
 
 
 
 @Module({
 	imports: [
-		UsersModule,
 		ConfigModule.forRoot({ isGlobal: true }),
 		TypeOrmModule.forRootAsync({
 			imports: [ConfigModule],
@@ -18,11 +18,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 				username: configService.get('DB_USERNAME'),
 				password: configService.get('DB_PASSWORD'),
 				database: configService.get('DB_NAME'),
-				entities: [],
+				entities: entities,
 				synchronize: true,
 			}),
 			inject: [ConfigService],
 		}),
+		UsersModule,
 	],
 	controllers: [],
 	providers: [],
