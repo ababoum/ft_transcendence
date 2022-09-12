@@ -4,7 +4,9 @@
 
 ##### CONFIG #####
 
-config/
+config/backend.env
+config/frontend.env
+config/postgres.env
 
 ##### BACKEND #####
 
