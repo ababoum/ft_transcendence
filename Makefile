@@ -1,22 +1,23 @@
-TSFILES = src/app.ts
+NAME = ping_me_more
 
-JSFILES = dist/app.js
+all: $(NAME)
 
 
-
-all: $(JSFILES)
-
-$(JSFILES): $(TSFILES)
-	tsc
-
-start:
-	npm start
-
-docker:
+$(NAME): 
 	mkdir -p "./data"
-	docker-compose --env-file .env -f docker-compose.yml build
-	docker-compose --env-file .env -f docker-compose.yml up -d
+	docker-compose up --build -d
 
-clean_docker:
-	docker-compose --env-file .env -f docker-compose.yml stop
-	docker-compose --env-file .env -f docker-compose.yml down
+clean:
+	docker-compose stop
+	docker-compose down
+
+fclean: clean
+	rm -rf ./data/
+	docker system prune -f --all --volumes
+	docker system prune -f
+	docker image prune -f --filter 'label=ping_me_more'
+
+
+re: fclean all
+
+.PHONY: linux all clean fclean re

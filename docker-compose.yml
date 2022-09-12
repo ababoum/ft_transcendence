@@ -13,12 +13,25 @@ services:
     # volumes:
     #   - database:/var/lib/postgresql/data
     restart: always
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - ./config/postgres.env
+
+# Backend (nestJS)
+
+  backend:
+    container_name: backend
+    image: backend:ping_me_more
+    build:
+      context: backend/
+    networks:
+      - network
+    restart: always
+    depends_on:
+      - postgres
     ports:
-      - '5432:5432'
+      - '3000:3000'
+    env_file:
+      - ./config/backend.env
 
 ############### NETWORKS ##################
 

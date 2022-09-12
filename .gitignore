@@ -1,3 +1,36 @@
 .env
 .vscode
-node_modules/
+**/node_modules/
+
+##### CONFIG #####
+
+config/
+
+##### BACKEND #####
+
+backend/node_modules
+
+backend/dist
+
+
+##### FRONTEND #####
+
+# dependencies
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
+
+# testing
+frontend/coverage
+
+# production
+frontend/build
+
+# misc
+frontend/.DS_Store
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+frontend/npm-debug.log*
