@@ -7,16 +7,33 @@ services:
 ## PostgreSQL database ##
   postgres:
     container_name: postgres
-    image: postgres
+    image: postgres:14-alpine
     networks:
       - network
-    # volumes:
-    #   - database:/var/lib/postgresql/data
+    volumes:
+      # - /goinfre/${USER}/data/postgres:/var/lib/postgresql/data
+      - /goinfre/${USER}/data:/var/lib/postgresql/data
     restart: always
     env_file:
       - ./config/postgres.env
 
-# Backend (nestJS)
+## Database administration (pgAdmin) ##
+  # pgadmin:
+  #   container_name: pgadmin
+  #   image: dpage/pgadmin4
+  #   ports:
+  #     - '5050:80'
+  #   volumes:
+  #   - /goinfre/${USER}/data/pgadmin:/root/.pgadmin
+  #   env_file:
+  #   - ./config/postgres.env
+  #   restart: always
+  #   networks:
+  #     - network
+  #   depends_on:
+  #     - postgres
+
+## Backend (nestJS) ##
 
   backend:
     container_name: backend
@@ -37,13 +54,3 @@ services:
 
 networks:
   network:
-
-
-############### VOLUMES ##################
-
-# volumes:
-#   database:
-#     driver_opts:
-#       type: none
-#       device: ./data
-#       o: bind
