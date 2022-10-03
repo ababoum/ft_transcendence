@@ -11,8 +11,8 @@ services:
     networks:
       - network
     volumes:
-      # - /goinfre/${USER}/data/postgres:/var/lib/postgresql/data
       - /goinfre/${USER}/data:/var/lib/postgresql/data
+      #- /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
     restart: always
     env_file:
       - ./config/postgres.env
@@ -49,6 +49,20 @@ services:
       - '3000:3000'
     env_file:
       - ./config/backend.env
+
+## Frontend (Svelte) ##
+
+  frontend:
+    container_name: frontend
+    build: frontend/
+    image: frontend
+    networks:
+      - network
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - '8080:8080'
 
 ############### NETWORKS ##################
 
