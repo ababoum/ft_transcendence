@@ -5,6 +5,7 @@ import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
 	const app = await NestFactory.create(ApplicationModule);
+
 	let port: number = + process.env.PORT;
 
 	if (port == null || port == 0) {
@@ -12,7 +13,7 @@ async function bootstrap() {
 	}
 
 	app.use(bodyParser.json());
-	await app.listen(process.env.PORT);
+	await app.listen(port);
 }
 
 
