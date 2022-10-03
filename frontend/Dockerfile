@@ -1,11 +1,19 @@
 FROM node:16.17.0-alpine
 
-RUN mkdir frontend
+WORKDIR /usr/src/app
 
-COPY ./ frontend/
-
-WORKDIR frontend
+COPY rollup.config.js ./
+COPY package*.json ./
 
 RUN npm install
 
-CMD ["npm", "run", "dev"]
+COPY ./src ./src
+COPY ./public ./public
+
+RUN npm run-script build
+
+EXPOSE 8080
+
+ENV HOST=0.0.0.0
+
+CMD [ "npm", "start" ]
