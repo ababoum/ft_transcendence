@@ -6,6 +6,8 @@ COPY rollup.config.js ./
 COPY package*.json ./
 
 RUN npm install
+RUN npm install bootstrap
+RUN npm install rollup-plugin-copy -D
 
 COPY ./src ./src
 COPY ./public ./public
