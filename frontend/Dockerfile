@@ -12,8 +12,9 @@ COPY ./public ./public
 
 RUN npm run-script build
 
-EXPOSE 8080
+EXPOSE 9000
 
 ENV HOST=0.0.0.0
+ENV PORT=9000
 
 CMD [ "npm", "start" ]
