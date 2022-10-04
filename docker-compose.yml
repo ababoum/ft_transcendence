@@ -11,8 +11,8 @@ services:
     networks:
       - network
     volumes:
-      - /goinfre/${USER}/data:/var/lib/postgresql/data
-      #- /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
+      #- /goinfre/${USER}/data:/var/lib/postgresql/data
+      - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
     restart: always
     env_file:
       - ./config/postgres.env
@@ -58,7 +58,7 @@ services:
     depends_on:
       - backend
     ports:
-      - '8080:8080'
+      - '9000:9000'
 
 ############### NETWORKS ##################
 

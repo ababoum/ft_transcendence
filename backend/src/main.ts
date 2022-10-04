@@ -8,7 +8,7 @@ async function bootstrap() {
 
 	let port: number = + process.env.PORT;
 
-	if (port == null || port == 0) {
+	if (port == null || port == 0 || isNaN(port)) {
 		port = 3000;
 	}
 
