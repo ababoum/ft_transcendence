@@ -7,6 +7,8 @@ COPY package*.json ./
 
 RUN npm install
 RUN npm install bootstrap
+RUN npm install svelte-spa-router
+RUN npm install url-slug timeago.js
 RUN npm install rollup-plugin-copy -D
 
 COPY ./src ./src
