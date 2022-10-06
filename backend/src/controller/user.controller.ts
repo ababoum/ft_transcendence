@@ -10,7 +10,8 @@ import {
 	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { User as UserModel } from '@prisma/client';
+import { User, User as UserModel } from '@prisma/client';
+import { Friend as FriendModel } from '@prisma/client';
 
 
 @Controller('users')
@@ -25,7 +26,7 @@ export class UserController {
 	}
 
 	@Get()
-	findUsersById() {
+	async findUsersById(): Promise<UserModel[]> {
 		return this.userService.users({});
 	}
 
@@ -37,7 +38,33 @@ export class UserController {
 	}
 
 	@Delete('id/:id')
-	async deletePost(@Param('id') id: string): Promise<UserModel> {
+	async deleteUser(@Param('id') id: string): Promise<UserModel> {
 		return this.userService.deleteUser({ id: Number(id) });
 	}
+
+	@Post('add_friend/:userId/:friendId')
+	async addFriend(@Param('userId') userId: string, @Param('friendId') friendId: string)
+	: Promise<UserModel[]> {
+
+		let ret: UserModel[] = [];
+
+		ret.push(await this.userService.addFriend(Number(userId), Number(friendId)));
+		ret.push(await this.userService.addFriend(Number(friendId), Number(userId)));
+
+		return ret;
+	}
+	
+	@Get('/friends/:userId')
+	async getFriendsList(@Param('userId') userId: string)
+	: Promise<UserModel[]> 
+	{
+		return this.userService.friends(Number(userId));
+	}
+
+	@Delete('/friendship/:userId/:friendId')
+	async deleteFriend(@Param('userId') userId: string, @Param('friendId') friendId: string)
+	{
+		return this.userService.deleteFriend(Number(userId), Number(friendId));
+	}
+
 }
