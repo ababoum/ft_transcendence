@@ -18,6 +18,7 @@ export class UserController {
 
 	constructor(private readonly userService: UserService) { }
 
+
 	@Get('id/:id')
 	async getUserById(@Param('id') id: string): Promise<UserModel> {
 		return this.userService.user({ id: Number(id) });
@@ -30,7 +31,7 @@ export class UserController {
 
 	@Post('create')
 	async signupUser(
-		@Body() userData: { login: string; email: string; nickname: string },
+		@Body() userData: { login: string; email: string; nickname: string, password: string },
 	): Promise<UserModel> {
 		return this.userService.createUser(userData);
 	}

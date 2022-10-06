@@ -12,11 +12,14 @@ clean:
 	docker-compose down
 
 fclean: clean
-	# rm -rf /goinfre/$(USER)/data/
-	docker system prune -f --all --volumes
+	rm -rf /goinfre/$(USER)/data/
 	docker system prune -f
 	docker image prune -f --filter 'label=ping_me_more'
 
+# update_scheme:
+# 	docker-compose up postgres -d
+# 	cd backend/
+# 	npx prisma migrate dev --name NAME
 
 re: fclean all
 

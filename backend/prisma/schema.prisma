@@ -15,9 +15,10 @@ model User {
     email             String     @unique
     login             String     @unique
     nickname          String
+    password          String	
     status            UserStatus @default(OFFLINE)
-    avatar            Image      @relation(fields: [imageId], references: [id])
-    imageId           Int
+    avatar            Image?     @relation(fields: [imageId], references: [id])
+    imageId           Int?
     userFriends       Friend[]   @relation(name: "user")
     friendUserFriends Friend[]   @relation(name: "friend_user")
     blockerId         Int?
