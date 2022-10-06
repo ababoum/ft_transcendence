@@ -8,6 +8,7 @@ generator client {
 datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
+
 }
 
 model User {
@@ -24,6 +25,12 @@ model User {
     blockerId         Int?
     blocker           User?      @relation("blocking", fields: [blockerId], references: [id])
     blockedList       User[]     @relation("blocking")
+	chatRoomOwned		ChatRoom[]	@relation(name:"OwnerTable")
+//	chatRoomAdmined		ChatRoom[]
+	chatRoomJoined		ChatRoom[]	@relation(name:"ParticipantTable")
+	chatRoomBanned		ChatRoom[]	@relation(name:"BanTable")
+	chatRoomMuted		ChatRoom[]	@relation(name:"MuteTable")
+	messages			Messages[]
 }
 
 // bi-directional
@@ -44,6 +51,34 @@ model Friend {
 //     blocker       User @relation(fields: [blockerId], references: [id])
 //     blockerId     Int
 // }
+
+model ChatRoom {
+    id					Int				@id @default(autoincrement())
+    name				String
+	creationDate		DateTime		@default(now())
+	mode				chatRoomType	@default(PUBLIC)
+	password			String?
+	owner				User			@relation(fields: [ownerId], references: [id], name:"OwnerTable")
+	ownerId				Int
+//	admin				User[]			@relation
+	participants		User			@relation(fields: [participantId], references: [id], name:"ParticipantTable")
+	participantId		Int
+	messages			Messages[]
+	banList				User			@relation(fields: [banListId], references: [id], name: "BanTable")
+	banListId			Int
+	muteList			User			@relation(fields: [muteListId], references: [id], name: "MuteTable")
+	muteListId			Int
+}
+
+model Messages {
+	id					Int				@id @default(autoincrement())
+	creationDate		DateTime		@default(now())
+	author				User			@relation(fields: [authorId], references: [id])
+	authorId			Int
+	content				String
+	location			ChatRoom		@relation(fields: [chatRoomId], references: [id])
+	chatRoomId			Int
+}
 
 enum chatRoomType {
     PRIVATE
