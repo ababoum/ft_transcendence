@@ -11,8 +11,8 @@ services:
     networks:
       - network
     volumes:
-      #- /goinfre/${USER}/data:/var/lib/postgresql/data
-      - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
+      - /goinfre/${USER}/data:/var/lib/postgresql/data
+      #- /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
     restart: always
     env_file:
       - ./config/postgres.env
@@ -42,7 +42,8 @@ services:
     depends_on:
       - postgres
     ports:
-      - '3000:3000'
+      - '3000:3000' #fix pour prod
+      - '5678:5678' #websocket
     env_file:
       - ./config/backend.env
 

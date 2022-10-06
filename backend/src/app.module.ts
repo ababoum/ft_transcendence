@@ -3,11 +3,12 @@ import { UsersModule } from './module/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import entities from './typeorm';
-
+import {GameModule} from "./module/game.module";
 
 
 @Module({
 	imports: [
+		GameModule,
 		ConfigModule.forRoot({ isGlobal: true }),
 		TypeOrmModule.forRootAsync({
 			imports: [ConfigModule],

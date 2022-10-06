@@ -1,5 +1,4 @@
 <script lang="ts">
-    import User from "../User";
     import { link } from "svelte-spa-router";
     import { LOGIN_URL } from "../stores";
     import { user } from "../stores";
