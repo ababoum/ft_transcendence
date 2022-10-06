@@ -11,7 +11,7 @@ services:
     networks:
       - network
     volumes:
-      - /goinfre/${USER}/data:/var/lib/postgresql/data
+      - /goinfre/${USER}/data1:/var/lib/postgresql/data
       # - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
     restart: always
     ports:

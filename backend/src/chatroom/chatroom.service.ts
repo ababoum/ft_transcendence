@@ -31,11 +31,23 @@ export class ChatroomService {
 		});
 	  }
 
-	async createChatRoom(data: Prisma.ChatRoomCreateInput): Promise<ChatRoom> {
-		return this.prisma.chatRoom.create({
-		  data,
-		});
+	async createChatRoom(data): Promise<ChatRoom> {
+		return this.prisma.chatRoom.create({data});
 	}
 
+
+/* 	async createChatRoom(data): Promise<ChatRoom> {
+		return this.prisma.chatRoom.create({
+		  data: {
+			name:"Plop",
+			owner: {
+				connect: {
+					email: "aaa"
+				}
+			}
+		  }
+		});
+	}
+ */
 
 }

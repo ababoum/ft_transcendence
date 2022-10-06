@@ -23,7 +23,20 @@ export class ChatroomController {
 		return this.ChatroomService.chatRooms({});
 	}
 
-	@Post('create')
+ 	@Post('create')
+	async createChatRoom(
+		@Body() ChatRoomData: { name: string, owneremail: string },
+	): Promise<ChatRoomModel> {
+		const { name, owneremail } = ChatRoomData;
+		return this.ChatroomService.createChatRoom({
+			name,
+			owner: {
+				connect: { email: owneremail }
+			}
+		});
+	}
+
+/* 	@Post('create')
 	async createChatRoom(
 		@Body() ChatRoomData: { name: string; owneremail: string},
 	): Promise<ChatRoomModel> {
@@ -37,6 +50,6 @@ export class ChatroomController {
 			banList: undefined,
 			muteList: undefined
 		});
-	}
+	} */
 
 }

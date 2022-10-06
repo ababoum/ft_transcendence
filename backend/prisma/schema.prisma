@@ -58,8 +58,8 @@ model ChatRoom {
 	creationDate		DateTime		@default(now())
 	mode				chatRoomType	@default(PUBLIC)
 	password			String?
-	owner				User			@relation(fields: [ownerId], references: [id], name:"OwnerTable")
-	ownerId				Int
+	owner				User			@relation(fields: [ownerEmail], references: [email], name:"OwnerTable")
+	ownerEmail			String
 	admin				User[]			@relation(name:"AdminTable")
 	participants		User[]			@relation(name:"ParticipantTable")
 	banList				User[]			@relation(name:"BanTable")
