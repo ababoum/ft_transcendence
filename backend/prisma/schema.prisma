@@ -26,7 +26,7 @@ model User {
     blocker           User?      @relation("blocking", fields: [blockerId], references: [id])
     blockedList       User[]     @relation("blocking")
 	chatRoomOwned		ChatRoom[]	@relation(name:"OwnerTable")
-//	chatRoomAdmined		ChatRoom[]
+	chatRoomAdmined		ChatRoom[]	@relation(name:"AdminTable")
 	chatRoomJoined		ChatRoom[]	@relation(name:"ParticipantTable")
 	chatRoomBanned		ChatRoom[]	@relation(name:"BanTable")
 	chatRoomMuted		ChatRoom[]	@relation(name:"MuteTable")
@@ -60,14 +60,11 @@ model ChatRoom {
 	password			String?
 	owner				User			@relation(fields: [ownerId], references: [id], name:"OwnerTable")
 	ownerId				Int
-//	admin				User[]			@relation
-	participants		User			@relation(fields: [participantId], references: [id], name:"ParticipantTable")
-	participantId		Int
+	admin				User[]			@relation(name:"AdminTable")
+	participants		User[]			@relation(name:"ParticipantTable")
+	banList				User[]			@relation(name: "BanTable")
+	muteList			User[]			@relation(name: "MuteTable")
 	messages			Messages[]
-	banList				User			@relation(fields: [banListId], references: [id], name: "BanTable")
-	banListId			Int
-	muteList			User			@relation(fields: [muteListId], references: [id], name: "MuteTable")
-	muteListId			Int
 }
 
 model Messages {
