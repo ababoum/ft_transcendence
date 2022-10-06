@@ -35,9 +35,6 @@ CREATE TABLE "ChatRoom" (
     "mode" "chatRoomType" NOT NULL DEFAULT 'PUBLIC',
     "password" TEXT,
     "ownerId" INTEGER NOT NULL,
-    "participantId" INTEGER NOT NULL,
-    "banListId" INTEGER NOT NULL,
-    "muteListId" INTEGER NOT NULL,
 
     CONSTRAINT "ChatRoom_pkey" PRIMARY KEY ("id")
 );
@@ -62,7 +59,25 @@ CREATE TABLE "Image" (
 );
 
 -- CreateTable
-CREATE TABLE "_ChatRoomToUser" (
+CREATE TABLE "_AdminTable" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_ParticipantTable" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_BanTable" (
+    "A" INTEGER NOT NULL,
+    "B" INTEGER NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_MuteTable" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
@@ -77,10 +92,28 @@ CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 CREATE UNIQUE INDEX "Friend_userId_friendUserId_key" ON "Friend"("userId", "friendUserId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_ChatRoomToUser_AB_unique" ON "_ChatRoomToUser"("A", "B");
+CREATE UNIQUE INDEX "_AdminTable_AB_unique" ON "_AdminTable"("A", "B");
 
 -- CreateIndex
-CREATE INDEX "_ChatRoomToUser_B_index" ON "_ChatRoomToUser"("B");
+CREATE INDEX "_AdminTable_B_index" ON "_AdminTable"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_ParticipantTable_AB_unique" ON "_ParticipantTable"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_ParticipantTable_B_index" ON "_ParticipantTable"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_BanTable_AB_unique" ON "_BanTable"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_BanTable_B_index" ON "_BanTable"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_MuteTable_AB_unique" ON "_MuteTable"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_MuteTable_B_index" ON "_MuteTable"("B");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_imageId_fkey" FOREIGN KEY ("imageId") REFERENCES "Image"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -98,22 +131,31 @@ ALTER TABLE "Friend" ADD CONSTRAINT "Friend_friendUserId_fkey" FOREIGN KEY ("fri
 ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_participantId_fkey" FOREIGN KEY ("participantId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_banListId_fkey" FOREIGN KEY ("banListId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_muteListId_fkey" FOREIGN KEY ("muteListId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Messages" ADD CONSTRAINT "Messages_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Messages" ADD CONSTRAINT "Messages_chatRoomId_fkey" FOREIGN KEY ("chatRoomId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_ChatRoomToUser" ADD CONSTRAINT "_ChatRoomToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_AdminTable" ADD CONSTRAINT "_AdminTable_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_ChatRoomToUser" ADD CONSTRAINT "_ChatRoomToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_AdminTable" ADD CONSTRAINT "_AdminTable_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_ParticipantTable" ADD CONSTRAINT "_ParticipantTable_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_ParticipantTable" ADD CONSTRAINT "_ParticipantTable_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_BanTable" ADD CONSTRAINT "_BanTable_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_BanTable" ADD CONSTRAINT "_BanTable_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_MuteTable" ADD CONSTRAINT "_MuteTable_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_MuteTable" ADD CONSTRAINT "_MuteTable_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

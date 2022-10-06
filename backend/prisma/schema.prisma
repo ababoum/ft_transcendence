@@ -62,8 +62,8 @@ model ChatRoom {
 	ownerId				Int
 	admin				User[]			@relation(name:"AdminTable")
 	participants		User[]			@relation(name:"ParticipantTable")
-	banList				User[]			@relation(name: "BanTable")
-	muteList			User[]			@relation(name: "MuteTable")
+	banList				User[]			@relation(name:"BanTable")
+	muteList			User[]			@relation(name:"MuteTable")
 	messages			Messages[]
 }
 
