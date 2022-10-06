@@ -11,9 +11,11 @@ services:
     networks:
       - network
     volumes:
-      #- /goinfre/${USER}/data:/var/lib/postgresql/data
-      - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
+      - /goinfre/${USER}/data:/var/lib/postgresql/data
+      # - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
     restart: always
+    ports:
+      - "5432:5432"
     env_file:
       - ./config/postgres.env
 

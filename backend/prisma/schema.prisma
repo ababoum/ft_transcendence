@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                Int        @id @default(autoincrement())
+    email             String     @unique
+    login             String     @unique
+    nickname          String
+    status            UserStatus @default(OFFLINE)
+    avatar            Image      @relation(fields: [imageId], references: [id])
+    imageId           Int
+    userFriends       Friend[]   @relation(name: "user")
+    friendUserFriends Friend[]   @relation(name: "friend_user")
+    blockerId         Int?
+    blocker           User?      @relation("blocking", fields: [blockerId], references: [id])
+    blockedList       User[]     @relation("blocking")
+}
+
+// bi-directional
+model Friend {
+    id           Int  @id @default(autoincrement())
+    userId       Int
+    friendUserId Int
+    User         User @relation(name: "user", fields: [userId], references: [id])
+    FriendUser   User @relation(name: "friend_user", fields: [friendUserId], references: [id])
+
+    @@unique([userId, friendUserId])
+}
+
+// uni-directional
+// model Blocked {
+//     id            Int  @id @default(autoincrement())
+//     blockedUserId Int  @unique
+//     blocker       User @relation(fields: [blockerId], references: [id])
+//     blockerId     Int
+// }
+
+enum chatRoomType {
+    PRIVATE
+    PROTECTED
+    PUBLIC
+}
+
+enum UserStatus {
+    ONLINE
+    OFFLINE
+    IN_GAME
+}
+
+model Image {
+    id   Int    @id @default(autoincrement())
+    name String
+    User User[]
+}
