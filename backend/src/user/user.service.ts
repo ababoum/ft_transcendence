@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Friend, Prisma } from '@prisma/client';
 
@@ -49,9 +49,10 @@ export class UserService {
 	}
 
 	async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
-		return this.prisma.user.delete({
-			where,
-		});
+			const result = this.prisma.user.delete({
+				where,
+			});
+			return result;
 	}
 
 	async addFriend(userId: number, friendId: number): Promise<Friend> {
@@ -64,7 +65,7 @@ export class UserService {
 			}
 		});
 
-		const user = await this.prisma.user.update({
+		await this.prisma.user.update({
 			where: {
 				id: userId,
 			},
@@ -105,9 +106,9 @@ export class UserService {
 		return result;
 	}
 
-	async deleteFriend(userId: number, friendId: number): Promise<void> {
+	async deleteFriend(userId: number, friendId: number) {
 
-		await this.prisma.friend.deleteMany({
+		const result = await this.prisma.friend.deleteMany({
 			where: {
 				OR: [
 					{
@@ -125,5 +126,6 @@ export class UserService {
 				]
 			}
 		})
+		return result;
 	}
 }

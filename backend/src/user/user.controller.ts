@@ -8,9 +8,11 @@ import {
 	Delete,
 	UsePipes,
 	ValidationPipe,
+	HttpException,
+	HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Friend, User as UserModel } from '@prisma/client';
+import { User as UserModel } from '@prisma/client';
 import { Friend as FriendModel } from '@prisma/client';
 
 
@@ -33,7 +35,7 @@ export class UserController {
 	@Post('create')
 	async signupUser(
 		@Body() userData: { login: string; email: string; nickname: string, password: string })
-	: Promise<UserModel> {
+		: Promise<UserModel> {
 		return this.userService.createUser(userData);
 	}
 
@@ -44,8 +46,9 @@ export class UserController {
 
 	@Post('add_friend')
 	async addFriend(
-		@Body() friendData: {userId: string; friendId: string} )
-	: Promise<FriendModel[]> {
+		@Body() friendData: { userId: string; friendId: string })
+		: Promise<FriendModel[]> {
+
 		return [
 			await this.userService.addFriend(
 				Number(friendData.userId),
@@ -55,22 +58,20 @@ export class UserController {
 				Number(friendData.userId))
 		]
 	}
-	
-	@Get('/friends/:userId')
+
+	@Get('/:userId/friends')
 	async getFriendsList(@Param('userId') userId: string)
-	: Promise<UserModel[]> 
-	{
+		: Promise<UserModel[]> {
 		return this.userService.friends(Number(userId));
 	}
 
 	@Delete('/friends')
 	async deleteFriend(
-		@Body() friendData: {userId: string; friendId: string} )
-	{
+		@Body() friendData: { userId: string; friendId: string }) {
 		return this.userService.deleteFriend(
 			Number(friendData.userId),
 			Number(friendData.friendId)
-			);
+		);
 	}
 
 }
