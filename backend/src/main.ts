@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ApplicationModule } from './app.module';
 import * as bodyParser from 'body-parser';
-import { PrismaService } from './service/prisma.service';
+import { PrismaService } from './prisma/prisma.service';
 
 
 async function bootstrap() {
@@ -18,7 +18,7 @@ async function bootstrap() {
 	// To deal with this, we need to add a listener for Prisma beforeExit event.
 
 	const prismaService = app.get(PrismaService);
-	await prismaService.enableShutdownHooks(app)
+	await prismaService.enableShutdownHooks(app);
 
 	app.use(bodyParser.json());
 	await app.listen(port);

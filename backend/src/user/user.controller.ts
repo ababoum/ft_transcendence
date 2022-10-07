@@ -9,8 +9,8 @@ import {
 	UsePipes,
 	ValidationPipe,
 } from '@nestjs/common';
-import { UserService } from '../service/user.service';
-import { User, User as UserModel } from '@prisma/client';
+import { UserService } from './user.service';
+import { Friend, User as UserModel } from '@prisma/client';
 import { Friend as FriendModel } from '@prisma/client';
 
 
@@ -32,8 +32,8 @@ export class UserController {
 
 	@Post('create')
 	async signupUser(
-		@Body() userData: { login: string; email: string; nickname: string, password: string },
-	): Promise<UserModel> {
+		@Body() userData: { login: string; email: string; nickname: string, password: string })
+	: Promise<UserModel> {
 		return this.userService.createUser(userData);
 	}
 
@@ -42,16 +42,18 @@ export class UserController {
 		return this.userService.deleteUser({ id: Number(id) });
 	}
 
-	@Post('add_friend/:userId/:friendId')
-	async addFriend(@Param('userId') userId: string, @Param('friendId') friendId: string)
-	: Promise<UserModel[]> {
-
-		let ret: UserModel[] = [];
-
-		ret.push(await this.userService.addFriend(Number(userId), Number(friendId)));
-		ret.push(await this.userService.addFriend(Number(friendId), Number(userId)));
-
-		return ret;
+	@Post('add_friend')
+	async addFriend(
+		@Body() friendData: {userId: string; friendId: string} )
+	: Promise<FriendModel[]> {
+		return [
+			await this.userService.addFriend(
+				Number(friendData.userId),
+				Number(friendData.friendId)),
+			await this.userService.addFriend(
+				Number(friendData.friendId),
+				Number(friendData.userId))
+		]
 	}
 	
 	@Get('/friends/:userId')
@@ -61,10 +63,14 @@ export class UserController {
 		return this.userService.friends(Number(userId));
 	}
 
-	@Delete('/friendship/:userId/:friendId')
-	async deleteFriend(@Param('userId') userId: string, @Param('friendId') friendId: string)
+	@Delete('/friends')
+	async deleteFriend(
+		@Body() friendData: {userId: string; friendId: string} )
 	{
-		return this.userService.deleteFriend(Number(userId), Number(friendId));
+		return this.userService.deleteFriend(
+			Number(friendData.userId),
+			Number(friendData.friendId)
+			);
 	}
 
 }

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
-import { User, Prisma } from '@prisma/client';
-import { using } from 'rxjs';
+import { PrismaService } from '../prisma/prisma.service';
+import { User, Friend, Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -55,7 +54,7 @@ export class UserService {
 		});
 	}
 
-	async addFriend(userId: number, friendId: number): Promise<User> {
+	async addFriend(userId: number, friendId: number): Promise<Friend> {
 
 		// create the friendship
 		const new_friendship = await this.prisma.friend.create({
@@ -77,7 +76,8 @@ export class UserService {
 				},
 			}
 		});
-		return user;
+
+		return new_friendship;
 	}
 
 	async friends(userId: number): Promise<User[]> {
@@ -105,29 +105,21 @@ export class UserService {
 		return result;
 	}
 
-	async deleteFriend(userId: number, friendId: number) {
+	async deleteFriend(userId: number, friendId: number): Promise<void> {
 
 		await this.prisma.friend.deleteMany({
 			where: {
 				OR: [
 					{
 						AND: [
-							{
-								userId: userId
-							},
-							{
-								friendUserId: friendId
-							}
+							{userId: userId},
+							{friendUserId: friendId}
 						]
 					},
 					{
 						AND: [
-							{
-								userId: friendId
-							},
-							{
-								friendUserId: userId
-							}
+							{userId: friendId},
+							{friendUserId: userId}
 						]
 					}
 				]
