@@ -53,7 +53,10 @@ CREATE TABLE "Messages" (
 -- CreateTable
 CREATE TABLE "Image" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
+    "filename" TEXT NOT NULL,
+    "filepath" TEXT NOT NULL,
+    "mimetype" TEXT NOT NULL,
+    "size" BIGINT NOT NULL,
 
     CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
 );
@@ -90,6 +93,9 @@ CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Friend_userId_friendUserId_key" ON "Friend"("userId", "friendUserId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Image_filename_key" ON "Image"("filename");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_AdminTable_AB_unique" ON "_AdminTable"("A", "B");

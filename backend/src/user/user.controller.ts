@@ -3,17 +3,26 @@ import {
 	Controller,
 	Get,
 	Param,
-	ParseIntPipe,
 	Post,
 	Delete,
-	UsePipes,
-	ValidationPipe,
-	HttpException,
-	HttpStatus,
+	UseGuards,
+	Request,
+	UseInterceptors,
+	UploadedFile,
+	ParseFilePipe,
+	MaxFileSizeValidator,
+	FileTypeValidator,
+	Header,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User as UserModel } from '@prisma/client';
 import { Friend as FriendModel } from '@prisma/client';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as shortid from 'shortid';
+import * as mime from 'mime-types';
 
 
 @Controller('users')
@@ -21,6 +30,8 @@ export class UserController {
 
 	constructor(private readonly userService: UserService) { }
 
+
+	/////////////////////// ACCESS USER INFO ////////////////////////
 
 	@Get('id/:id')
 	async getUserById(@Param('id') id: string): Promise<UserModel> {
@@ -31,6 +42,8 @@ export class UserController {
 	async findUsersById(): Promise<UserModel[]> {
 		return this.userService.users({});
 	}
+
+	/////////////////////// CREATE/DELETE USERS ////////////////////////
 
 	@Post('create')
 	async signupUser(
@@ -43,6 +56,9 @@ export class UserController {
 	async deleteUser(@Param('id') id: string): Promise<UserModel> {
 		return this.userService.deleteUser({ id: Number(id) });
 	}
+
+
+	/////////////////////// MANAGE USER'S FRIENDSHIP ////////////////////////
 
 	@Post('add_friend')
 	async addFriend(
@@ -74,4 +90,40 @@ export class UserController {
 		);
 	}
 
+	/////////////////////// MANAGE USER'S AVATAR ////////////////////////
+
+
+	@UseGuards(JwtAuthGuard)
+	@UseInterceptors(FileInterceptor(
+		'file',
+		{
+			storage: diskStorage({
+				destination: './uploads/',
+				filename: function (req, file, cb) {
+					/* generates a "unique" name - not collision proof but unique enough for small sized applications */
+					let id = shortid.generate();
+					/* need to use the file's mimetype because the file name may not have an extension at all */
+					let ext = mime.extension(file.mimetype);
+					cb(null, `${id}.${ext}`);
+				}
+			}),
+		})
+	)
+	@Post('upload_avatar')
+	async addAvatar(
+		@UploadedFile(
+			new ParseFilePipe({
+				validators: [
+					new MaxFileSizeValidator({ maxSize: 2000000 }),
+					new FileTypeValidator({ fileType: 'jpeg|png' }),
+				],
+			}),
+		)
+		file: Express.Multer.File,
+		@Request() req,
+		@Body() body) {
+
+		const img = await this.userService.createImage(file);
+		return this.userService.linkAvatar(img, req.user.login);
+	}
 }
