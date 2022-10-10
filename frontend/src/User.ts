@@ -1,5 +1,6 @@
 export default class User {
     private _isLogged: boolean = false;
+    private _id: number;
 
     constructor() {
         this._isLogged = false;
@@ -31,6 +32,9 @@ export default class User {
             return "User has been created";
         }
         return "Error!";
+    }
 
+    get id(): number {
+        return this._id;
     }
 }

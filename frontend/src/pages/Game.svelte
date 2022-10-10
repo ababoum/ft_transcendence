@@ -1,39 +1,81 @@
 <script lang="ts">
     import Header from "./Header.svelte";
-    import {link} from "svelte-spa-router";
-    import {io} from "socket.io-client";
+    import {link, pop} from "svelte-spa-router";
+    import {onMount} from 'svelte';
+    import PongGame from "../PongGame";
 
-    const socket = io("http://localhost:5678")
+    let canvas;
+    let pong = new PongGame("5678", 1);
 
-    let messages = []
-    let message = ''
+    const UP_KEY : number = 38;
+    const DOWN_KEY : number = 40;
 
-    socket.on('message', (data) => {
-        messages = [...messages, data]
+    function keyHandler(e) {
+        if(e.keyCode == UP_KEY || e.keyCode == DOWN_KEY) {
+            pong.movePaddle(e.keyCode);
+        }
+    }
+
+    onMount(() => {
+        const context = canvas.getContext('2d');
+
+        // x, y are position. w and h are width and height of the shape
+        function drawRect(x, y, w, h): void {
+            context.fillStyle = "#0095DD";
+            context.fillRect(x, y, w, h);
+        }
+
+        // x, y are position, r is radius
+        function drawCircle(x: number, y: number, r: number): void {
+            context.fillStyle = "white";
+            context.beginPath();
+            // 0 is start of angle. Math.PI * 2 (360 degrees) is end of angle. false is direction (not important in this context
+            context.arc(x, y, r, 0, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+        }
+
+        function drawText(text: string, x: number, y: number, color: string): void {
+            context.fillStyle = color;
+            context.font = "45px fantasy";
+            context.fillText(text, x, y);
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawText("waiting for players", 100, 200, "white");
+            try {
+                $: drawText((pong.playersCount === undefined ? "0" : pong.playersCount) + " connected", 200, 300, "white");
+            } catch (error) {}
+            /*
+            try {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                drawRect(pong.leftPlayerX, pong.leftPlayerY, pong.paddleWidth, pong.paddleHeight);
+                drawRect(pong.rightPlayerX, pong.rightPlayerY, pong.paddleWidth, pong.paddleHeight);
+            } catch (error) {
+                //console.log(error);
+            }
+            */
+        }
+        //draw();
+        setInterval(draw, 100);
     })
 
-    function sendMessage() {
-        socket.emit('message', message)
-        message = ''
-    }
+
 </script>
-<main>
-    <Header/>
-    <div class="flex justify-center items-center h-screen">
-        <div class="flex flex-col w-5/12 bg-slate-900 px-8 py-8 rounded-lg">
-            <h1 class="mb-4 font-bold text-gray-50 text-4xl text-center">Chat Application</h1>
-            <div class="w-full mb-4 bg-gray-300 rounded-md px-4 py-4">
-                {#each messages as message}
-                    <div class="px-4 py-2 mb-2 bg-pink-700 rounded-md font-semibold text-gray-50 w-fit">{message}</div>
-                {/each}
-            </div>
-            <div class="w-full flex">
-                <input bind:value={message} class="rounded-md px-2 py-2 w-full border-0" placeholder="Message..."
-                       type="text">
-                <button on:click={sendMessage} class="rounded-md px-3 py-2 bg-pink-700 text-gray-50 border-0 ml-2">
-                    Send
-                </button>
-            </div>
-        </div>
-    </div>
-</main>
+
+<Header/>
+
+<svelte:window on:keydown={keyHandler} on:keyup={keyHandler} />
+<canvas
+        bind:this={canvas}
+        width={pong._field_width}
+        height={pong._field_height}
+></canvas>
+<button on:click={pong.connectToGame}>
+    {pong.playersCount === undefined ? "0" : pong.playersCount}
+</button>
+
+<style>
+    canvas { background: #1a1e21; }
+</style>
