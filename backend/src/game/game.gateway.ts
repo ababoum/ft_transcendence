@@ -1,6 +1,6 @@
 import {ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
 import {Server, Socket} from "socket.io";
-import {Game} from "../Game";
+import {Game} from "./Game";
 
 @WebSocketGateway(5678, {cors : '*'} ) //cors = all can connect
 //@WebSocketGateway() //cors = all can connect

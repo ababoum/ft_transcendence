@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Header from "./Header.svelte";
+    import Header from "../components/Nav.svelte";
     import {link, pop} from "svelte-spa-router";
     import {onMount} from 'svelte';
     import PongGame from "../PongGame";
