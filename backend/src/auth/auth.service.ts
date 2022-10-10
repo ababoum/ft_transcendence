@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 
@@ -8,7 +10,8 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
 	constructor(
 		private userService: UserService,
-		private jwtService: JwtService
+		private jwtService: JwtService,
+		private prisma: PrismaService
 	) { }
 
 	// validate user based on hashed password in database
@@ -29,5 +32,19 @@ export class AuthService {
 		return {
 			access_token: this.jwtService.sign(payload),
 		};
+	}
+
+	async getProfile(login: string): Promise<object | null> {
+		return this.prisma.user.findUnique({
+			where: {
+				login: login
+			},
+			select: {
+				id: true,
+				email: true,
+				nickname: true,
+				login: true
+			}
+		});
 	}
 }
