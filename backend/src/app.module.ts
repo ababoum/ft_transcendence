@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
 import { AuthModule } from './auth/auth.module';
-import { AppController } from './app.controller';
-import {GameModule} from "./game/game.module";
 
 
 @Module({
@@ -11,9 +9,8 @@ import {GameModule} from "./game/game.module";
 		AuthModule,
 		UserModule,
 		ChatroomModule,
-		GameModule
 	],
-	controllers: [AppController],
+	controllers: [],
 	providers: [],
 })
 export class ApplicationModule { }

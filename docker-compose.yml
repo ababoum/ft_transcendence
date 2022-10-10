@@ -11,8 +11,8 @@ services:
     networks:
       - network
     volumes:
-      #- /goinfre/${USER}/${DATA_FOLDER_NAME}:/var/lib/postgresql/data
-      - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
+      - /goinfre/${USER}/data:/var/lib/postgresql/data
+      # - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
     restart: always
     ports:
       - "5432:5432"
@@ -34,6 +34,8 @@ services:
 ## Backend (nestJS) ##
 
   backend:
+    env_file:
+      - ./config/backend.env
     container_name: backend
     image: backend:ping_me_more
     build:
@@ -44,10 +46,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - '3000:3000' #fix pour prod
-      - '5678:5678' #websocket
-    env_file:
-      - ./config/backend.env
+      - '3000:3000'
 
 ## Frontend (Svelte) ##
 

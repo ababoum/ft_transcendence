@@ -1,44 +1,21 @@
 ###################
-# BUILD FOR LOCAL DEVELOPMENT
-###################
-
-# Base image (same as Linux Dumps' version in Sept 2022)
-FROM node:16.17.0-alpine As development
-
-WORKDIR /usr/src/app
-
-COPY --chown=node:node package*.json ./
-COPY --chown=node:node prisma/ ./prisma/
-
-
-RUN npm ci
-
-
-COPY --chown=node:node . .
-
-USER node
-
-###################
 # BUILD FOR PRODUCTION
 ###################
-
 
 FROM node:16.17.0-alpine As build
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node package*.json ./
-COPY --chown=node:node prisma/ ./prisma/
+COPY --chown=node:node package*.json 	./
+COPY --chown=node:node prisma/ 			./prisma/
 
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+# Install app dependencies
+RUN npm install
 
-COPY --chown=node:node . .
+# Copy src/ files and all nestjs files
+COPY . .
 
 RUN npm run build
-
-ENV NODE_ENV production
-
-RUN npm ci --only=production && npm cache clean --force
 
 USER node
 
@@ -48,7 +25,11 @@ USER node
 
 FROM node:16.17.0-alpine As production
 
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY --chown=node:node --from=build /usr/src/app/node_modules 	./node_modules
+COPY --chown=node:node --from=build /usr/src/app/prisma 		./prisma
+COPY --chown=node:node --from=build /usr/src/app/package*.json 	./
+COPY --chown=node:node --from=build /usr/src/app/dist 			./dist
 
-CMD [ "node", "dist/main.js" ]
+
+EXPOSE 3000
+CMD [  "npm", "run", "start:migrate:prod" ]
