@@ -49,6 +49,7 @@
     "mysql2": "^2.3.3",
     "nest": "^0.1.6",
     "passport": "^0.6.0",
+    "passport-42": "^1.2.6",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "pg": "^8.8.0",

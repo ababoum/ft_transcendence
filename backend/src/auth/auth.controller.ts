@@ -1,7 +1,11 @@
-import { Controller, Request, Post, UseGuards, Get } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Get, Redirect } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { LocalAuthGuard } from './local-auth.guard';
+import {
+	JwtAuthGuard,
+	LocalAuthGuard,
+	FT_OAuthGuard,
+	AuthenticatedGuard
+} from './guards';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +28,36 @@ export class AuthController {
 	@Get('check')
 	checkToken(@Request() req) {
 		return req.user;
-	} // no call to db is made
+	}
 
+
+	///////////// 42 AUTHENTICATION //////////////
+
+
+	@UseGuards(FT_OAuthGuard)
+	@Get('42')
+	ftAuth() {
+		return;
+	}
+
+	@UseGuards(FT_OAuthGuard)
+	@Get('42/return')
+	@Redirect('/')
+	ftAuthCallback() {
+		return;
+	}
+
+	///////////// 42 PROFILE ACCESS //////////////
+
+
+	@Get('42/login')
+	logIn() {
+		return;
+	}
+
+	@Get('profile')
+	@UseGuards(AuthenticatedGuard)
+	profile(@Request() req) {
+		return req.user;
+	}
 }

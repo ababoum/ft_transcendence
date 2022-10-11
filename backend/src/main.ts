@@ -3,6 +3,7 @@ import { ApplicationModule } from './app.module';
 import * as bodyParser from 'body-parser';
 import { PrismaService } from './prisma/prisma.service';
 import { NotFoundExceptionFilter } from './prisma/notFound.filter';
+import { HttpExceptionFilter } from './http-exception.filter';
 
 
 async function bootstrap() {
@@ -22,7 +23,12 @@ async function bootstrap() {
 	await prismaService.enableShutdownHooks(app);
 
 	app.use(bodyParser.json());
+
+	// Exception Handler
+	app.useGlobalFilters(new HttpExceptionFilter());
 	app.useGlobalFilters(new NotFoundExceptionFilter());
+
+	
 	await app.listen(port);
 }
 
