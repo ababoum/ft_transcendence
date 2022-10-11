@@ -50,3 +50,6 @@ export class AuthenticatedGuard implements CanActivate {
 		return req.isAuthenticated();
 	}
 }
+
+@Injectable()
+export default class JwtTwoFactorGuard extends AuthGuard('jwt-two-factor') {}

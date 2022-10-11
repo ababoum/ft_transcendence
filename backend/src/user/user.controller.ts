@@ -15,9 +15,12 @@ import {
 	Header,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User as UserModel } from '@prisma/client';
-import { Friend as FriendModel } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+	User as UserModel,
+	Friend as FriendModel,
+	Image as ImageModel
+} from '@prisma/client';
+import { JwtAuthGuard } from '../auth/guards';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -36,6 +39,11 @@ export class UserController {
 	@Get('id/:id')
 	async getUserById(@Param('id') id: string): Promise<UserModel> {
 		return this.userService.user({ id: Number(id) });
+	}
+
+	@Get('profile/:login')
+	async getUserByLogin(@Param('login') login: string): Promise<UserModel> {
+		return this.userService.user({ login: login });
 	}
 
 	@Get()
@@ -125,5 +133,10 @@ export class UserController {
 
 		const img = await this.userService.createImage(file);
 		return this.userService.linkAvatar(img, req.user.login);
+	}
+
+	@Get('image/:id')
+	async getImageById(@Param('id') id: string): Promise<ImageModel> {
+		return this.userService.image({ id: Number(id) });
 	}
 }

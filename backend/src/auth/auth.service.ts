@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { jwtConstants } from './constants';
+import { TokenPayload } from './interfaces';
 
 
 @Injectable()
@@ -47,4 +49,34 @@ export class AuthService {
 			}
 		});
 	}
+
+	/////////////////// FOR 2FA AUTHENTICATION ///////////////////
+
+	public getCookieWithJwtAccessToken(userId: number, isSecondFactorAuthenticated = false) {
+		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
+
+		const jwt_secret = jwtConstants.secret;
+		const exp_time = jwtConstants.exp_time
+
+		const token = this.jwtService.sign(payload, {
+			secret: jwt_secret,
+			expiresIn: `${exp_time}s`
+		});
+		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${exp_time}`;
+	}
+
+	public getCookieWithJwtRefreshToken(userId: number, isSecondFactorAuthenticated = false) {
+		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
+
+		const jwt_secret = jwtConstants.secret;
+		const exp_time = jwtConstants.exp_time
+
+		const token = this.jwtService.sign(payload, {
+			secret: jwt_secret,
+			expiresIn: `${exp_time}s`
+		});
+		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${exp_time}`;
+	}
+
+
 }

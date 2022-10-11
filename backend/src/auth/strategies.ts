@@ -7,7 +7,9 @@ import { ExtractJwt, Strategy as jwt_Strategy } from 'passport-jwt';
 import { jwtConstants } from './constants';
 
 import { Strategy as ft_Strategy, Profile, VerifyCallback } from 'passport-42';
-import { ConfigService } from '@nestjs/config';
+import { TokenPayload } from './interfaces';
+import { UserService } from '../user/user.service';
+import { Request } from 'express';
 
 
 ///////////////////// LOCAL STRATEGY /////////////////////
@@ -52,7 +54,7 @@ export class JwtStrategy extends PassportStrategy(jwt_Strategy) {
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(ft_Strategy, '42') {
-	constructor(private readonly configService: ConfigService) {
+	constructor() {
 		super({
 			clientID: process.env.FORTYTWO_APP_ID,
 			clientSecret: process.env.FORTYTWO_APP_SECRET,
@@ -70,6 +72,36 @@ export class FtStrategy extends PassportStrategy(ft_Strategy, '42') {
 	): Promise<any> {
 		request.session.accessToken = accessToken;
 		console.log('accessToken', accessToken, 'refreshToken', refreshToken); // TO DELETE
+		console.log(profile); // TO DELETE
 		return cb(null, profile);
+	}
+}
+
+///////////////////// TWO FA STRATEGY /////////////////////
+
+@Injectable()
+export class JwtTwoFactorStrategy extends PassportStrategy(
+	jwt_Strategy,
+	'jwt-two-factor'
+) {
+	constructor(
+		private readonly userService: UserService,
+	) {
+		super({
+			jwtFromRequest: ExtractJwt.fromExtractors([(request: Request) => {
+				return request?.cookies?.Authentication;
+			}]),
+			secretOrKey: jwtConstants.secret
+		});
+	}
+
+	async validate(payload: TokenPayload) {
+		const user = await this.userService.user({ id: payload.userId });
+		if (!user.isTwoFAEnabled) {
+			return user;
+		}
+		if (payload.isSecondFactorAuthenticated) {
+			return user;
+		}
 	}
 }

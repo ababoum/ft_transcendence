@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Friend, Prisma, Image } from '@prisma/client';
 
@@ -40,6 +40,7 @@ export class UserService {
 
 
 	async createUser(data: Prisma.UserCreateInput): Promise<User> {
+
 		return this.prisma.user.create({
 			data,
 		});
@@ -57,7 +58,8 @@ export class UserService {
 	}
 
 	async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
-		const result = this.prisma.user.delete({
+
+		const result = await this.prisma.user.delete({
 			where,
 		});
 		return result;
@@ -169,4 +171,50 @@ export class UserService {
 			}
 		})
 	}
+
+	async image(
+		imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
+	): Promise<Image | null> {
+		return this.prisma.image.findUnique({
+			where: imageWhereUniqueInput,
+		});
+	}
+
+	/////////////////////// MANAGE USER'S 2FA ////////////////////////
+
+	async turnOnTwoFactorAuthentication(login: string) {
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				isTwoFAEnabled: true
+			}
+		});
+	  }
+
+	async setTwoFactorAuthenticationSecret(secret: string, login: string)
+	: Promise<User> {
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				TwoFA_secret: secret
+			}
+		});
+	}
+
+	// async setCurrentRefreshToken(refreshToken: string, userID: number)
+	// : Promise<User> {
+	// 	return this.prisma.user.update({
+	// 		where: {
+	// 			login: login
+	// 		},
+	// 		data: {
+	// 			TwoFA_secret: secret
+	// 		}
+	// 	});
+	// }
+
 }
