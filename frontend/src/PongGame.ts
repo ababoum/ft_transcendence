@@ -1,6 +1,3 @@
-import {io} from "socket.io-client";
-import User from "./User";
-
 export default class PongGame {
 
     private readonly _port: string;
@@ -20,8 +17,8 @@ export default class PongGame {
     constructor(port: string, id: number) {
         this._port = port;
         this._id = id;
-        this._socket = io("http://localhost:" + this._port);
 
+        /*
         this._socket.on('get-data', (data) => {
             this._game_data =  JSON.parse(data);
             this._field_height = this._game_data.FIELD_HEIGHT;
@@ -35,6 +32,7 @@ export default class PongGame {
             this._playersCount = this._game_data.playersCount;
             console.log(this);
         });
+        */
             /*
 
         });

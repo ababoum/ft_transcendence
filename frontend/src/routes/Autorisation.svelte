@@ -1,35 +1,45 @@
 <script lang="ts">
-    import {link} from "svelte-spa-router";
-    import {LOGIN_URL} from "../stores";
-    import {user} from "../stores";
-    import {el} from "timeago.js/lib/lang";
+    import {link, push} from "svelte-spa-router";
+    import {LOBBY_URL, LOGIN_URL} from "../stores";
+    import { is_authenticated } from "../stores";
+    import {onMount} from "svelte";
 
     let login: string;
     let password: string;
     let email: string;
     let nickname: string;
-    let result: string;
+    let result_msg: string;
 
-    let is_login: boolean = true;
+    let tmp: boolean;
+    onMount(async () => { tmp = await is_authenticated(); });
+    $: is_logged = tmp;
+    $: if (is_logged)
+        push('/');
+    $: is_login = true;
     const submit = async () => {
-        console.log(login + " " + password + " " + email + " " + nickname + " " + is_login);
         if (!is_login) {
-            result = "Account was successfully registered";
-            await fetch('http://localhost:3000/create', {
+            result_msg = "Account was successfully registered";
+            await fetch('http://localhost:3000/users/create', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    login,
-                    password,
-                    email,
-                    nickname
-                })
-            }).catch((error) => {
-                result = "Can't register account: " + error;
-            })
+                body: JSON.stringify({ login, password, email, nickname })
+            }).catch((error) => { result_msg = "Can't register account: " + error; })
+            if (result_msg == "Account was successfully registered")
+                is_login = true;
+        } else {
+            let token;
+            await fetch('http://localhost:3000/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ login, password })
+            }).then(response=>response.json())
+                .then(data=>{ token = data['access_token']; })
+            if (token != undefined) {
+                document.cookie = "jwt=" + token;
+                await push('/');
+            } else
+                result_msg = "Wrong login or password";
         }
-        //else
-        //    await fetch();
     };
 </script>
 
@@ -72,10 +82,8 @@
                                         <label class="form-label" for="typePasswordX">Password</label>
                                     </div>
 
-                                    <p class="small mb-5 pb-lg-2"><a class="text-white-50" href="#!">Forgot
-                                        password?</a></p>
-                                    {#if result !== undefined}
-                                        <p>{result}</p>
+                                    {#if result_msg !== undefined}
+                                        <p>{result_msg}</p>
                                     {/if}
                                     <button class="btn btn-outline-light btn-lg px-5" type="submit">
                                         {is_login ? "Login" : "Register"} </button>

@@ -1,18 +1,6 @@
+import {Player} from "./Player";
+
 export class Game {
-    static Player = class {
-        public x: number;
-        public y: number;
-        public side: string;
-        public score: number;
-        public playerId: number;
-
-        constructor(x: number, y: number) {
-            this.x = x;
-            this.y = y;
-            this.score = 0;
-        }
-    }
-
     readonly FIELD_HEIGHT: number = 400;
     readonly FIELD_WIDTH: number = 600;
     readonly paddleHeight: number = 100;
@@ -23,9 +11,7 @@ export class Game {
     private playersCount: number = 0;
 
 
-    constructor() {
-        this.leftPlayer = new Game.Player(0, this.FIELD_HEIGHT / 2 - this.paddleHeight / 2);
-        this.rightPlayer = new Game.Player(this.FIELD_WIDTH - this.paddleWidth, this.FIELD_HEIGHT / 2 - this.paddleHeight / 2);
+    constructor(player1: Player, player2: Player) {
     }
 
     public move_down(player): void {

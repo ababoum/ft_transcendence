@@ -1,19 +1,28 @@
 <script lang="ts">
     import Header from "../components/Nav.svelte";
-    import {link, pop} from "svelte-spa-router";
+    import {link, pop, push} from "svelte-spa-router";
     import {onMount} from 'svelte';
     import PongGame from "../PongGame";
+    import {is_authenticated} from "../stores";
+
+    let tmp: boolean;
+    onMount(async () => { tmp = await is_authenticated(); });
+    $: is_logged = tmp;
+    //FIXME is logged do smth
 
     let canvas;
-    let pong = new PongGame("5678", 1);
-
     const UP_KEY : number = 38;
     const DOWN_KEY : number = 40;
-
     function keyHandler(e) {
-        if(e.keyCode == UP_KEY || e.keyCode == DOWN_KEY) {
-            pong.movePaddle(e.keyCode);
+        if (e.keyCode == UP_KEY || e.keyCode == DOWN_KEY) {
         }
+    }
+    /*
+    let pong = new PongGame("5678", 1);
+
+
+
+
     }
 
     onMount(() => {
@@ -55,11 +64,11 @@
             } catch (error) {
                 //console.log(error);
             }
-            */
         }
         //draw();
         setInterval(draw, 100);
     })
+    */
 
 
 </script>
@@ -69,12 +78,9 @@
 <svelte:window on:keydown={keyHandler} on:keyup={keyHandler} />
 <canvas
         bind:this={canvas}
-        width={pong._field_width}
-        height={pong._field_height}
+        width={600}
+        height={600}
 ></canvas>
-<button on:click={pong.connectToGame}>
-    {pong.playersCount === undefined ? "0" : pong.playersCount}
-</button>
 
 <style>
     canvas { background: #1a1e21; }

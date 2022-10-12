@@ -23,6 +23,7 @@ async function bootstrap() {
 
 	app.use(bodyParser.json());
 	app.useGlobalFilters(new NotFoundExceptionFilter());
+	app.enableCors();
 	await app.listen(port);
 }
 
