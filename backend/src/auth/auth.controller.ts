@@ -1,6 +1,5 @@
-import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { AuthService } from './auth.service';
 import {
 	JwtAuthGuard,
 	LocalAuthGuard,
@@ -8,8 +7,12 @@ import {
 	AuthenticatedGuard
 } from './guards';
 import { RequestWithUser } from './interfaces';
+import { ApiBody, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
 
 	constructor(
@@ -18,6 +21,7 @@ export class AuthController {
 	) { }
 
 	@UseGuards(LocalAuthGuard)
+	@ApiBody({type: LoginDto})
 	@Post('login')
 	async login(@Request() req: RequestWithUser) {
 		const {access_token} = await this.authService.login(req.user);

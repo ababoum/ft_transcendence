@@ -19,6 +19,7 @@ export class AuthService {
 	// validate user based on hashed password in database
 
 	async validateUser(username: string, pass: string): Promise<any> {
+		console.log(username, pass)
 		const user = await this.userService.user({ login: username });
 		if (user) {
 			if (await bcrypt.compare(pass, user.password)) {

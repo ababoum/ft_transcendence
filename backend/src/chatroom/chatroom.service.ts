@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatRoom, User, Prisma } from '@prisma/client';
+import { CreateChatRoomDto } from './dto/create-chatroom.dto';
+import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 
 @Injectable()
 export class ChatroomService {
@@ -9,7 +11,7 @@ export class ChatroomService {
 	async chatRoom(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
 	  ): Promise<ChatRoom | null> {
-		return this.prisma.chatRoom.findUnique({
+		return this.prisma.chatRoom.findUniqueOrThrow({
 		  where: userWhereUniqueInput,
 		});
 	  }
@@ -31,47 +33,58 @@ export class ChatroomService {
 		});
 	  }
 
-	async createChatRoom(data: Prisma.ChatRoomCreateInput): Promise<ChatRoom> {
-		return this.prisma.chatRoom.create({data});
+	async createChatRoom(userlogin: string, CreateChatRoomDto: CreateChatRoomDto): Promise<ChatRoom> {
+		return this.prisma.chatRoom.create({
+			data: {
+				name: CreateChatRoomDto.name,
+				owner: {connect: {login: userlogin}},
+				mode: CreateChatRoomDto.mode,
+				admin: {connect: {login: userlogin}},
+				participants: {connect: {login: userlogin}},
+		}});
 	}
 
 // PARTICIPANTS //
 	async participantsByChatRoom(chatroomid: number) {
-		return this.prisma.user.findMany({
-			where: { chatRoomJoined: { some: { id: chatroomid } } },
-			select: { id: true, login: true },
+		// try {
+		// 	return this.prisma.user.findMany({
+		// 		where: { chatRoomJoined: { some: { id: chatroomid } } },
+		// 		select: { nickname: true },
+		// 	})
+		// }
+		return this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { participants: { select: { login: true, nickname: true } } },
 		})
 	}
 
-	async inviteUser(params: {chatroomid: number; userlogin: string;}): Promise<ChatRoom> {
-		const { chatroomid, userlogin } = params;
-		return this.prisma.chatRoom.update({
+	async joinChatRoom(userlogin: string, chatroomid: number) {
+		try {
+			return await this.prisma.chatRoom.update({
 			where: { id: chatroomid },
 			data: {
 				participants: { connect: { login: userlogin } },
 			},
 		});
+		}
+		catch {
+			throw new HttpException("This room doesn't exist", 404)
+		}
 	}
 
-	async leaveChatRoom(params: {chatroomid: number; userlogin: string;}): Promise<ChatRoom> {
-		const { chatroomid, userlogin } = params;
-		// if (this.prisma.chatRoom.ownerlogin = userlogin) {
-		// 	return this.prisma.chatRoom.update({
-		// 		where: { id: chatroomid },
-		// 		data: {
-		// 			owner: { connect : { id: 1 } },
-		// 			admin: { disconnect : { login: userlogin } },
-		// 			participants: { disconnect : { login: userlogin } },
-		// 		},
-		// 	});
-		// }
-			return this.prisma.chatRoom.update({
+	async leaveChatRoom(userlogin: string, chatroomid: number) {
+		try {	
+			return await this.prisma.chatRoom.update({
 				where: { id: chatroomid },
 				data: {
 					admin: { disconnect : { login: userlogin } },
 					participants: { disconnect : { login: userlogin } },
 				},
 			});
+		}
+		catch {
+			throw new HttpException("This room doesn't exist", 404)
+		}
 	}
 
 // ADMIN //
@@ -135,14 +148,19 @@ export class ChatroomService {
 		})
 	}
 
-	async banUser(params: {chatroomid: number; userlogin: string;}): Promise<ChatRoom> {
+	async banUser(params: {chatroomid: number; userlogin: string;}) {
 		const { chatroomid, userlogin } = params;
-		return this.prisma.chatRoom.update({
-			where: { id: chatroomid },
-			data: {
-				banList: { connect: { login: userlogin } },
-			},
-		});
+		try {
+			return await this.prisma.chatRoom.update({
+				where: { id: chatroomid },
+				data: {
+					banList: { connect: { login: userlogin } },
+				},
+			});
+		}
+		catch(e) {
+			throw new HttpException("User is already banned", 409);
+		}
 	}
 
 	async unbanUser(params: {chatroomid: number; userlogin: string;}): Promise<ChatRoom> {

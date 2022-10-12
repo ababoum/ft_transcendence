@@ -1,5 +1,5 @@
 NAME = ping_me_more
-IMG_TO_DEL = $(shell docker images -q | wc -l)
+IMG_TO_DEL = $(shell docker images -qa | wc -l)
 
 all: $(NAME)
 
