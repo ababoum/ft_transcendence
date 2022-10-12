@@ -8,3 +8,8 @@ Pour un 1er lancement
 - npx prisma generate
 - cd ..
 - make
+
+
+ISSUES:
+- Quand on recupere req.user, userId est undefined (voir requete createChatRoom dans Swagger)
+- Les prisma.update renvoie la meme chose si update a eu un effet ou non.

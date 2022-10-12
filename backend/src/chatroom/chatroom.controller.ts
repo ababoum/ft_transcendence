@@ -8,100 +8,93 @@ import {
 	Delete,
 	UsePipes,
 	ValidationPipe,
+	HttpException,
+	Injectable,
+	Scope,
+	UseGuards,
+	Req,
+	Request,
+	Patch,
 } from '@nestjs/common';
 import { ChatroomService } from './chatroom.service';
-import { ChatRoom as ChatRoomModel } from '@prisma/client';
+import { ChatRoom as ChatRoomModel, Prisma } from '@prisma/client';
 import { User as UserModel } from '@prisma/client';
 import { chatRoomType } from '@prisma/client';
-
+import { CreateChatRoomDto } from './dto/create-chatroom.dto';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('chatroom')
+@ApiTags('chatroom')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ChatroomController {
 
 	constructor(private readonly ChatroomService: ChatroomService) { }
 
 	@Get()
-	findAllChatRooms() {
+	async findAllChatRooms() {
 		return this.ChatroomService.chatRooms({});
 	}
 
- 	@Post('create')
-	async createChatRoom(
-		@Body() ChatRoomData: { name: string, ownerlogin: string, mode?: chatRoomType},
-	): Promise<ChatRoomModel> {
-		const { name, ownerlogin, mode } = ChatRoomData;
-		return this.ChatroomService.createChatRoom({
-			name,
-			owner: {
-				connect: { login: ownerlogin }
-			},
-			mode,
-			participants: {
-				connect: {login: ownerlogin }
-			},
-			admin: {
-				connect: {login: ownerlogin }
-			}
-		});
+	@Get(':id')
+	async findOneChatRoom(@Param('id') id: string) {
+		return this.ChatroomService.chatRoom({ id: Number(id) });
+	}
+
+ 	@Post()
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	async createChatRoom(@Request() req, @Body() CreateChatRoomDto: CreateChatRoomDto) {
+		console.log(req.user)
+		return await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
 	}
 
 // PARTICIPANTS //
-	@Get('participants')
-	async participants(@Body() ChatRoomData: { chatroomid: number } ) {
-		const {chatroomid} = ChatRoomData;
-		return this.ChatroomService.participantsByChatRoom(chatroomid);
+	@Get(':id/participants')
+	async participants(@Param('id') id: string) {
+		return this.ChatroomService.participantsByChatRoom(+id);
 	}
 
-	@Post('invite')
-	async invite(
+	@Patch(':id/join')
+	async join(@Request() req, @Param('id') id: string) {
+		return this.ChatroomService.joinChatRoom(req.user.login, +id);
+	}
+
+	@Patch(':id/leave')
+	async leave(@Request() req, @Param('id') id: string) {
+		return this.ChatroomService.leaveChatRoom(req.user.login, +id);
+	}
+
+// ADMIN //
+	@Get('adminList')
+	async adminList(@Body() ChatRoomData: { chatroomid: number } ) {
+		const {chatroomid} = ChatRoomData;
+		return this.ChatroomService.adminListByChatRoom(chatroomid);
+	}
+
+	@Post('admin')
+	async adminUser(
 		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
 	) {
 		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.inviteUser({
+		return this.ChatroomService.adminUser({
 			chatroomid,
 			userlogin
 		});
 	}
 
-	@Post('leave')
-	async leave(
+	@Post('unadmin')
+	async unadminUser(
 		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
 	): Promise<ChatRoomModel> {
 		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.leaveChatRoom({
+		return this.ChatroomService.unadminUser({
 			chatroomid,
 			userlogin
 		});
 	}
-
-	// MUTE //
-		@Get('adminList')
-		async adminList(@Body() ChatRoomData: { chatroomid: number } ) {
-			const {chatroomid} = ChatRoomData;
-			return this.ChatroomService.adminListByChatRoom(chatroomid);
-		}
-
-		@Post('admin')
-		async adminUser(
-			@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-		) {
-			const { chatroomid, userlogin } = ChatRoomData;
-			return this.ChatroomService.adminUser({
-				chatroomid,
-				userlogin
-			});
-		}
-
-		@Post('unadmin')
-		async unadminUser(
-			@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-		): Promise<ChatRoomModel> {
-			const { chatroomid, userlogin } = ChatRoomData;
-			return this.ChatroomService.unadminUser({
-				chatroomid,
-				userlogin
-			});
-		}
 
 // MUTE //
 	@Get('muteList')
@@ -115,21 +108,23 @@ export class ChatroomController {
 		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
 	) {
 		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.muteUser({
+		await this.ChatroomService.muteUser({
 			chatroomid,
 			userlogin
 		});
+		return this.ChatroomService.muteListByChatRoom(chatroomid);
 	}
 
 	@Post('unmute')
 	async unmuteUser(
 		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-	): Promise<ChatRoomModel> {
+	) {
 		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.unmuteUser({
+		await this.ChatroomService.unmuteUser({
 			chatroomid,
 			userlogin
 		});
+		return this.ChatroomService.muteListByChatRoom(chatroomid);
 	}
 
 // BAN //

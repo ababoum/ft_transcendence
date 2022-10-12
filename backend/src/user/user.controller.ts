@@ -26,9 +26,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as shortid from 'shortid';
 import * as mime from 'mime-types';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
 
 
 @Controller('users')
+@ApiTags('users')
 export class UserController {
 
 	constructor(private readonly userService: UserService) { }
@@ -54,6 +57,7 @@ export class UserController {
 	/////////////////////// CREATE/DELETE USERS ////////////////////////
 
 	@Post('create')
+	@ApiBody({type: CreateUserDto})
 	async signupUser(
 		@Body() userData: { login: string; email: string; nickname: string, password: string })
 		: Promise<UserModel> {
