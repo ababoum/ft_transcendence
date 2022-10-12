@@ -27,9 +27,14 @@
   },
   "dependencies": {
     "bootstrap": "^5.2.2",
+    "cookie": "^0.5.0",
     "sirv-cli": "^2.0.0",
+    "socket.io": "^4.5.2",
+    "socket.io-client": "^4.5.2",
+    "svelte-routing": "^1.6.0",
     "svelte-spa-router": "^3.3.0",
     "timeago.js": "^4.0.2",
-    "url-slug": "^3.0.4"
+    "url-slug": "^3.0.4",
+    "uuid": "^9.0.0"
   }
 }

@@ -26,8 +26,9 @@ async function bootstrap() {
 	// 👇 apply PrismaClientExceptionFilter to entire application, requires HttpAdapterHost because it extends BaseExceptionFilter
 	const { httpAdapter } = app.get(HttpAdapterHost);
 	app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+	app.enableCors();
 
-	
+
 	await app.listen(port);
 }
 
