@@ -23,8 +23,7 @@ import { chatRoomType } from '@prisma/client';
 import { CreateChatRoomDto } from './dto/create-chatroom.dto';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { LocalAuthGuard } from '../auth/local-auth.guard';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('chatroom')
 @ApiTags('chatroom')
