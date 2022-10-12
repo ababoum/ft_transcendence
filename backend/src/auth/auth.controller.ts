@@ -28,7 +28,7 @@ export class AuthController {
 
 		req.res.setHeader('Set-Cookie', [access_token]);
 
-		return req.user;
+		return {access_token: access_token};
 
 	}
 
