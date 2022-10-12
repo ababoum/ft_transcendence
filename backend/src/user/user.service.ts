@@ -1,10 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, Friend, Prisma } from '@prisma/client';
+import { User, Friend, Prisma, Image } from '@prisma/client';
 
 @Injectable()
 export class UserService {
 	constructor(private prisma: PrismaService) { }
+
+
+	/////////////////////// ACCESS USER INFO ////////////////////////
+
 
 	async user(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
@@ -31,7 +35,12 @@ export class UserService {
 		});
 	}
 
+
+	/////////////////////// CREATE/DELETE USERS ////////////////////////
+
+
 	async createUser(data: Prisma.UserCreateInput): Promise<User> {
+
 		return this.prisma.user.create({
 			data,
 		});
@@ -49,11 +58,16 @@ export class UserService {
 	}
 
 	async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
-			const result = this.prisma.user.delete({
-				where,
-			});
-			return result;
+
+		const result = await this.prisma.user.delete({
+			where,
+		});
+		return result;
 	}
+
+
+	/////////////////////// MANAGE USER'S FRIENDSHIP ////////////////////////
+
 
 	async addFriend(userId: number, friendId: number): Promise<Friend> {
 
@@ -113,14 +127,14 @@ export class UserService {
 				OR: [
 					{
 						AND: [
-							{userId: userId},
-							{friendUserId: friendId}
+							{ userId: userId },
+							{ friendUserId: friendId }
 						]
 					},
 					{
 						AND: [
-							{userId: friendId},
-							{friendUserId: userId}
+							{ userId: friendId },
+							{ friendUserId: userId }
 						]
 					}
 				]
@@ -128,4 +142,79 @@ export class UserService {
 		})
 		return result;
 	}
+
+
+	/////////////////////// MANAGE USER'S AVATAR ////////////////////////
+
+	async createImage(imageData: Express.Multer.File): Promise<Image> {
+		return this.prisma.image.create({
+			data: {
+				filename: imageData.filename,
+				filepath: imageData.path,
+				mimetype: imageData.mimetype,
+				size: imageData.size,
+			},
+		});
+	}
+
+	async linkAvatar(image: Image, login: string): Promise<User> {
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				avatar: {
+					connect: {
+						id: image.id
+					}
+				}
+			}
+		})
+	}
+
+	async image(
+		imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
+	): Promise<Image | null> {
+		return this.prisma.image.findUnique({
+			where: imageWhereUniqueInput,
+		});
+	}
+
+	/////////////////////// MANAGE USER'S 2FA ////////////////////////
+
+	async turnOnTwoFactorAuthentication(login: string) {
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				isTwoFAEnabled: true
+			}
+		});
+	  }
+
+	async setTwoFactorAuthenticationSecret(secret: string, login: string)
+	: Promise<User> {
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				TwoFA_secret: secret
+			}
+		});
+	}
+
+	// async setCurrentRefreshToken(refreshToken: string, userID: number)
+	// : Promise<User> {
+	// 	return this.prisma.user.update({
+	// 		where: {
+	// 			login: login
+	// 		},
+	// 		data: {
+	// 			TwoFA_secret: secret
+	// 		}
+	// 	});
+	// }
+
 }

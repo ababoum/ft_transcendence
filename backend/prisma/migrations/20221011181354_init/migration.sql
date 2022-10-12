@@ -13,6 +13,8 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "status" "UserStatus" NOT NULL DEFAULT 'OFFLINE',
     "imageId" INTEGER,
+    "isTwoFAEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "TwoFA_secret" TEXT,
     "blockerId" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -34,7 +36,7 @@ CREATE TABLE "ChatRoom" (
     "creationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "mode" "chatRoomType" NOT NULL DEFAULT 'PUBLIC',
     "password" TEXT,
-    "ownerEmail" TEXT NOT NULL,
+    "ownerlogin" TEXT NOT NULL,
 
     CONSTRAINT "ChatRoom_pkey" PRIMARY KEY ("id")
 );
@@ -53,7 +55,10 @@ CREATE TABLE "Messages" (
 -- CreateTable
 CREATE TABLE "Image" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
+    "filename" TEXT NOT NULL,
+    "filepath" TEXT NOT NULL,
+    "mimetype" TEXT NOT NULL,
+    "size" BIGINT NOT NULL,
 
     CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
 );
@@ -92,6 +97,9 @@ CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 CREATE UNIQUE INDEX "Friend_userId_friendUserId_key" ON "Friend"("userId", "friendUserId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Image_filename_key" ON "Image"("filename");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_AdminTable_AB_unique" ON "_AdminTable"("A", "B");
 
 -- CreateIndex
@@ -128,7 +136,7 @@ ALTER TABLE "Friend" ADD CONSTRAINT "Friend_userId_fkey" FOREIGN KEY ("userId") 
 ALTER TABLE "Friend" ADD CONSTRAINT "Friend_friendUserId_fkey" FOREIGN KEY ("friendUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_ownerEmail_fkey" FOREIGN KEY ("ownerEmail") REFERENCES "User"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ChatRoom" ADD CONSTRAINT "ChatRoom_ownerlogin_fkey" FOREIGN KEY ("ownerlogin") REFERENCES "User"("login") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Messages" ADD CONSTRAINT "Messages_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
