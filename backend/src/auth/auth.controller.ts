@@ -19,24 +19,29 @@ export class AuthController {
 
 	@UseGuards(LocalAuthGuard)
 	@Post('login')
-	async login(@Request() req) {
-		return this.authService.login(req.user);
+	async login(@Request() req: RequestWithUser) {
+		const {access_token} = await this.authService.login(req.user);
+
+		req.res.setHeader('Set-Cookie', [access_token]);
+
+		return req.user;
+
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Get('profile')
-	async getProfile(@Request() req) {
+	async getProfile(@Request() req: RequestWithUser) {
 		return this.authService.getProfile(req.user.login);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Get('check')
-	checkToken(@Request() req) {
+	checkToken(@Request() req: RequestWithUser) {
 		return req.user;
 	}
 
 
-	///////////// 42 AUTHENTICATION //////////////
+	/////////////////////// 42 AUTHENTICATION ///////////////////////
 
 
 	@UseGuards(FT_OAuthGuard)
@@ -46,7 +51,7 @@ export class AuthController {
 		return;
 	}
 
-	///////////// 42 PROFILE ACCESS //////////////
+	/////////////////////// 42 PROFILE ACCESS ///////////////////////
 
 
 	@Get('42/login')
@@ -62,28 +67,21 @@ export class AuthController {
 	}
 
 
-	/////////////////// 2 FA LOGIN -> TO BE IMPLEMENTED ////////////////
+	/////////////////////// 2 FA LOGIN  ///////////////////////
 
-	// @HttpCode(200)
-	// @UseGuards(LocalAuthGuard)
-	// @Post('log-in')
-	// async logIn_refresh(@Req() request: RequestWithUser) {
-	//   const { user } = request;
-	//   const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(user.id);
-	//   const {
-	// 	cookie: refreshTokenCookie,
-	// 	token: refreshToken
-	//   } = this.authService.getCookieWithJwtRefreshToken(user.id);
-   
-	//   await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-   
-	//   request.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
-   
-	//   if (user.isTwoFAEnabled) {
-	// 	return;	
-	//   }
-   
-	//   return user;
-	// }
+	@HttpCode(200)
+	@UseGuards(LocalAuthGuard)
+	@Post('log-in')
+	async logIn_2fa(@Req() request: RequestWithUser) {
+		const { user } = request;
+		const accessTokenCookie = this.authService.getCookieWith_2FAJwtAccessToken(user.id);
+
+		request.res.setHeader('Set-Cookie', [accessTokenCookie]);
+
+		if (user.isTwoFAEnabled) {
+			return;
+		}
+		return user;
+	}
 
 }
