@@ -4,10 +4,8 @@ IMG_TO_DEL = $(shell docker images -q | wc -l)
 all: $(NAME)
 
 $(NAME):
-	# source db_folder_namer.sh
 	docker-compose up --build -d
 	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data/"
-
 
 clean:
 	docker-compose stop
