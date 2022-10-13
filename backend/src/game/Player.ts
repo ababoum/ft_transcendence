@@ -6,7 +6,7 @@ export class Player {
     private				_y: number;
     private				_score: number;
     private readonly	_id: number;
-	private readonly	_nickname: string;
+	private readonly _nickname: string;
     private readonly	_socket: Socket;
 
     constructor(player_socket: Socket, profile: any) {
@@ -17,14 +17,15 @@ export class Player {
     }
 
 	public move_down(maxTopPos: number): void {
-		if (this.y + 3 <= maxTopPos)
-			this.y += 3;
+		if (this.y + 7 <= maxTopPos)
+			this.y += 7;
 	}
 
 	public move_up(maxBotPos: number): void {
-		if (this.y - 3 >= maxBotPos)
-			this.y -= 3;
+		if (this.y - 7 >= maxBotPos)
+			this.y -= 7;
 	}
+
 
     get socket(): Socket {
         return this._socket;
@@ -55,4 +56,7 @@ export class Player {
     }
 
 
+	get nickname(): string {
+		return this._nickname;
+	}
 }

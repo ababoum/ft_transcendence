@@ -31,7 +31,7 @@ export async function is_authenticated() {
         if (r.ok)
             return true;
     } catch (error) {
-        console.log("catched");
+        console.log("catched error in is_auth (stores.ts)");
     }
     eraseCookie("jwt");
     return false;

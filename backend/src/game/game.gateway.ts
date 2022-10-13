@@ -28,11 +28,6 @@ export class GameGateway {
             this.gameServer.endLeaverGame(client);
     }
 
-    @SubscribeMessage('get-data')
-    sendGameData(@ConnectedSocket() client: Socket): void {
-      //  this.server.emit('get-data', JSON.stringify(this.game));
-    }
-
     @SubscribeMessage('move-paddle')
     movePaddle(@MessageBody() direction: string, @ConnectedSocket() client: Socket): void {
         this.gameServer.movePaddle(client, direction);

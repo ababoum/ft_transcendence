@@ -13,11 +13,8 @@
 
     let profile = undefined;
     async function findGame() {
-		console.log("before ", tmp);
 		tmp = await is_authenticated();
-		console.log("after ", tmp);
 		if (!tmp) {
-			console.log("inside");
 			await push('/log');
 			return;
 		}
