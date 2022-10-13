@@ -12,6 +12,7 @@ datasource db {
 
 model User {
     id                Int        @id @default(autoincrement())
+    // personal info and avatar
     email             String     @unique
     login             String     @unique
     nickname          String
@@ -19,19 +20,25 @@ model User {
     status            UserStatus @default(OFFLINE)
     avatar            Image?     @relation(fields: [imageId], references: [id])
     imageId           Int?
+    // authentication
     isTwoFAEnabled    Boolean    @default(false)
     TwoFA_secret      String?
+    // friendships
     userFriends       Friend[]   @relation(name: "user")
     friendUserFriends Friend[]   @relation(name: "friend_user")
     blockerId         Int?
     blocker           User?      @relation("blocking", fields: [blockerId], references: [id])
     blockedList       User[]     @relation("blocking")
+    // chats
     chatRoomOwned     ChatRoom[] @relation(name: "OwnerTable")
     chatRoomAdmined   ChatRoom[] @relation(name: "AdminTable")
     chatRoomJoined    ChatRoom[] @relation(name: "ParticipantTable")
     chatRoomBanned    ChatRoom[] @relation(name: "BanTable")
-    chatRoomMuted     ChatRoom[] @relation(name: "MuteTable")
+    chatRoomMuted     UsersMutedinChatRooms[]
     messages          Messages[]
+    // games
+    matchWinner       Match[]    @relation(name: "match_winner")
+    matchLoser        Match[]    @relation(name: "match_loser")
 }
 
 // bi-directional
@@ -56,8 +63,19 @@ model ChatRoom {
     admin        User[]       @relation(name: "AdminTable")
     participants User[]       @relation(name: "ParticipantTable")
     banList      User[]       @relation(name: "BanTable")
-    muteList     User[]       @relation(name: "MuteTable")
+    muteList     UsersMutedinChatRooms[]
     messages     Messages[]
+}
+
+model UsersMutedinChatRooms {
+	chatRoom	ChatRoom 	@relation(fields: [chatRoomId], references: [id])
+	chatRoomId	Int
+	user		User		@relation(fields: [userLogin], references: [login])
+	userLogin	String
+	mutedAt		DateTime 	@default(now())
+	mutedUntil	DateTime
+
+	@@id([chatRoomId, userLogin])
 }
 
 model Messages {
@@ -70,6 +88,26 @@ model Messages {
     chatRoomId   Int
 }
 
+model Image {
+    id       Int    @id @default(autoincrement())
+    filename String @unique
+    filepath String
+    mimetype String
+    size     BigInt
+    User     User[]
+}
+
+model Match {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    winnerLogin String
+    loserLogin  String
+    winner      User     @relation(name: "match_winner", fields: [winnerLogin], references: [login])
+    loser       User     @relation(name: "match_loser", fields: [loserLogin], references: [login])
+    winnerScore Int
+    loserScore  Int
+}
+
 enum chatRoomType {
     PRIVATE
     PROTECTED
@@ -80,13 +118,4 @@ enum UserStatus {
     ONLINE
     OFFLINE
     IN_GAME
-}
-
-model Image {
-    id       Int    @id @default(autoincrement())
-    filename String @unique
-    filepath String
-    mimetype String
-    size     BigInt
-    User     User[]
 }

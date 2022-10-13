@@ -205,16 +205,5 @@ export class UserService {
 		});
 	}
 
-	// async setCurrentRefreshToken(refreshToken: string, userID: number)
-	// : Promise<User> {
-	// 	return this.prisma.user.update({
-	// 		where: {
-	// 			login: login
-	// 		},
-	// 		data: {
-	// 			TwoFA_secret: secret
-	// 		}
-	// 	});
-	// }
 
 }

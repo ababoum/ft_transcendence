@@ -8,158 +8,111 @@ import {
 	Delete,
 	UsePipes,
 	ValidationPipe,
+	HttpException,
+	Injectable,
+	Scope,
+	UseGuards,
+	Req,
+	Request,
+	Patch,
 } from '@nestjs/common';
 import { ChatroomService } from './chatroom.service';
-import { ChatRoom as ChatRoomModel } from '@prisma/client';
+import { ChatRoom as ChatRoomModel, Prisma } from '@prisma/client';
 import { User as UserModel } from '@prisma/client';
 import { chatRoomType } from '@prisma/client';
+import { CreateChatRoomDto } from './dto/create-chatroom.dto';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../auth/guards';
+import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 
-
-@Controller('chatroom')
+@Controller('chatrooms')
+@ApiTags('chatrooms')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class ChatroomController {
 
 	constructor(private readonly ChatroomService: ChatroomService) { }
 
 	@Get()
-	findAllChatRooms() {
+	async findAllChatRooms() {
 		return this.ChatroomService.chatRooms({});
 	}
 
- 	@Post('create')
-	async createChatRoom(
-		@Body() ChatRoomData: { name: string, ownerlogin: string, mode?: chatRoomType},
-	): Promise<ChatRoomModel> {
-		const { name, ownerlogin, mode } = ChatRoomData;
-		return this.ChatroomService.createChatRoom({
-			name,
-			owner: {
-				connect: { login: ownerlogin }
-			},
-			mode,
-			participants: {
-				connect: {login: ownerlogin }
-			},
-			admin: {
-				connect: {login: ownerlogin }
-			}
-		});
+	@Get(':id')
+	async findOneChatRoom(@Param('id') id: string) {
+		return this.ChatroomService.chatRoom({ id: Number(id) });
+	}
+
+ 	@Post()
+	async createChatRoom(@Request() req, @Body() CreateChatRoomDto: CreateChatRoomDto) {
+		console.log(req.user)
+		return await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
 	}
 
 // PARTICIPANTS //
-	@Get('participants')
-	async participants(@Body() ChatRoomData: { chatroomid: number } ) {
-		const {chatroomid} = ChatRoomData;
-		return this.ChatroomService.participantsByChatRoom(chatroomid);
+	@Get(':id/participantsList')
+	async participants(@Param('id') id: string) {
+		return this.ChatroomService.participantsByChatRoom(+id);
 	}
 
-	@Post('invite')
-	async invite(
-		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-	) {
-		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.inviteUser({
-			chatroomid,
-			userlogin
-		});
+	@Patch(':id/join')
+	async join(@Request() req, @Param('id') id: string) {
+		return this.ChatroomService.joinChatRoom(req.user.login, +id);
 	}
 
-	@Post('leave')
-	async leave(
-		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-	): Promise<ChatRoomModel> {
-		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.leaveChatRoom({
-			chatroomid,
-			userlogin
-		});
+	@Patch(':id/leave')
+	async leave(@Request() req, @Param('id') id: string) {
+		return this.ChatroomService.leaveChatRoom(req.user.login, +id);
 	}
 
-	// MUTE //
-		@Get('adminList')
-		async adminList(@Body() ChatRoomData: { chatroomid: number } ) {
-			const {chatroomid} = ChatRoomData;
-			return this.ChatroomService.adminListByChatRoom(chatroomid);
-		}
-
-		@Post('admin')
-		async adminUser(
-			@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-		) {
-			const { chatroomid, userlogin } = ChatRoomData;
-			return this.ChatroomService.adminUser({
-				chatroomid,
-				userlogin
-			});
-		}
-
-		@Post('unadmin')
-		async unadminUser(
-			@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-		): Promise<ChatRoomModel> {
-			const { chatroomid, userlogin } = ChatRoomData;
-			return this.ChatroomService.unadminUser({
-				chatroomid,
-				userlogin
-			});
-		}
-
-// MUTE //
-	@Get('muteList')
-	async muteList(@Body() ChatRoomData: { chatroomid: number } ) {
-		const {chatroomid} = ChatRoomData;
-		return this.ChatroomService.muteListByChatRoom(chatroomid);
+// ADMIN //
+	@Get(':id/adminList')
+	async admins(@Param('id') id: string) {
+		return this.ChatroomService.adminsByChatRoom(+id);
 	}
 
-	@Post('mute')
-	async muteUser(
-		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-	) {
-		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.muteUser({
-			chatroomid,
-			userlogin
-		});
+	@Patch(':id/adminUser')
+	async adminUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		return this.ChatroomService.adminUser(req.user.login, +id, UpdateChatRoomDto);
 	}
 
-	@Post('unmute')
-	async unmuteUser(
-		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-	): Promise<ChatRoomModel> {
-		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.unmuteUser({
-			chatroomid,
-			userlogin
-		});
+	@Patch(':id/unadminUser')
+	async unadminUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		return this.ChatroomService.unadminUser(req.user.login, +id, UpdateChatRoomDto);
 	}
 
 // BAN //
-	@Get('banList')
-	async banList(@Body() ChatRoomData: { chatroomid: number } ) {
-		const {chatroomid} = ChatRoomData;
-		return this.ChatroomService.banListByChatRoom(chatroomid);
+	@Get(':id/banList')
+	async banList(@Param('id') id: string) {
+		return this.ChatroomService.banListByChatRoom(+id);
 	}
 
-	@Post('ban')
-	async banUser(
-		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-	) {
-		const { chatroomid, userlogin } = ChatRoomData;
-		this.ChatroomService.banUser({
-			chatroomid,
-			userlogin
-		});
-		return this.ChatroomService.banListByChatRoom(chatroomid);
+	@Patch(':id/banUser')
+	async banUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		return this.ChatroomService.banUser(req.user.login, +id, UpdateChatRoomDto);
 	}
 
-	@Post('unban')
-	async unbanUser(
-		@Body() ChatRoomData: { chatroomid: number, userlogin: string },
-	): Promise<ChatRoomModel> {
-		const { chatroomid, userlogin } = ChatRoomData;
-		return this.ChatroomService.unbanUser({
-			chatroomid,
-			userlogin
-		});
+	@Patch(':id/unbanUser')
+	async unbanUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		return this.ChatroomService.unbanUser(req.user.login, +id, UpdateChatRoomDto);
 	}
+
+// MUTE //
+	@Get(':id/muteList')
+	async muteList(@Param('id') id: string) {
+		return this.ChatroomService.muteListByChatRoom(+id);
+	}
+
+	@Patch(':id/muteUser')
+	async muteUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		return this.ChatroomService.muteUser(req.user.login, +id, UpdateChatRoomDto);
+	}
+
+	@Patch(':id/unmuteUser')
+	async unmuteUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		return this.ChatroomService.unmuteUser(req.user.login, +id, UpdateChatRoomDto);
+	}
+
 
 }

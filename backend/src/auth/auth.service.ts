@@ -19,6 +19,7 @@ export class AuthService {
 	// validate user based on hashed password in database
 
 	async validateUser(username: string, pass: string): Promise<any> {
+		console.log(username, pass)
 		const user = await this.userService.user({ login: username });
 		if (user) {
 			if (await bcrypt.compare(pass, user.password)) {
@@ -52,7 +53,7 @@ export class AuthService {
 
 	/////////////////// FOR 2FA AUTHENTICATION ///////////////////
 
-	public getCookieWithJwtAccessToken(userId: number, isSecondFactorAuthenticated = false) {
+	public getCookieWith_2FAJwtAccessToken(userId: number, isSecondFactorAuthenticated = false) {
 		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
 
 		const jwt_secret = jwtConstants.secret;
@@ -69,7 +70,7 @@ export class AuthService {
 		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
 
 		const jwt_secret = jwtConstants.secret;
-		const exp_time = jwtConstants.exp_time
+		const exp_time = jwtConstants.exp_time;
 
 		const token = this.jwtService.sign(payload, {
 			secret: jwt_secret,
