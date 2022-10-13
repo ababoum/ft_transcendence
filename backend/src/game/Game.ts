@@ -79,7 +79,7 @@ export class Game {
 		if (this.collision(player)) {
 			//if collision, need check where exactly ball touched paddle to change ball direction
 			let collidePoint = (this.ball.y - (player.y + Game.PADDLE_HEIGHT / 2));
-				collidePoint = collidePoint / Game.PADDLE_HEIGHT / 2;
+				collidePoint = collidePoint / (Game.PADDLE_HEIGHT / 2);
 			let angeRad = (Math.PI / 4) * collidePoint;
 			let direction = (this.ball.x < Game.FIELD_WIDTH / 2) ? 1 : -1;//FIXME unused?
 			this.ball.velocityX = direction * this.ball.speed * Math.cos(angeRad);

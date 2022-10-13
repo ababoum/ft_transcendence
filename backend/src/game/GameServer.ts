@@ -3,7 +3,7 @@ import {Game} from "./Game";
 import {Socket} from "socket.io";
 
 export class GameServer {
-    private _games: Array<Game>;
+    private readonly _games: Array<Game>;
 	private interval;
 	private static readonly fps = 50;
 
@@ -18,8 +18,10 @@ export class GameServer {
         player2.socket.emit('find-game', { status: 'found' });
 
         this._games.push(new Game(player1, player2));
-		if (this._games.length == 1)
-        	this.interval = setInterval(this.sendGameData, 1000/GameServer.fps, this._games);
+		if (this._games.length == 1) {
+			console.log("Game has been started");
+			this.interval = setInterval(this.sendGameData, 1000 / GameServer.fps, this._games);
+		}
     }
 
     public sendGameData(games: Array<Game>): void {
@@ -35,9 +37,10 @@ export class GameServer {
 					object.pop();
 				else
 					object.slice(index, 1);
-				if (object.length == 0)
+				if (object.length == 0) {
 					clearInterval(this.interval);
-				console.log("after " + object.length);
+					console.log("Interval is off, this game is over, games online " + object.length);
+				}
 			}
         });
     }
@@ -55,6 +58,4 @@ export class GameServer {
                 return;
         });
     }
-
-    private writeResult() {}
 }

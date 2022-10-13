@@ -34,13 +34,13 @@ export class Player {
 	}
 
 	public move_down(maxTopPos: number): void {
-		if (this.y + 7 <= maxTopPos)
-			this.y += 7;
+		if (this.y + 3.5 <= maxTopPos)
+			this.y += 3.5;
 	}
 
 	public move_up(maxBotPos: number): void {
-		if (this.y - 7 >= maxBotPos)
-			this.y -= 7;
+		if (this.y - 3.5 >= maxBotPos)
+			this.y -= 3.5;
 	}
 
 
