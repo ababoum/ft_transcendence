@@ -9,7 +9,7 @@ import {
 import { RequestWithUser } from './auth.interfaces';
 import { ApiBody, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from './auth.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -35,18 +35,11 @@ export class AuthController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('profile')
-	async getProfile(@Request() req: RequestWithUser) {
-		return this.authService.getProfile(req.user.login);
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Get('check')
 	checkToken(@Request() req: RequestWithUser) {
 		const login = req.user.login;
 
 		return this.userService.user({login: login});
 	}
-
 
 	/////////////////////// 42 AUTHENTICATION ///////////////////////
 

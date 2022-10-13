@@ -25,7 +25,7 @@ export function eraseCookie(name: string) {
 }
 
 export async function get_current_user_data(): Promise<loginBase> {
-	const resp = await fetch(`${BACKEND_URL}/auth/check`, {
+	const resp = await fetch(`${BACKEND_URL}/auth/profile`, {
 		method: 'GET',
 		headers: { "Authorization": "Bearer " + getCookie("jwt") }
 	});

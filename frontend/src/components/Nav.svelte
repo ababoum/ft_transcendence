@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { PROFILE_URL, GAME_URL, LOBBY_URL, LOGIN_URL } from "../stores";
-	import { is_authenticated, eraseCookie } from "../stores";
+	import { get_current_user_data, eraseCookie } from "../stores";
 	import { onMount } from "svelte";
 	import { push } from "svelte-spa-router";
+    import type { loginBase } from "../types";
 
-	let tmp: boolean;
+	let tmp: loginBase;
 	onMount(async () => {
-		tmp = await is_authenticated();
+		tmp = await get_current_user_data();
 	});
-	$: is_logged = tmp;
+	$: is_logged = tmp.is_logged_in;
 
 	async function logout() {
 		eraseCookie("jwt");
@@ -19,7 +20,7 @@
 <main>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#">
+			<a class="navbar-brand" href="#/">
 				<img src="/logo.png" alt="" width="40" height="30" />
 				TRANSCENDENCE
 			</a>
