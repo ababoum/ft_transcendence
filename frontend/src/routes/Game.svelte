@@ -1,13 +1,15 @@
 <script lang="ts">
     import Header from "../components/Nav.svelte";
-    import {link, pop, push} from "svelte-spa-router";
+    import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from 'svelte';
 	import {game_socket, is_authenticated} from "../stores";
 
+	const UP_KEY : number = 38;
+	const DOWN_KEY : number = 40;
 	let canvas;
 	let context;
-
 	let is_started = false;
+
 	let game_data: any = {
 		field: {
 			width: 0,
@@ -15,21 +17,16 @@
 		}
     };
 
-	const UP_KEY : number = 38;
-	const DOWN_KEY : number = 40;
-
 	function keyHandler(e) {
-	if (e.keyCode == DOWN_KEY)
-		$game_socket.emit('move-paddle', "down");
-	if (e.keyCode == UP_KEY)
-		$game_socket.emit('move-paddle', "up");
+	    if (e.keyCode == DOWN_KEY) {
+		    $game_socket.emit('move-paddle', "down");
+		    $game_socket.emit('move-paddle', "down");
+	    }
+	    if (e.keyCode == UP_KEY) {
+	    	$game_socket.emit('move-paddle', "up");
+	    	$game_socket.emit('move-paddle', "up");
+    	}
 	}
-
-
-
-onMount(() => {
-    context = canvas.getContext('2d');
-})
 
     // x, y are position. w and h are width and height of the shape
     function drawRect(x, y, w, h): void {
@@ -67,6 +64,10 @@ onMount(() => {
         }
     }
 
+	onMount(() => {
+		context = canvas.getContext('2d');
+	})
+
 	onMount(async () => {
 		if (!await is_authenticated()) {
 			await push('/');
@@ -95,7 +96,6 @@ onMount(() => {
 </script>
 
 <Header/>
-
 
 <svelte:window on:keydown|preventDefault={keyHandler}  />
 <canvas
