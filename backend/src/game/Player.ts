@@ -1,16 +1,48 @@
 import {Socket} from "socket.io";
+import {Game} from "./Game";
 
 export class Player {
 
-    private _x: number;
-    private _y: number;
-    private _score: number;
-    private _socket: Socket;
+    private				_x: number;
+    private				_y: number;
+    private				_score: number;
+    private readonly	_id: number;
+	private readonly _nickname: string;
+    private readonly	_socket: Socket;
 
-    constructor(player_socket: Socket) {
+    constructor(player_socket: Socket, profile: any) {
         this._score = 0;
         this._socket = player_socket;
+		this._id = profile._id;
+		this._nickname = profile._nickname;
     }
+
+	public getPaddleTop(): number {
+		return this.y;
+	}
+
+	public getPaddleBottom(): number {
+		return this.y + Game.PADDLE_HEIGHT;
+	}
+
+	public getPaddleLeft(): number {
+		return this.x;
+	}
+
+	public getPaddleRight(): number {
+		return this.x + Game.PADDLE_WIDTH;
+	}
+
+	public move_down(maxTopPos: number): void {
+		if (this.y + 7 <= maxTopPos)
+			this.y += 7;
+	}
+
+	public move_up(maxBotPos: number): void {
+		if (this.y - 7 >= maxBotPos)
+			this.y -= 7;
+	}
+
 
     get socket(): Socket {
         return this._socket;
@@ -39,4 +71,11 @@ export class Player {
     set score(value: number) {
         this._score = value;
     }
+
+
+	get nickname(): string {
+		return this._nickname;
+	}
+
+
 }

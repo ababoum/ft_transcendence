@@ -1,3 +1,5 @@
+import {contains} from "class-validator";
+
 export class Queue<T> {
     private storage: T[] = [];
 
@@ -12,6 +14,17 @@ export class Queue<T> {
 
     dequeue(): T | undefined {
         return this.storage.shift();
+    }
+
+    contains(item: T): boolean {
+        let result: boolean = false;
+        this.storage.forEach((element) => {
+            if (item == element) {
+                result = true;
+                return;
+            }
+        });
+        return result;
     }
 
     size(): number {

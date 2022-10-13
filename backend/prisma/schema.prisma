@@ -34,7 +34,7 @@ model User {
     chatRoomAdmined   ChatRoom[] @relation(name: "AdminTable")
     chatRoomJoined    ChatRoom[] @relation(name: "ParticipantTable")
     chatRoomBanned    ChatRoom[] @relation(name: "BanTable")
-    chatRoomMuted     ChatRoom[] @relation(name: "MuteTable")
+    chatRoomMuted     UsersMutedinChatRooms[]
     messages          Messages[]
     // games
     matchWinner       Match[]    @relation(name: "match_winner")
@@ -63,8 +63,19 @@ model ChatRoom {
     admin        User[]       @relation(name: "AdminTable")
     participants User[]       @relation(name: "ParticipantTable")
     banList      User[]       @relation(name: "BanTable")
-    muteList     User[]       @relation(name: "MuteTable")
+    muteList     UsersMutedinChatRooms[]
     messages     Messages[]
+}
+
+model UsersMutedinChatRooms {
+	chatRoom	ChatRoom 	@relation(fields: [chatRoomId], references: [id])
+	chatRoomId	Int
+	user		User		@relation(fields: [userLogin], references: [login])
+	userLogin	String
+	mutedAt		DateTime 	@default(now())
+	mutedUntil	DateTime
+
+	@@id([chatRoomId, userLogin])
 }
 
 model Messages {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import { link, push } from "svelte-spa-router";
-	import { get_current_user_data } from "../stores";
+	import {game_socket, get_current_user_data } from "../stores";
 	import { onMount } from "svelte";
 	import type { loginBase } from "../types";
 	import ProfileImage from "../components/Profile/ProfileImage.svelte";

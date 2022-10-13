@@ -2,13 +2,13 @@ import { readable, Writable, writable } from "svelte/store";
 import { io } from "socket.io-client";
 import { FRONTEND_URL, BACKEND_URL, GAME_DOMAIN} from './domain.js'
 import { loginBase } from "./types.js";
-
+import error from "svelte/types/compiler/utils/error";
 
 export const PROFILE_URL = readable("/#/profile");
 export const GAME_URL = readable("/#/game");
 export const LOBBY_URL = readable("/#/");
 export const LOGIN_URL = readable("/#/log");
-export const game_socket = readable(io(`${GAME_DOMAIN}`));
+export const game_socket = writable();
 
 function getCookie(name: string): string {
 	let cookieArr = document.cookie.split(";");
@@ -45,13 +45,5 @@ export async function get_current_user_data(): Promise<loginBase> {
 	eraseCookie("jwt");
 	return new loginBase(false);
 }
-
-// export async function get_current_user_data() {
-// 	return await fetch(`${BACKEND_URL}/auth/profile`, {
-// 		method: 'GET',
-// 		headers: { "Authorization": "Bearer " + getCookie("jwt") }
-// 	}).then(response => response.json());
-// }
-
 
 

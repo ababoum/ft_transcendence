@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { chatRoomType } from '@prisma/client';
 import {
 	IsEnum,
@@ -16,11 +16,11 @@ export class CreateChatRoomDto {
  
   @IsOptional()
   @IsEnum(chatRoomType)
-  @ApiProperty({ required: false, default: "PUBLIC" })
+  @ApiPropertyOptional({default: "PUBLIC" })
   mode?: chatRoomType;
 
   @IsOptional()
   @MinLength(3)
-  @ApiProperty({required: false})
+  @ApiPropertyOptional()
   password?: string;
 }
