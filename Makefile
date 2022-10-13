@@ -19,7 +19,8 @@ ifneq (${IMG_TO_DEL}, 0)
 	$(shell docker rmi -f $(docker images -q))
 endif
 
-
+test_env:
+	docker-compose up postgres adminer -d
 # update_scheme:
 # 	docker-compose up postgres -d
 # 	cd backend/

@@ -35,17 +35,19 @@ async function bootstrap() {
 	// 👇 apply PrismaClientExceptionFilter to entire application, requires HttpAdapterHost because it extends BaseExceptionFilter
 	const { httpAdapter } = app.get(HttpAdapterHost);
 	app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+
+	// enable CORS to allow communication with frontend via 'fetch'
 	app.enableCors();
 
-//	app.useGlobalFilters(new NotFoundExceptionFilter());
+	//	app.useGlobalFilters(new NotFoundExceptionFilter());
 
 	//Swagger config
 	const config = new DocumentBuilder()
 		.setTitle('ft_transcendence')
 		.addBearerAuth()
 		.build();
-		const document = SwaggerModule.createDocument(app, config);
- 	SwaggerModule.setup('api', app, document, { customSiteTitle: 'Prisma Day' });
+	const document = SwaggerModule.createDocument(app, config);
+	SwaggerModule.setup('api', app, document, { customSiteTitle: 'Prisma Day' });
 
 	await app.listen(port);
 }

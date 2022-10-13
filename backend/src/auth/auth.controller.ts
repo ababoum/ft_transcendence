@@ -1,4 +1,4 @@
-import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping, Body } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import {
 	JwtAuthGuard,
@@ -23,7 +23,8 @@ export class AuthController {
 	@UseGuards(LocalAuthGuard)
 	@ApiBody({type: LoginDto})
 	@Post('login')
-	async login(@Request() req: RequestWithUser) {
+	async login(@Body() body: LoginDto, @Request() req: RequestWithUser) {
+
 		const {access_token} = await this.authService.login(req.user);
 
 		req.res.setHeader('Set-Cookie', [access_token]);
