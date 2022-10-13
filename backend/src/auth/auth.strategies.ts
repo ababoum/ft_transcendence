@@ -4,10 +4,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import { ExtractJwt, Strategy as jwt_Strategy } from 'passport-jwt';
-import { jwtConstants } from './constants';
+import { jwtConstants } from './auth.constants';
 
 import { Strategy as ft_Strategy, Profile, VerifyCallback } from 'passport-42';
-import { TokenPayload } from './interfaces';
+import { TokenPayload } from './auth.interfaces';
 import { UserService } from '../user/user.service';
 import { Request } from 'express';
 

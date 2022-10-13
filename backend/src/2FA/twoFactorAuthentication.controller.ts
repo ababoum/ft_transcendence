@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { TwoFactorAuthenticationService } from './twoFactorAuthentication.service';
 import { Response } from 'express';
-import { JwtAuthGuard } from '../auth/guards';
-import { RequestWithUser } from '../auth/interfaces';
-import { UserService } from './user.service';
+import { JwtAuthGuard } from '../auth/auth.guards';
+import { RequestWithUser } from '../auth/auth.interfaces';
+import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
 
 

@@ -3,7 +3,6 @@ import { IsNotEmpty, MaxLength, MinLength } from 'class-validator';
 
 export class LoginDto {
 	@IsNotEmpty()
-	@MinLength(20)
 	@ApiProperty()
 	login: string;
 

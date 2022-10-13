@@ -5,8 +5,8 @@ import {
 	LocalAuthGuard,
 	FT_OAuthGuard,
 	AuthenticatedGuard
-} from './guards';
-import { RequestWithUser } from './interfaces';
+} from './auth.guards';
+import { RequestWithUser } from './auth.interfaces';
 import { ApiBody, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -42,7 +42,9 @@ export class AuthController {
 	@UseGuards(JwtAuthGuard)
 	@Get('check')
 	checkToken(@Request() req: RequestWithUser) {
-		return req.user;
+		const login = req.user.login;
+
+		return this.userService.user({login: login});
 	}
 
 

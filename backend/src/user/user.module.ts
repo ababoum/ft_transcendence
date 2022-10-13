@@ -3,10 +3,10 @@ import { UserController } from './user.controller';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from './user.service';
 import { MulterModule } from '@nestjs/platform-express';
-import { TwoFactorAuthenticationController } from './twoFactorAuthentication.controller';
-import { TwoFactorAuthenticationService } from './twoFactorAuthentication.service';
+import { TwoFactorAuthenticationController } from '../2FA/twoFactorAuthentication.controller';
+import { TwoFactorAuthenticationService } from '../2FA/twoFactorAuthentication.service';
 import { AuthService } from '../auth/auth.service';
-import { JwtAuthGuard } from '../auth/guards';
+import { JwtAuthGuard } from '../auth/auth.guards';
 import { JwtService } from '@nestjs/jwt';
 
 

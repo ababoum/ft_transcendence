@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { User as UserModel } from '@prisma/client';
-import { UserService } from './user.service';
+import { UserService } from '../user/user.service';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
 

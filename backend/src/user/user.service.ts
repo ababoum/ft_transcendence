@@ -106,7 +106,7 @@ export class UserService {
 				friendUserId: true
 			}
 		}
-		);
+		);	
 
 		// retrieve the list of users listed in the friendships
 		const result = await this.prisma.user.findMany({

@@ -50,17 +50,18 @@ services:
 
 ## Frontend (Svelte) ##
 
-  # frontend:
-  #   container_name: frontend
-  #   build: frontend/
-  #   image: frontend
-  #   networks:
-  #     - network
-  #   restart: always
-  #   depends_on:
-  #     - backend
-  #   ports:
-  #     - '9000:9000'
+  frontend:
+    container_name: frontend
+    build:
+      context: frontend/
+    image: frontend:ping_me_more
+    networks:
+      - network
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - '8080:8080'
 
 ############### NETWORKS ##################
 
