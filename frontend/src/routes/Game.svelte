@@ -1,28 +1,44 @@
 <script lang="ts">
     import Header from "../components/Nav.svelte";
     import {link, pop, push} from "svelte-spa-router";
-    import {onMount} from 'svelte';
+	import {onDestroy, onMount} from 'svelte';
     import PongGame from "../PongGame";
-    import {is_authenticated} from "../stores";
+	import {game_socket, is_authenticated} from "../stores";
 
-    let tmp: boolean;
-    onMount(async () => { tmp = await is_authenticated(); });
-    $: is_logged = tmp;
-    //FIXME is logged do smth
+	let canvas;
+	const UP_KEY : number = 38;
+	const DOWN_KEY : number = 40;
 
-    let canvas;
-    const UP_KEY : number = 38;
-    const DOWN_KEY : number = 40;
-    function keyHandler(e) {
-        if (e.keyCode == UP_KEY || e.keyCode == DOWN_KEY) {
+	onMount(async () => {
+		if (!await is_authenticated()) {
+			await push('/');
+		} else {
+			$game_socket.on('exit-game', async () => {
+				console.log("Game finished");
+				//await push('/');
+            });
         }
+    });
+
+	onDestroy(() => {
+		try {
+			$game_socket.removeAllListeners();
+			$game_socket.close();
+		} catch (error) {}
+	});
+
+    function upKeyHandler(e) {
+        if (e.keyCode == UP_KEY)
+			$game_socket.emit('move-paddle', "up");
     }
+
+	function downKeyHandler(e) {
+	if (e.keyCode == DOWN_KEY)
+			$game_socket.emit('move-paddle', "down");
+    }
+
     /*
     let pong = new PongGame("5678", 1);
-
-
-
-
     }
 
     onMount(() => {
@@ -75,7 +91,7 @@
 
 <Header/>
 
-<svelte:window on:keydown={keyHandler} on:keyup={keyHandler} />
+<svelte:window on:keydown={downKeyHandler} on:keyup={upKeyHandler} />
 <canvas
         bind:this={canvas}
         width={600}

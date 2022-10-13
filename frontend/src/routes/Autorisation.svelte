@@ -1,8 +1,8 @@
 <script lang="ts">
     import {link, push} from "svelte-spa-router";
-    import {LOBBY_URL, LOGIN_URL} from "../stores";
+    import {LOGIN_URL} from "../stores";
     import { is_authenticated } from "../stores";
-    import {onMount} from "svelte";
+	import {onMount} from "svelte";
 
     let login: string;
     let password: string;
@@ -10,11 +10,8 @@
     let nickname: string;
     let result_msg: string;
 
-    let tmp: boolean;
-    onMount(async () => { tmp = await is_authenticated(); });
-    $: is_logged = tmp;
-    $: if (is_logged)
-        push('/');
+	onMount(async () => { if (await is_authenticated()) await push('/')} );
+
     $: is_login = true;
     const submit = async () => {
         if (!is_login) {

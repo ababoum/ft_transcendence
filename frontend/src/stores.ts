@@ -1,11 +1,12 @@
 import {readable, Writable, writable} from "svelte/store";
 import {io} from "socket.io-client";
+import error from "svelte/types/compiler/utils/error";
 
 export const PROFILE_URL = readable("/#/profile");
 export const GAME_URL = readable("/#/game");
 export const LOBBY_URL = readable("/#/");
 export const LOGIN_URL = readable("/#/log");
-export const game_socket = readable(io("http://localhost:5678"));
+export const game_socket = writable();
 
 function getCookie(name):string {
     let cookieArr = document.cookie.split(";");
@@ -22,14 +23,16 @@ export function eraseCookie(name) {
 }
 
 export async function is_authenticated() {
-    const r = await fetch("http://localhost:3000/auth/check", {
-        method: 'GET',
-        headers: {"Authorization": "Bearer " + getCookie("jwt")}
-    });
     try {
+        const r = await fetch("http://localhost:3000/auth/check", {
+            method: 'GET',
+            headers: {"Authorization": "Bearer " + getCookie("jwt")}
+        });
         if (r.ok)
             return true;
-    } catch (error) {}
+    } catch (error) {
+        console.log("catched");
+    }
     eraseCookie("jwt");
     return false;
 }
