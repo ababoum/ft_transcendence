@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { MatchService } from "./match.service";
 import { Match as MatchModel } from '@prisma/client';
 import { UserService } from "../user/user.service";
-import { matchDataModel } from './interfaces'
+import { createMatchDTO } from './dto'
 
 
 @Controller('match_history')
@@ -18,7 +18,7 @@ export class MatchController {
 
 	@Post('create')
 	async addMatch(
-		@Body() matchData: matchDataModel)
+		@Body() matchData: createMatchDTO)
 		: Promise<MatchModel> {
 		return this.matchService.createMatch(matchData);
 	}

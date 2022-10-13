@@ -20,14 +20,15 @@ import {
 	Friend as FriendModel,
 	Image as ImageModel
 } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/guards';
+import { JwtAuthGuard } from '../auth/auth.guards';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as shortid from 'shortid';
 import * as mime from 'mime-types';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './user.dto';
+import { RequestWithUser } from '../auth/auth.interfaces';
 
 
 @Controller('users')
@@ -132,8 +133,7 @@ export class UserController {
 			}),
 		)
 		file: Express.Multer.File,
-		@Request() req,
-		@Body() body) {
+		@Request() req: RequestWithUser) {
 
 		const img = await this.userService.createImage(file);
 		return this.userService.linkAvatar(img, req.user.login);
