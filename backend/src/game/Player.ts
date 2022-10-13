@@ -1,4 +1,5 @@
 import {Socket} from "socket.io";
+import {Game} from "./Game";
 
 export class Player {
 
@@ -15,6 +16,22 @@ export class Player {
 		this._id = profile._id;
 		this._nickname = profile._nickname;
     }
+
+	public getPaddleTop(): number {
+		return this.y;
+	}
+
+	public getPaddleBottom(): number {
+		return this.y + Game.PADDLE_HEIGHT;
+	}
+
+	public getPaddleLeft(): number {
+		return this.x;
+	}
+
+	public getPaddleRight(): number {
+		return this.x + Game.PADDLE_WIDTH;
+	}
 
 	public move_down(maxTopPos: number): void {
 		if (this.y + 7 <= maxTopPos)
@@ -59,4 +76,6 @@ export class Player {
 	get nickname(): string {
 		return this._nickname;
 	}
+
+
 }

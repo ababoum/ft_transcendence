@@ -5,6 +5,7 @@ import {Socket} from "socket.io";
 export class GameServer {
     private _games: Array<Game>;
 	private interval;
+	private static readonly fps = 50;
 
 
     constructor() {
@@ -18,11 +19,12 @@ export class GameServer {
 
         this._games.push(new Game(player1, player2));
 		if (this._games.length == 1)
-        	this.interval = setInterval(this.sendGameData, 10, this._games);
+        	this.interval = setInterval(this.sendGameData, 1000/GameServer.fps, this._games);
     }
 
     public sendGameData(games: Array<Game>): void {
         games.forEach((element, index, object) => {
+			element.update();
 			element.leftPlayer.socket.emit('get-data', element);
 			element.rightPlayer.socket.emit('get-data', element);
 			if (element.leftPlayer.score == Game.MAX_SCORE ||

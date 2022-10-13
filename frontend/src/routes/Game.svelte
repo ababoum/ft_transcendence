@@ -47,8 +47,8 @@ onMount(() => {
         context.fill();
     }
 
-    function drawText(text: string, x: number, y: number, color: string): void {
-        context.fillStyle = color;
+    function drawText(text: string, x: number, y: number): void {
+        context.fillStyle = "white";
         context.font = "45px fantasy";
         context.fillText(text, x, y);
     }
@@ -60,6 +60,8 @@ onMount(() => {
             drawRect(game_data.leftPlayer.x, game_data.leftPlayer.y, game_data.paddle.width, game_data.paddle.height);
 			drawRect(game_data.rightPlayer.x, game_data.rightPlayer.y, game_data.paddle.width, game_data.paddle.height);
 			drawCircle(game_data.ball.x, game_data.ball.y, game_data.ball.radius);
+			drawText(game_data.leftPlayer.score, game_data.leftPlayer.score_x, game_data.leftPlayer.score_y);
+			drawText(game_data.rightPlayer.score, game_data.rightPlayer.score_x, game_data.rightPlayer.score_y);
         } catch (error) {
             console.log(error);
         }
