@@ -1,49 +1,17 @@
-import { readable, Writable, writable } from "svelte/store";
-import { io } from "socket.io-client";
-import { FRONTEND_URL, BACKEND_URL, GAME_DOMAIN} from './domain.js'
-import { loginBase } from "./types.js";
-import error from "svelte/types/compiler/utils/error";
+import {readable, writable} from "svelte/store";
 
-export const PROFILE_URL = readable("/#/profile");
-export const GAME_URL = readable("/#/game");
-export const LOBBY_URL = readable("/#/");
-export const LOGIN_URL = readable("/#/log");
+export const PROFILE_PAGE = readable("/#/profile");
+export const GAME_PAGE = readable("/#/game");
+export const LOBBY_PAGE = readable("/#/");
+export const LOGIN_PAGE = readable("/#/log");
+
+export const FRONTEND_URL = readable('http://localhost:8080');
+export const BACKEND_URL = readable('http://localhost:3000');
+export const GAME_URL = readable('http://localhost:5678');
+export const CHECK_AUTH_URL = readable('http://localhost:3000/auth/check');
+export const GET_PROFILE_URL = readable('http://localhost:3000/auth/profile');
+export const LOGIN_URL = readable('http://localhost:3000/auth/login');
+export const CREATE_ACC_URL = readable('http://localhost:3000/users/create');
+
 export const game_socket = writable();
-
-function getCookie(name: string): string {
-	let cookieArr = document.cookie.split(";");
-	for (let i: number = 0; i < cookieArr.length; i++) {
-		let cookiePair = cookieArr[i].split("=");
-		if (name == cookiePair[0].trim())
-			return decodeURIComponent(cookiePair[1]);
-	}
-	return "Cookie is not found";
-}
-
-export function eraseCookie(name: string) {
-	document.cookie = name + '=; Max-Age=0';
-}
-
-export async function get_current_user_data(): Promise<loginBase> {
-	const resp = await fetch(`${BACKEND_URL}/auth/profile`, {
-		method: 'GET',
-		headers: { "Authorization": "Bearer " + getCookie("jwt") }
-	});
-
-	try {
-		if (resp.ok)
-		{
-			const resp_body = await resp.json();
-			const ret = new loginBase();
-			ret.is_logged_in = true;
-			ret.userID = resp_body.id;
-			ret.userLogin = resp_body.login;
-
-			return ret;
-		}
-	} catch (error) { }
-	eraseCookie("jwt");
-	return new loginBase(false);
-}
-
 

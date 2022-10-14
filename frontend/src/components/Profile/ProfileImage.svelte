@@ -3,6 +3,7 @@
 	let default_imageSrc = '../'
 </script>
 
+<!--
 {#await imageSrc}
 <div class="avatar">
 	<img src={imageSrc} alt="profile" class="avatar-img" />
@@ -13,7 +14,7 @@
 </div>
 	
 {/await}
-
+-->
 <style>
 	.avatar {
 		text-align: center;

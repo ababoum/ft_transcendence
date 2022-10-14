@@ -2,7 +2,8 @@
     import Header from "../components/Nav.svelte";
     import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from 'svelte';
-	import {game_socket, get_current_user_data} from "../stores";
+	import {game_socket} from "../stores";
+	import {is_authenticated} from "../auth";
 
 	const UP_KEY : number = 38;
 	const DOWN_KEY : number = 40;
@@ -69,7 +70,7 @@
 	})
 
 	onMount(async () => {
-		if (!await get_current_user_data().then(resp => resp.is_logged_in)) {
+		if (!await is_authenticated()) {
 			await push('/');
 		}
 		try {

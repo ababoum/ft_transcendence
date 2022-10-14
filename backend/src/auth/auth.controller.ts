@@ -35,10 +35,14 @@ export class AuthController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('profile')
-	checkToken(@Request() req: RequestWithUser) {
-		const login = req.user.login;
+	async getProfile(@Request() req) {
+		return this.authService.getProfile(req.user.login);
+	}
 
-		return this.userService.user({login: login});
+	@UseGuards(JwtAuthGuard)
+	@Get('check')
+	checkToken(@Request() req) {
+		return req.user;
 	}
 
 	/////////////////////// 42 AUTHENTICATION ///////////////////////
