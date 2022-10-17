@@ -113,6 +113,7 @@ export class ChatroomService {
 			where: { id: chatroomid },
 			data: {
 				admin: { connect: { login: UpdateChatRoomDto.login } },
+				participants: {connect: {login: UpdateChatRoomDto.login}}
 			},
 			select: {admin: {select: {id: true, nickname: true}}}
 			});
