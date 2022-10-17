@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
-	import {game_socket, GAME_URL} from "../stores";
-	import {onMount} from "svelte";
-	import {io} from "socket.io-client";
+	import {game_socket} from "../stores";
+	import {onDestroy, onMount} from "svelte";
 	import {get_current_user_data, is_authenticated} from "../auth.js";
+	import MatchList from "../components/Lobby/MatchList.svelte";
 
 	let tmp: boolean;
 	onMount(async () => { tmp = await is_authenticated(); });
@@ -21,7 +21,6 @@
 		}
 		if (is_searching)
 			return;
-		$game_socket = io($GAME_URL);
 		$game_socket.on('find-game', (data)=> {
 			if (data['status'] == 'searching')
 				is_searching = true;
@@ -32,16 +31,21 @@
 			}
 		});
 		profile = await get_current_user_data(); //FIXME if is not ok protection
+		console.log(profile);
 		$game_socket.emit('find-game', profile);
 	}
+
+	onDestroy(() => {
+		$game_socket.removeListener('find-game');
+	})
 </script>
 
 <main>
 	<Header/>
+	<MatchList/>
 	{#if !is_logged}
 		<p> You are not login </p>
 	{:else}
-		<p>Hello from Lobby (list of matches and start game) page</p>
 		<button on:click={findGame} > {is_searching_resp ? "Searching..." : "Find Game" }</button>
 	{/if}
 </main>

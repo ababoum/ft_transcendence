@@ -6,15 +6,17 @@ export class Player {
     private				_x: number;
     private				_y: number;
     private				_score: number;
-    private readonly	_id: number;
-	private readonly _nickname: string;
+    private readonly _id: number;
+	private readonly	_nickname: string;
     private readonly	_socket: Socket;
+	private _is_ready: boolean;
 
     constructor(player_socket: Socket, profile: any) {
         this._score = 0;
         this._socket = player_socket;
-		this._id = profile._id;
-		this._nickname = profile._nickname;
+		this._id = profile.id;
+		this._nickname = profile.nickname;
+		this._is_ready = false;
     }
 
 	public getPaddleTop(): number {
@@ -78,4 +80,15 @@ export class Player {
 	}
 
 
+	get is_ready(): boolean {
+		return this._is_ready;
+	}
+
+	set is_ready(value: boolean) {
+		this._is_ready = value;
+	}
+
+	get id(): number {
+		return this._id;
+	}
 }

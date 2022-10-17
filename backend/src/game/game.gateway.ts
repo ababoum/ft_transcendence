@@ -1,50 +1,55 @@
 import {ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
-import {Server, Socket} from "socket.io";
-import {Game} from "./Game";
+import {Socket} from "socket.io";
 import {Player} from "./Player";
-import {Queue} from "../utils/Queue";
 import {GameServer} from "./GameServer";
 
-@WebSocketGateway(5678, {cors : '*'} ) //cors = all can connect
-//@WebSocketGateway() //cors = all can connect
+@WebSocketGateway(5678, {cors: '*'})
 export class GameGateway {
-    @WebSocketServer()
-    server: Server;
-    queue: Queue<Socket> = new Queue<Socket>();
-    gameServer: GameServer = new GameServer();
+	@WebSocketServer()
+	private server: any;
+	private _gameServer: GameServer;
+	private _interval;
 
+	constructor() {
+		this._gameServer = new GameServer();
+		this._interval = setInterval(() => {
+				this.server.emit('get-games-list', this._gameServer);
+		} , 3000);
+	}
 
-    handleConnection(client: Socket) {
-        console.log('Client connected: ', client.id);
-    }
+	handleConnection(client: Socket) {
+		console.log("connect --- " + client.id);
+		this._gameServer._playersOnlineCount++;
+	}
 
-    handleDisconnect(client: Socket) {
-		console.log('Client disconnected: -_-', client.id);
-        if (this.queue.contains(client)) {
-            this.queue.dequeue();
-            console.log("client " + client.id + " has been removed from queue" +
-            ", queue size is " + this.queue.size());
-        } else
-            this.gameServer.endLeaverGame(client);
-    }
+	handleDisconnect(client: Socket) {
+		console.log("disc --- " + client.id);
+		this._gameServer._playersOnlineCount--;
+		this._gameServer.deletePlayerFromQueue(client);
+	}
 
-    @SubscribeMessage('move-paddle')
-    movePaddle(@MessageBody() direction: string, @ConnectedSocket() client: Socket): void {
-        this.gameServer.movePaddle(client, direction);
-    }
+	@SubscribeMessage('ready')
+	ready(@ConnectedSocket() client: Socket): void {
+		this._gameServer.pressReady(client);
+	}
 
-    @SubscribeMessage('find-game')
-    findGame(@MessageBody() profile: any, @ConnectedSocket() client:Socket): void {
-        console.log("Client " + client.id + " (login: " + profile.login + ") now searching a game");
-        if (!this.queue.contains(client)) {
-            this.queue.enqueue(client);
-            client.emit('find-game', {status: 'searching'});
-            console.log("Queue size is " + this.queue.size());
-        } else
-            console.log("Can't add client to queue, bcs he is already there");
-        if (this.queue.size() == 2)
-            this.gameServer.createRoom(new Player(this.queue.dequeue(), profile), new Player(this.queue.dequeue(), profile));
-    }
+	@SubscribeMessage('exit-game')
+	exitGame(@ConnectedSocket() client: Socket): void {
+		this._gameServer.endLeaverGame(client);
+	}
 
+	@SubscribeMessage('get-games-list')
+	initGameList(@ConnectedSocket() client: Socket): void {
+		client.emit('get-games-list', this._gameServer);
+	}
 
+	@SubscribeMessage('move-paddle')
+	movePaddle(@MessageBody() direction: string, @ConnectedSocket() client: Socket): void {
+		this._gameServer.movePaddle(client, direction);
+	}
+
+	@SubscribeMessage('find-game')
+	findGame(@MessageBody() profile: any, @ConnectedSocket() client: Socket): void {
+		this._gameServer.addPlayerToQueue(client, profile);
+	}
 }

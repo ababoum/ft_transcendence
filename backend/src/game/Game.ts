@@ -7,7 +7,7 @@ export class Game {
 	public static readonly FIELD_WIDTH: number = 600;
 	public static readonly PADDLE_HEIGHT: number = 100;
 	public static readonly PADDLE_WIDTH: number = 10;
-	public static readonly MAX_SCORE: number = 42;
+	public static readonly MAX_SCORE: number = 1000;
 
 	/*** VARS ***/
 	private _leftPlayer: Player;
@@ -54,11 +54,7 @@ export class Game {
 		this._rightPlayer.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
 		this.ball.x = Game.FIELD_WIDTH / 2;
 		this.ball.y = Game.FIELD_HEIGHT / 2;
-	}
-
-	public startGame(): void {
-		console.log("Game has been started");
-		console.log("Game over");
+		this.ball.reset();
 	}
 
 	private collision(player: Player): boolean {
@@ -79,9 +75,9 @@ export class Game {
 		if (this.collision(player)) {
 			//if collision, need check where exactly ball touched paddle to change ball direction
 			let collidePoint = (this.ball.y - (player.y + Game.PADDLE_HEIGHT / 2));
-				collidePoint = collidePoint / (Game.PADDLE_HEIGHT / 2);
+			collidePoint = collidePoint / (Game.PADDLE_HEIGHT / 2);
 			let angeRad = (Math.PI / 4) * collidePoint;
-			let direction = (this.ball.x < Game.FIELD_WIDTH / 2) ? 1 : -1;//FIXME unused?
+			let direction = (this.ball.x < Game.FIELD_WIDTH / 2) ? 1 : -1;
 			this.ball.velocityX = direction * this.ball.speed * Math.cos(angeRad);
 			this.ball.velocityY = direction * this.ball.speed * Math.sin(angeRad);
 
@@ -126,6 +122,24 @@ export class Game {
 		return false;
 	}
 
+	public pressReady(socket: Socket): boolean {
+		if (socket == this._leftPlayer.socket) {
+			this._leftPlayer.is_ready = true;
+			return true;
+		} else if (socket == this.rightPlayer.socket) {
+			this.rightPlayer.is_ready = true;
+			return true;
+		}
+		return false;
+	}
+	
+	public isFinished(): boolean {
+		if (this.rightPlayer.socket.disconnected)
+			this.leftPlayer.score = Game.MAX_SCORE;
+		if (this.leftPlayer.socket.disconnected)
+			this.rightPlayer.score = Game.MAX_SCORE;
+		return (this.leftPlayer.score == Game.MAX_SCORE || this._rightPlayer.score == Game.MAX_SCORE);
+	}
 
 	get leftPlayer(): Player {
 		return this._leftPlayer;
@@ -135,7 +149,7 @@ export class Game {
 		return this._rightPlayer;
 	}
 
-	toJSON() {
+	public toJSON() {
 		return {
 			leftPlayer: {
 				x: this._leftPlayer.x,
@@ -165,7 +179,8 @@ export class Game {
 				x: this.ball.x,
 				y: this.ball.y,
 				radius: this.ball.radius
-			}
+			},
+			winner: (this.leftPlayer.score == Game.MAX_SCORE ? this.leftPlayer.nickname : this.rightPlayer.nickname)
 		}
 	}
 }

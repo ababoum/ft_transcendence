@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE} from "../stores";
 	import {onMount} from "svelte";
-	import {push} from "svelte-spa-router";
+	import {link, push} from "svelte-spa-router";
 	import {eraseCookie, is_authenticated} from "../auth.js";
 
 	let tmp: boolean;
@@ -10,35 +10,36 @@
 
 	async function logout() {
 		eraseCookie("jwt");
-		await push('/log');
+		await push($LOGIN_PAGE);
 	}
 </script>
 
 <main>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<div class="container-fluid">
-			<a class="navbar-brand" href="{$LOBBY_PAGE}">
+			<a class="navbar-brand" href="{$LOBBY_PAGE}" use:link>
 				<img src="/logo.png" alt="" width="40" height="30">
 				TRANSCENDENCE
 			</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+					aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav">
 					<li class="nav-item">
-						<a class="nav-link" href={$PROFILE_PAGE}>Profile</a>
+						<a class="nav-link" href={$PROFILE_PAGE} use:link>Profile</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href={$GAME_PAGE}>GAME</a>
+						<a class="nav-link" href={$GAME_PAGE} use:link>GAME</a>
 					</li>
 					{#if !is_logged}
 						<li class="nav-item">
-							<a class="nav-link" href="{$LOGIN_PAGE}">Login</a>
+							<a class="nav-link" href="{$LOGIN_PAGE}" use:link>Login</a>
 						</li>
 					{:else}
 						<li class="nav-item">
-							<a class="nav-link" on:click={logout} href="{$LOGIN_PAGE}">Logout</a>
+							<a class="nav-link" on:click={logout} href="{$LOGIN_PAGE}" use:link>Logout</a>
 						</li>
 					{/if}
 				</ul>
