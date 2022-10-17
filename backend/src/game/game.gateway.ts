@@ -52,4 +52,9 @@ export class GameGateway {
 	findGame(@MessageBody() profile: any, @ConnectedSocket() client: Socket): void {
 		this._gameServer.addPlayerToQueue(client, profile);
 	}
+
+	@SubscribeMessage('spectate')
+	spectateHandler(@MessageBody() id: any, @ConnectedSocket() client: Socket): void {
+		this._gameServer.addSpectator(client, id);
+	}
 }

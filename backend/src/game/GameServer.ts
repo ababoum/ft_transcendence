@@ -6,6 +6,7 @@ export class GameServer {
 	private _games: Array<Game>;
 	private _queue: Map<Socket, Player>;
 	private _ingame_players: Map<Socket, Player>;
+	private _spectators: Map<Game, Set<Socket> >;
 
 	private static readonly fps = 50;
 	public _playersOnlineCount: number;
@@ -15,6 +16,7 @@ export class GameServer {
 		this._games = new Array<Game>();
 		this._queue = new Map();
 		this._ingame_players = new Map();
+		this._spectators = new Map();
 
 		this._playersOnlineCount = 0;
 	}
@@ -34,6 +36,14 @@ export class GameServer {
 						this._games[i].update();
 					this._games[i].leftPlayer.socket.emit('get-data', this._games[i]);
 					this._games[i].rightPlayer.socket.emit('get-data', this._games[i]);
+					if (this._spectators.has(this._games[i])) {
+						this._spectators.get(this._games[i]).forEach((element) => {
+							if (element.connected)
+								element.emit('get-data', this._games[i]);
+							else
+								this._spectators.get(this._games[i]).delete(element);
+						});
+					}
 					if (this._games[i].isFinished()) {
 						game.leftPlayer.socket.emit('exit-game', game);
 						game.rightPlayer.socket.emit('exit-game', game);
@@ -68,6 +78,16 @@ export class GameServer {
 			this._queue.clear();
 			console.log("Game has been started. Queue: " + this._queue.size + " players");
 		}
+	}
+
+	addSpectator(socket: Socket, match_id: any) {
+		this._games.forEach((element) => {
+			if (element.leftPlayer.id == match_id.id1 || element.leftPlayer == match_id.id2) {
+				if (!this._spectators.has(element))
+					this._spectators.set(element, new Set<Socket>());
+				this._spectators.get(element).add(socket);
+			}
+		});
 	}
 
 	public deletePlayerFromQueue(socket: Socket) {

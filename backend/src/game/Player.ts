@@ -6,7 +6,7 @@ export class Player {
     private				_x: number;
     private				_y: number;
     private				_score: number;
-    private readonly _id: number;
+    readonly _id: number;
 	private readonly	_nickname: string;
     private readonly	_socket: Socket;
 	private _is_ready: boolean;

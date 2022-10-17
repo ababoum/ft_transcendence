@@ -1,12 +1,22 @@
 <script lang="ts">
 	import {onDestroy, onMount} from "svelte";
-	import {game_socket} from "../../stores";
+	import {GAME_PAGE, game_socket} from "../../stores";
+	import {push} from "svelte-spa-router";
 
 	let game_list;
 	let interval;
 
+	async function spectate(id1: string, id2: string) {
+		$game_socket.emit('spectate', {
+			id1: id1,
+			id2: id2
+		});
+		await push($GAME_PAGE);
+    }
+
 	onMount(() => {
 		$game_socket.on('get-games-list', (data) => {
+			console.log(data);
 			game_list = data;
 		});
 	});
@@ -31,7 +41,8 @@
                             <div class="fw-bold">{game.leftPlayer.nickname + "(" + game.leftPlayer.score + ") vs "
                             + game.rightPlayer.nickname + "(" + game.rightPlayer.score + ")"}</div>
                         </div>
-                        <span class="badge bg-primary rounded-pill">Spectate</span>
+                        <span class="badge bg-primary rounded-pill" style="cursor: default"
+                              on:click={spectate(game.leftPlayer.id, game.rightPlayer.id)}>Spectate</span>
                     </li>
                 {/each}
             </ol>
