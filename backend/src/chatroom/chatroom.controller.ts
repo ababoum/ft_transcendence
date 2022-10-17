@@ -50,6 +50,11 @@ export class ChatroomController {
 		return await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
 	}
 
+	@Get(':id/messages')
+	async messages(@Param('id') id: string) {
+		return this.ChatroomService.participantsByChatRoom(+id);
+	}
+
 // PARTICIPANTS //
 	@Get(':id/participantsList')
 	async participants(@Param('id') id: string) {
