@@ -1,5 +1,5 @@
-import {get, readable, writable} from "svelte/store";
-import {io} from "socket.io-client";
+import { get, readable, writable } from "svelte/store";
+import { io } from "socket.io-client";
 
 export const PROFILE_PAGE = readable("/profile");
 export const GAME_PAGE = readable("/game");
@@ -15,4 +15,3 @@ export const LOGIN_URL = readable('http://localhost:3000/auth/login');
 export const CREATE_ACC_URL = readable('http://localhost:3000/users/create');
 
 export const game_socket = writable(io(get(GAME_URL)));
-

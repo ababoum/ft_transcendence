@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Friend, Prisma, Image } from '@prisma/client';
+import { capitalizeFirstLetter } from '../utils';
 
 @Injectable()
 export class UserService {
@@ -40,10 +41,21 @@ export class UserService {
 
 
 	async createUser(data: Prisma.UserCreateInput): Promise<User> {
-
-		return this.prisma.user.create({
-			data,
-		});
+		try {
+			return await this.prisma.user.create({
+				data,
+			});
+		}
+		catch (e) {
+			console.log(e)
+			if (e instanceof Prisma.PrismaClientKnownRequestError) {
+				if (e.code === 'P2002') {
+					throw new HttpException(
+						`${capitalizeFirstLetter(e.meta.target as string)} already exists`,
+						400);
+				}
+			}
+		}
 	}
 
 	async updateUser(params: {
@@ -106,7 +118,7 @@ export class UserService {
 				friendUserId: true
 			}
 		}
-		);	
+		);
 
 		// retrieve the list of users listed in the friendships
 		const result = await this.prisma.user.findMany({
@@ -191,10 +203,10 @@ export class UserService {
 				isTwoFAEnabled: true
 			}
 		});
-	  }
+	}
 
 	async setTwoFactorAuthenticationSecret(secret: string, login: string)
-	: Promise<User> {
+		: Promise<User> {
 		return this.prisma.user.update({
 			where: {
 				login: login

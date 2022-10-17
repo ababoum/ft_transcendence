@@ -35,10 +35,11 @@ export async function is_authenticated() {
 }
 
 export async function get_current_user_data() {
-	return await fetch(get(GET_PROFILE_URL), {
+	return fetch(get(GET_PROFILE_URL), {
 		method: 'GET',
 		headers: {"Authorization": "Bearer " + getCookie("jwt")}
-	}).then(response => response.json());
+	})
+	// .then(response => response.json());
 }
 
 /*

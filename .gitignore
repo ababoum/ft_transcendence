@@ -28,8 +28,9 @@ frontend/.pnp.js
 frontend/coverage
 
 # production
-frontend/build
-frontend/public
+frontend/public/build
+frontend/public/vendor
+frontend/public/static
 
 # misc
 frontend/.DS_Store

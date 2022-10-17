@@ -24,3 +24,7 @@ export class CreateUserDto {
 	@ApiProperty()
 	password: string;
 }
+
+export class DeleteUserDto {
+	
+}

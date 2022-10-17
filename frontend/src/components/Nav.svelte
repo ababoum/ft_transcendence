@@ -18,7 +18,7 @@
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="{$LOBBY_PAGE}" use:link>
-				<img src="/logo.png" alt="" width="40" height="30">
+				<img src="/static/logo.png" alt="" width="40" height="30">
 				TRANSCENDENCE
 			</a>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -28,18 +28,18 @@
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav">
 					<li class="nav-item">
-						<a class="nav-link" href={$PROFILE_PAGE} use:link>Profile</a>
+						<a class="nav-link" href={$PROFILE_PAGE} use:link>PROFILE</a>
 					</li>
 					<li class="nav-item">
 						<a class="nav-link" href={$GAME_PAGE} use:link>GAME</a>
 					</li>
 					{#if !is_logged}
 						<li class="nav-item">
-							<a class="nav-link" href="{$LOGIN_PAGE}" use:link>Login</a>
+							<a class="nav-link" href="{$LOGIN_PAGE}" use:link>LOGIN</a>
 						</li>
 					{:else}
 						<li class="nav-item">
-							<a class="nav-link" on:click={logout} href="{$LOGIN_PAGE}" use:link>Logout</a>
+							<a class="nav-link" on:click={logout} href="{$LOGIN_PAGE}" use:link>LOGOUT</a>
 						</li>
 					{/if}
 				</ul>

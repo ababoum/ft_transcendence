@@ -7,4 +7,5 @@ export class loginBase {
 	is_logged_in: boolean;
 	userID: number;
 	userLogin: string;
+	imageId: number;
 }

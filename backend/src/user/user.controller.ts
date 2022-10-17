@@ -12,7 +12,8 @@ import {
 	ParseFilePipe,
 	MaxFileSizeValidator,
 	FileTypeValidator,
-	Header,
+	Res,
+	StreamableFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -29,7 +30,8 @@ import * as mime from 'mime-types';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './user.dto';
 import { RequestWithUser } from '../auth/auth.interfaces';
-
+import { createReadStream } from 'fs';
+import type { Response } from 'express';
 
 @Controller('users')
 @ApiTags('users')
@@ -58,16 +60,21 @@ export class UserController {
 	/////////////////////// CREATE/DELETE USERS ////////////////////////
 
 	@Post('create')
-	@ApiBody({type: CreateUserDto})
+	@ApiBody({ type: CreateUserDto })
 	async signupUser(
-		@Body() userData: { login: string; email: string; nickname: string, password: string })
+		@Body() userData: CreateUserDto)
 		: Promise<UserModel> {
 		return this.userService.createUser(userData);
 	}
 
 	@Delete('id/:id')
-	async deleteUser(@Param('id') id: string): Promise<UserModel> {
+	async deleteUserById(@Param('id') id: string): Promise<UserModel> {
 		return this.userService.deleteUser({ id: Number(id) });
+	}
+
+	@Delete('login/:login')
+	async deleteUserByLogin(@Param('login') login: string): Promise<UserModel> {
+		return this.userService.deleteUser({ login: login });
 	}
 
 
@@ -140,7 +147,17 @@ export class UserController {
 	}
 
 	@Get('image/:id')
-	async getImageById(@Param('id') id: string): Promise<ImageModel> {
-		return this.userService.image({ id: Number(id) });
+	async getImageById(
+		@Param('id') id: string,
+		@Res({ passthrough: true }) res: Response)
+		: Promise<StreamableFile> {
+		let img_object: ImageModel = await this.userService.image({ id: Number(id) });
+
+		const file = createReadStream(img_object.filepath);
+		res.set({
+			'Content-Type': `${img_object.mimetype}`,
+			'Content-Disposition': `attachment; filename="${img_object.filename}"`,
+		});
+		return new StreamableFile(file);
 	}
 }

@@ -46,7 +46,8 @@ export class AuthService {
 				id: true,
 				email: true,
 				nickname: true,
-				login: true
+				login: true,
+				imageId: true,
 			}
 		});
 	}

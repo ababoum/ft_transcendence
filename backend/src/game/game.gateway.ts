@@ -18,12 +18,12 @@ export class GameGateway {
 	}
 
 	handleConnection(client: Socket) {
-		console.log("connect --- " + client.id);
+		// console.log("connect --- " + client.id);
 		this._gameServer._playersOnlineCount++;
 	}
 
 	handleDisconnect(client: Socket) {
-		console.log("disc --- " + client.id);
+		// console.log("disc --- " + client.id);
 		this._gameServer._playersOnlineCount--;
 		this._gameServer.deletePlayerFromQueue(client);
 	}
