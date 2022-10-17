@@ -1,20 +1,29 @@
-FROM node:16.17.0-alpine
+###################
+# BUILD FOR PRODUCTION
+###################
 
-WORKDIR /usr/src/app
+FROM node:16.17.0-alpine As build
 
-COPY rollup.config.js ./
-COPY package*.json ./
+WORKDIR /app
 
+# Copy src/ | package*.json | static/ | public/ without build folders
+COPY . .
+
+# Install app dependencies
 RUN npm install
+RUN npm run build
 
-COPY ./src ./src
-COPY ./public ./public
 
-RUN npm run-script build
+###################
+# PRODUCTION
+###################
+
+FROM node:16.17.0-alpine As production
+
+COPY --from=build /app/* ./
+RUN  cp -r ./static ./public/static
+
 
 EXPOSE 8080
 
-ENV HOST=0.0.0.0
-ENV PORT=8080
-
-CMD [ "npm", "start" ]
+CMD [ "npm", "run", "start" ]
