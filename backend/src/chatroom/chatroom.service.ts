@@ -45,6 +45,13 @@ export class ChatroomService {
 		}});
 	}
 
+	async messages(chatroomid: number) {
+		return this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { messages: { select: { author: true, content: true } } },
+		})
+	}
+
 // PARTICIPANTS //
 	async participantsByChatRoom(chatroomid: number) {
 		return this.prisma.chatRoom.findUniqueOrThrow({
