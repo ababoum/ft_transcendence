@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE} from "../stores";
+	import {PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE, CHATROOM_PAGE} from "../stores";
 	import {onMount} from "svelte";
 	import {link, push} from "svelte-spa-router";
 	import {eraseCookie, is_authenticated} from "../auth.js";
@@ -32,6 +32,9 @@
 					</li>
 					<li class="nav-item">
 						<a class="nav-link" href={$GAME_PAGE} use:link>GAME</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href={$CHATROOM_PAGE} use:link>CHATROOM</a>
 					</li>
 					{#if !is_logged}
 						<li class="nav-item">
