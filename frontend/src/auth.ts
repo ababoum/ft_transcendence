@@ -39,7 +39,14 @@ export async function get_current_user_data() {
 		method: 'GET',
 		headers: {"Authorization": "Bearer " + getCookie("jwt")}
 	})
-	// .then(response => response.json());
+}
+
+export async function get_current_user_json() {
+	return fetch(get(GET_PROFILE_URL), {
+		method: 'GET',
+		headers: {"Authorization": "Bearer " + getCookie("jwt")}
+	})
+	.then(response => response.json());
 }
 
 /*

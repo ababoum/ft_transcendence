@@ -5,8 +5,8 @@
 	import { BACKEND_URL } from "../../stores";
 	
 	let default_imageSrc = "static/default_avatar.png";
+	let loading_imageSrc = "static/loading_icon.gif";
 	let actual_img = default_imageSrc;
-	$: img_url = actual_img;
 
 	const imageSrc = (async () => {
 		const resp = await fetch(
@@ -30,7 +30,7 @@
 
 {#await imageSrc}
 	<div class="avatar">
-		<img src={default_imageSrc} alt="profile" class="avatar-img" />
+		<img src={loading_imageSrc} alt="profile" class="avatar-img" />
 	</div>
 {:then data}
 	<div class="avatar">
