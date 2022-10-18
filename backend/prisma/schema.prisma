@@ -82,8 +82,8 @@ model UsersMutedinChatRooms {
 model Messages {
     id           Int      @id @default(autoincrement())
     creationDate DateTime @default(now())
-    author       User     @relation(fields: [authorId], references: [id])
-    authorId     Int
+    author       User     @relation(fields: [authorLogin], references: [login])
+    authorLogin  String
     content      String
     location     ChatRoom @relation(fields: [chatRoomId], references: [id])
     chatRoomId   Int
