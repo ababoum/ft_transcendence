@@ -3,9 +3,10 @@ import { MatchService } from "./match.service";
 import { Match as MatchModel } from '@prisma/client';
 import { UserService } from "../user/user.service";
 import { createMatchDTO } from './dto'
-
+import { ApiTags } from "@nestjs/swagger";
 
 @Controller('match_history')
+@ApiTags('match_history')
 export class MatchController {
 	constructor(
 		private readonly matchService: MatchService,

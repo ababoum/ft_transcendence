@@ -15,3 +15,8 @@ export const LOGIN_URL = readable('http://localhost:3000/auth/login');
 export const CREATE_ACC_URL = readable('http://localhost:3000/users/create');
 
 export const game_socket = writable(io(get(GAME_URL)));
+
+
+export const CHATROOM_PAGE = readable("/chatroom");
+export const CHATROOM_URL = readable('http://localhost:5678/chatroom');
+export const chatroom_socket = writable(io(get(CHATROOM_URL)));

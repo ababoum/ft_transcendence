@@ -52,7 +52,7 @@ export class ChatroomController {
 
 	@Get(':id/messages')
 	async messages(@Param('id') id: string) {
-		return this.ChatroomService.participantsByChatRoom(+id);
+		return this.ChatroomService.messages(+id);
 	}
 
 // PARTICIPANTS //

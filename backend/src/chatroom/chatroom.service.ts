@@ -48,7 +48,7 @@ export class ChatroomService {
 	async messages(chatroomid: number) {
 		return this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { messages: { select: { author: true, content: true } } },
+			select: { messages: { select: { author: {select: {login: true, nickname: true}}, creationDate: true, content: true } } },
 		})
 	}
 
