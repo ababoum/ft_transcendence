@@ -33,13 +33,13 @@ async function bootstrap() {
 	app.use(bodyParser.json());
 
 	// 👇 apply PrismaClientExceptionFilter to entire application, requires HttpAdapterHost because it extends BaseExceptionFilter
-	// const { httpAdapter } = app.get(HttpAdapterHost);
-	// app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+	const { httpAdapter } = app.get(HttpAdapterHost);
+	app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
 	// enable CORS to allow communication with frontend via 'fetch'
 	app.enableCors();
 
-	//	app.useGlobalFilters(new NotFoundExceptionFilter());
+	//app.useGlobalFilters(new NotFoundExceptionFilter());
 
 	//Swagger config
 	const config = new DocumentBuilder()
