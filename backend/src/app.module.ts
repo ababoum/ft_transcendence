@@ -3,6 +3,7 @@ import { UserModule } from './user/user.module';
 import { ChatroomModule } from './chatroom/chatroom.module';
 import { AuthModule } from './auth/auth.module';
 import { GameModule } from "./game/game.module";
+import { MatchModule } from './match/match.module';
 
 
 @Module({
@@ -10,7 +11,8 @@ import { GameModule } from "./game/game.module";
 		AuthModule,
 		UserModule,
 		ChatroomModule,
-		GameModule
+		GameModule,
+		MatchModule
 	],
 	controllers: [],
 	providers: [],
