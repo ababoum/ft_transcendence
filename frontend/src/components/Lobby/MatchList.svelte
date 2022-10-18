@@ -16,7 +16,6 @@
 
 	onMount(() => {
 		$game_socket.on('get-games-list', (data) => {
-			console.log(data);
 			game_list = data;
 		});
 	});

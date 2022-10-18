@@ -16,12 +16,25 @@
 	let ball_color: string = "#0000FF";
 	let text_color: string = "#FFFF00";
 	let match_finished: boolean = false;
+	let innerWidth = 0;
+	let innerHeight = 0;
 	let data: any = {
 		field: {
 			width: 0,
 			height: 0
 		}
 	};
+
+	function getScalingNumber() {
+		if (innerWidth < innerHeight) {
+			if (innerWidth - 150 > data.field.width)
+				return (innerWidth - 150) / data.field.width;
+			return 1;
+        }
+		if (innerHeight - 200 > data.field.height)
+			return (innerHeight - 200) / data.field.height;
+		return 1;
+    }
 
 	function keyHandler(e) {
 		if (e.keyCode == DOWN_KEY) {
@@ -37,16 +50,19 @@
 	function draw() {
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		try {
+			let scaling = getScalingNumber();
 			let draw: Draw2D = new Draw2D(context);
 			if (!match_finished) {
-				context.clearRect(0, 0, canvas.width, canvas.height);
-				draw.rect(data.leftPlayer.x, data.leftPlayer.y, data.paddle.width, data.paddle.height, paddle_color);
-				draw.rect(data.rightPlayer.x, data.rightPlayer.y, data.paddle.width, data.paddle.height, paddle_color);
-				draw.circle(data.ball.x, data.ball.y, data.ball.radius, ball_color);
-				draw.text(data.leftPlayer.score, data.leftPlayer.score_x, data.leftPlayer.score_y, text_color);
-				draw.text(data.rightPlayer.score, data.rightPlayer.score_x, data.rightPlayer.score_y, text_color);
-			} else
-				draw.text(data.winner + " winner", 100, 100, "red");
+				context.clearRect(0, 0, canvas.width * scaling, canvas.height * scaling);
+				draw.rect(data.leftPlayer.x, data.leftPlayer.y, data.paddle.width, data.paddle.height, scaling, paddle_color);
+				draw.rect(data.rightPlayer.x, data.rightPlayer.y, data.paddle.width, data.paddle.height, scaling, paddle_color);
+				draw.circle(data.ball.x, data.ball.y, data.ball.radius, scaling, ball_color);
+				draw.text(data.leftPlayer.score, data.leftPlayer.score_x, data.leftPlayer.score_y, scaling, text_color);
+				draw.text(data.rightPlayer.score, data.rightPlayer.score_x, data.rightPlayer.score_y, scaling, text_color);
+			} else {
+				draw.text(data.winner, 10, 100, scaling, "red");
+				draw.text("winner", 10, 200, scaling, "red");
+			}
 		} catch (error) {
 			console.log(error);
 		}
@@ -88,7 +104,7 @@
     <br>
 </div>
 
-<svelte:window on:keydown|preventDefault={keyHandler}/>
+<svelte:window on:keydown|preventDefault={keyHandler} bind:innerWidth bind:innerHeight/>
 {#if data.field.width !== 0}
     <div class="h-100 d-flex align-items-center justify-content-center">
     <ul class="list-group list-group-horizontal position-relative">
@@ -100,8 +116,8 @@
 <div class="h-100 d-flex align-items-center justify-content-center">
     <canvas
             bind:this={canvas}
-            width={data.field.width}
-            height={data.field.height}
+            width={data.field.width * getScalingNumber()}
+            height={ data.field.height * getScalingNumber()}
     ></canvas>
 </div>
 

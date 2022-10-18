@@ -25,13 +25,11 @@
 			if (data['status'] == 'searching')
 				is_searching = true;
 			if (data['status'] == 'found') {
-				console.log('ok');
 				push('/game');
 				$game_socket.off('find-game');
 			}
 		});
 		profile = await get_current_user_data(); //FIXME if is not ok protection
-		console.log(profile);
 		$game_socket.emit('find-game', profile);
 	}
 
