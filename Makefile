@@ -21,6 +21,7 @@ endif
 
 test_env:
 	docker-compose up postgres adminer -d
+	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data/"
 # update_scheme:
 # 	docker-compose up postgres -d
 # 	cd backend/
