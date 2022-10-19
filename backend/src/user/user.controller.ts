@@ -146,6 +146,7 @@ export class UserController {
 		return this.userService.linkAvatar(img, req.user.login);
 	}
 
+	// Get image by imageId
 	@Get('image/:id')
 	async getImageById(
 		@Param('id') id: string,
@@ -155,7 +156,26 @@ export class UserController {
 		let id_number: number = parseInt(id);
 		if (isNaN(id_number)) { id_number = 0 };
 
-		let img_object: ImageModel = await this.userService.image({ id: id_number});
+		const img_object: ImageModel = await this.userService.image({ id: id_number});
+
+		const file = createReadStream(img_object.filepath);
+		res.set({
+			'Content-Type': `${img_object.mimetype}`,
+			'Content-Disposition': `attachment; filename="${img_object.filename}"`,
+		});
+		return new StreamableFile(file);
+	}
+
+	// Get avatar by userLogin
+	@Get('avatar/:login')
+	async getAvatarByLogin(
+		@Param('login') login: string,
+		@Res({ passthrough: true }) res: Response)
+		: Promise<StreamableFile> {
+
+		const usr = await this.userService.user({login: login});
+
+		const img_object: ImageModel = await this.userService.image({ id: usr.imageId});
 
 		const file = createReadStream(img_object.filepath);
 		res.set({
