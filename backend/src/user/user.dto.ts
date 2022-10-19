@@ -3,7 +3,7 @@ import { chatRoomType } from '@prisma/client';
 import {
 	IsEmail,
 	IsNotEmpty,
-	IsOptional,
+	MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -20,7 +20,7 @@ export class CreateUserDto {
 	@ApiProperty()
 	email: string;
 
-	@IsOptional()
+	@MinLength(8)
 	@ApiProperty()
 	password: string;
 }

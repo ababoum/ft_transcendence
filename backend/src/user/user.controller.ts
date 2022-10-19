@@ -151,7 +151,11 @@ export class UserController {
 		@Param('id') id: string,
 		@Res({ passthrough: true }) res: Response)
 		: Promise<StreamableFile> {
-		let img_object: ImageModel = await this.userService.image({ id: parseInt(id)});
+
+		let id_number: number = parseInt(id);
+		if (isNaN(id_number)) { id_number = 0 };
+
+		let img_object: ImageModel = await this.userService.image({ id: id_number});
 
 		const file = createReadStream(img_object.filepath);
 		res.set({

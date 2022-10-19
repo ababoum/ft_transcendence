@@ -187,9 +187,14 @@ export class UserService {
 	async image(
 		imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
 	): Promise<Image | null> {
-		return this.prisma.image.findUnique({
+
+		const img = await this.prisma.image.findUnique({
 			where: imageWhereUniqueInput,
 		});
+
+		if (!img)
+			throw new HttpException("Requested image not found", 404);
+		return img;
 	}
 
 	/////////////////////// MANAGE USER'S 2FA ////////////////////////
