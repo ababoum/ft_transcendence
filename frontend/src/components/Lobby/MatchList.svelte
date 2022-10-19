@@ -28,6 +28,7 @@
 </script>
 
 <main>
+    <h3 class="mb-3">Online: </h3>
     {#if game_list !== undefined}
         <p> Games online: {game_list.games_online}</p>
         <p> Players online: {game_list.players_online}</p>
