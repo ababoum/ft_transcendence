@@ -156,7 +156,7 @@ export class UserController {
 		let id_number: number = parseInt(id);
 		if (isNaN(id_number)) { id_number = 0 };
 
-		const img_object: ImageModel = await this.userService.image({ id: id_number});
+		const img_object: ImageModel = await this.userService.image({ id: id_number });
 
 		const file = createReadStream(img_object.filepath);
 		res.set({
@@ -173,9 +173,9 @@ export class UserController {
 		@Res({ passthrough: true }) res: Response)
 		: Promise<StreamableFile> {
 
-		const usr = await this.userService.user({login: login});
-
-		const img_object: ImageModel = await this.userService.image({ id: usr.imageId});
+		const img_object: ImageModel = await this.userService.image({
+			id: await this.userService.user({ login: login }).then(usr => usr.imageId)
+		});
 
 		const file = createReadStream(img_object.filepath);
 		res.set({

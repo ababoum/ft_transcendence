@@ -11,12 +11,15 @@ export class UserService {
 	/////////////////////// ACCESS USER INFO ////////////////////////
 
 
-	async user(
-		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-	): Promise<User | null> {
-		return this.prisma.user.findUnique({
+	async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput)
+		: Promise<User | null> {
+
+		const usr = await this.prisma.user.findUnique({
 			where: userWhereUniqueInput,
 		});
+		if (!usr)
+			throw new HttpException("User not found", 404);
+		return usr;
 	}
 
 	async users(params: {
@@ -47,7 +50,7 @@ export class UserService {
 			});
 		}
 		catch (e) {
-			console.log(e)
+			console.log(e);
 			if (e instanceof Prisma.PrismaClientKnownRequestError) {
 				if (e.code === 'P2002') {
 					throw new HttpException(
