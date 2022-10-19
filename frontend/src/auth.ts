@@ -1,7 +1,7 @@
 import {CHECK_AUTH_URL, GET_PROFILE_URL} from "./stores";
 import {get} from 'svelte/store'
 
-function getCookie(name: string): string {
+export function getCookie(name: string): string {
 	let cookieArr = document.cookie.split(";");
 	for (let i: number = 0; i < cookieArr.length; i++) {
 		let cookiePair = cookieArr[i].split("=");
@@ -38,7 +38,15 @@ export async function get_current_user_data() {
 	return fetch(get(GET_PROFILE_URL), {
 		method: 'GET',
 		headers: {"Authorization": "Bearer " + getCookie("jwt")}
-	}).then(response => response.json());
+	});
+}
+
+export async function get_current_user_json() {
+	return fetch(get(GET_PROFILE_URL), {
+		method: 'GET',
+		headers: {"Authorization": "Bearer " + getCookie("jwt")}
+	})
+	.then(response => response.json());
 }
 
 /*

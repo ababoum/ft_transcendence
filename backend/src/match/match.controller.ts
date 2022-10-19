@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { MatchService } from "./match.service";
-import { Match as MatchModel } from '@prisma/client';
+import { Match as MatchModel, User as UserModel } from '@prisma/client';
 import { UserService } from "../user/user.service";
 import { createMatchDTO } from './dto'
 import { ApiTags } from "@nestjs/swagger";
@@ -17,11 +17,32 @@ export class MatchController {
 		return this.matchService.getMatches({});
 	}
 
+	@Get('top10')
+	async getTop10Players(): Promise<UserModel[]> {
+		return this.userService.users({
+			take: 10,
+			orderBy: {rating: 'desc'}
+		});
+	}
+
 	@Post('create')
 	async addMatch(
 		@Body() matchData: createMatchDTO)
 		: Promise<MatchModel> {
-		return this.matchService.createMatch(matchData);
+		// record the match
+		const ret = this.matchService.createMatch(matchData);
+
+		// update the winner's rating
+		this.userService.updateUser({
+			where: { login: matchData.winnerLogin },
+			data: {
+				rating: {
+					increment: matchData.winnerScore - matchData.loserScore
+				}
+			}
+		});
+
+		return ret;
 	}
 
 	@Get('/:login')

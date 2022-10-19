@@ -4,6 +4,7 @@ import { ChatRoom, User, UsersMutedinChatRooms, Prisma } from '@prisma/client';
 import { CreateChatRoomDto } from './dto/create-chatroom.dto';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 import { networkInterfaces } from 'os';
+import { MessageDto } from './dto/message.dto';
 
 @Injectable()
 export class ChatroomService {
@@ -43,13 +44,6 @@ export class ChatroomService {
 				admin: {connect: {login: userlogin}},
 				participants: {connect: {login: userlogin}},
 		}});
-	}
-
-	async messages(chatroomid: number) {
-		return this.prisma.chatRoom.findUniqueOrThrow({
-			where: { id: chatroomid },
-			select: { messages: { select: { author: {select: {login: true, nickname: true}}, creationDate: true, content: true } } },
-		})
 	}
 
 // PARTICIPANTS //
@@ -232,4 +226,28 @@ export class ChatroomService {
 		throw new HttpException("You are not admin of this chatroom", 401)
 	}
 
+
+	async getMessages(chatroomid: number) {
+		return await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { messages: { select: { author: {select: {login: true, nickname: true}}, creationDate: true, content: true } } },
+		})
+	}
+
+	async postMessage(userlogin: string, chatroomid: number, MessageDto: MessageDto) {
+		const res = await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { participants: {where: {login: userlogin}} }
+		})
+		if (res.participants[0]) {
+			return await this.prisma.messages.create({
+				data: {
+					authorLogin: userlogin,
+					content: MessageDto.content,
+					chatRoomId: chatroomid
+				}
+			})
+		}
+		throw new HttpException("You are not participant of this chatroom", 401)
+	}
 }

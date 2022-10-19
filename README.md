@@ -12,7 +12,7 @@ Pour un 1er lancement
 
 ISSUES:
 - Les prisma.update renvoie la meme chose si update a eu un effet ou non.
-- Ne pas utiliser le prisma filter qui interfere avec les FindUniqueOrThrow()
+- UTILISER EXCEPTIONFILTER pour les FindUniqueorThrow
 - Comment gerer les mute avec le chat en websocket ?
 	- A chaque message recu, check si le sender est mute par le receiver ?
 	- A chaque message envoye, check si le receiver a mute le sender ?

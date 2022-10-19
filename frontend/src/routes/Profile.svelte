@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import { link, push } from "svelte-spa-router";
-	import { game_socket } from "../stores";
+	import { BACKEND_URL, game_socket } from "../stores";
 	import { onMount } from "svelte";
 	import type { loginBase } from "../types";
 	import ProfileImage from "../components/Profile/ProfileImage.svelte";
@@ -21,6 +21,7 @@
 	}
 
 	let loginPayload = profileBuild();
+	$: login = loginPayload.then( data => data.userLogin);
 </script>
 
 <Header />
@@ -35,10 +36,12 @@
 	<div class="profile-container">You must log in to view your profile.</div>
 {/await}
 
-
 <style>
 	.profile-container {
-		text-align: center;
+		display: flex;
+		width: 100%;
+		flex-direction: column;
+		justify-content: flex-end;
 		padding: 10px;
 		background-color: var(--white2);
 	}

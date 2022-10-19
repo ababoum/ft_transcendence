@@ -1,8 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsPositive, Min } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsInt, IsNotEmpty, IsNumber, IsNumberString, IsPositive, Min } from "class-validator";
 
 export class createMatchDTO {
-	
+
 	@IsNotEmpty()
 	@ApiProperty()
 	winnerLogin: string;
@@ -11,15 +12,15 @@ export class createMatchDTO {
 	@ApiProperty()
 	loserLogin: string;
 
-	@IsNotEmpty()
-	@IsNumber()
+	// @Transform(({ value }) => parseInt(value))
 	@Min(0)
+	@IsInt()
 	@ApiProperty()
 	winnerScore: number;
 
-	@IsNotEmpty()
-	@IsNumber()
+	// @Transform(({ value }) => parseInt(value))
 	@Min(0)
+	@IsInt()
 	@ApiProperty()
 	loserScore: number;
 }

@@ -25,6 +25,7 @@ import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } fr
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/auth.guards';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
+import { MessageDto } from './dto/message.dto';
 
 @Controller('chatrooms')
 @ApiTags('chatrooms')
@@ -48,11 +49,6 @@ export class ChatroomController {
 	async createChatRoom(@Request() req, @Body() CreateChatRoomDto: CreateChatRoomDto) {
 		console.log(req.user)
 		return await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
-	}
-
-	@Get(':id/messages')
-	async messages(@Param('id') id: string) {
-		return this.ChatroomService.messages(+id);
 	}
 
 // PARTICIPANTS //
@@ -119,5 +115,14 @@ export class ChatroomController {
 		return this.ChatroomService.unmuteUser(req.user.login, +id, UpdateChatRoomDto);
 	}
 
+// MESSAGES //
+	@Get(':id/messages')
+	async getMessages(@Param('id') id: string) {
+		return this.ChatroomService.getMessages(+id);
+	}
 
+	@Post(':id/messages')
+	async postMessage(@Request() req, @Param('id') id: string, @Body() MessageDto: MessageDto) {
+		return this.ChatroomService.postMessage(req.user.login, +id, MessageDto);
+	}
 }

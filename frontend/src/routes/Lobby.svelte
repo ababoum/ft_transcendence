@@ -3,7 +3,7 @@
 	import {push} from "svelte-spa-router";
 	import {game_socket} from "../stores";
 	import {onDestroy, onMount} from "svelte";
-	import {get_current_user_data, is_authenticated} from "../auth.js";
+	import {get_current_user_json, is_authenticated} from "../auth.js";
 	import MatchList from "../components/Lobby/MatchList.svelte";
 
 	let tmp: boolean;
@@ -32,7 +32,7 @@
 				$game_socket.off('find-game');
 			}
 		});
-		profile = await get_current_user_data(); //FIXME if is not ok protection
+		profile = await get_current_user_json(); //FIXME if is not ok protection
 		$game_socket.emit('find-game', profile);
 	}
 
