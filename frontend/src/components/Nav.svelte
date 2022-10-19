@@ -18,7 +18,7 @@
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="{$LOBBY_PAGE}" use:link>
-				<img src="/static/logo.png" alt="" width="40" height="30">
+				<img src="static/logo.png" alt="" width="40" height="30">
 				TRANSCENDENCE
 			</a>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"

@@ -1,4 +1,4 @@
-import {CHECK_AUTH_URL, GET_PROFILE_URL} from "./stores";
+import {CHECK_AUTH_URL, GET_PROFILE_URL, TOP_10} from "./stores";
 import {get} from 'svelte/store'
 
 export function getCookie(name: string): string {
@@ -38,7 +38,7 @@ export async function get_current_user_data() {
 	return fetch(get(GET_PROFILE_URL), {
 		method: 'GET',
 		headers: {"Authorization": "Bearer " + getCookie("jwt")}
-	})
+	});
 }
 
 export async function get_current_user_json() {
@@ -47,6 +47,12 @@ export async function get_current_user_json() {
 		headers: {"Authorization": "Bearer " + getCookie("jwt")}
 	})
 	.then(response => response.json());
+}
+
+export async function get_top_10() {
+	return fetch(get(TOP_10), {
+		method: 'GET',
+	}).then(response => response.json());
 }
 
 /*

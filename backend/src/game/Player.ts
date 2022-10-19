@@ -8,6 +8,7 @@ export class Player {
     private				_score: number;
     readonly _id: number;
 	private readonly	_nickname: string;
+	private readonly _login: string;
     private readonly	_socket: Socket;
 	private _is_ready: boolean;
 
@@ -17,6 +18,7 @@ export class Player {
 		this._id = profile.id;
 		this._nickname = profile.nickname;
 		this._is_ready = false;
+		this._login = profile.login;
     }
 
 	public getPaddleTop(): number {
@@ -90,5 +92,10 @@ export class Player {
 
 	get id(): number {
 		return this._id;
+	}
+
+
+	get login(): string {
+		return this._login;
 	}
 }

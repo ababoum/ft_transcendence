@@ -99,7 +99,7 @@
 							<div>
 								<p class="mb-0">{is_login ? "Don't h" : "H"}ave an account? <a
 										class="text-white-50 fw-bold"
-										href={$LOGIN_PAGE}
+										href="/#/log"
 										on:click={() => (is_login = !is_login)}>Sign {is_login ? "Up" : "In"} </a>
 								</p>
 							</div>
