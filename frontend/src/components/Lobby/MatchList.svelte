@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {onDestroy, onMount} from "svelte";
-	import {GAME_PAGE, game_socket} from "../../stores";
+	import {GAME_PAGE, game_socket, is_spectator} from "../../stores";
 	import {push} from "svelte-spa-router";
 
 	let game_list;
@@ -11,6 +11,7 @@
 			id1: id1,
 			id2: id2
 		});
+		$is_spectator = true;
 		await push($GAME_PAGE);
     }
 

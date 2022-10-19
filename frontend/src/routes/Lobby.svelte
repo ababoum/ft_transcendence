@@ -19,8 +19,11 @@
 			await push('/log');
 			return;
 		}
-		if (is_searching)
+		if (is_searching) {
+			$game_socket.emit('find-game-stop');
+			is_searching = false;
 			return;
+		}
 		$game_socket.on('find-game', (data)=> {
 			if (data['status'] == 'searching')
 				is_searching = true;

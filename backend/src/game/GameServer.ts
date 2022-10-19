@@ -36,7 +36,7 @@ export class GameServer {
 						this._games[i].update();
 					this._games[i].leftPlayer.socket.emit('get-data', this._games[i]);
 					this._games[i].rightPlayer.socket.emit('get-data', this._games[i]);
-					if (this._spectators.has(this._games[i])) {
+					if (this._spectators.has(this._games[i])) { //fixme in func
 						this._spectators.get(this._games[i]).forEach((element) => {
 							if (element.connected)
 								element.emit('get-data', this._games[i]);
@@ -47,6 +47,14 @@ export class GameServer {
 					if (this._games[i].isFinished()) {
 						game.leftPlayer.socket.emit('exit-game', game);
 						game.rightPlayer.socket.emit('exit-game', game);
+						if (this._spectators.has(this._games[i])) {
+							this._spectators.get(this._games[i]).forEach((element) => {
+								if (element.connected)
+									element.emit('exit-game', this._games[i]);
+								else
+									this._spectators.get(this._games[i]).delete(element);
+							});
+						}
 						this._ingame_players.delete(game.leftPlayer.socket);
 						this._ingame_players.delete(game.rightPlayer.socket);
 						this.write_result_in_db(this._games.pop());

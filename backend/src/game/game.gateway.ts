@@ -14,7 +14,7 @@ export class GameGateway {
 		this._gameServer = new GameServer();
 		this._interval = setInterval(() => {
 				this.server.emit('get-games-list', this._gameServer);
-		} , 3000);
+		} , 1000);
 	}
 
 	handleConnection(client: Socket) {
@@ -52,6 +52,12 @@ export class GameGateway {
 	findGame(@MessageBody() profile: any, @ConnectedSocket() client: Socket): void {
 		this._gameServer.addPlayerToQueue(client, profile);
 	}
+
+	@SubscribeMessage('find-game-stop')
+	findGameStop(@MessageBody() profile: any, @ConnectedSocket() client: Socket): void {
+		this._gameServer.deletePlayerFromQueue(client);
+	}
+
 
 	@SubscribeMessage('spectate')
 	spectateHandler(@MessageBody() id: any, @ConnectedSocket() client: Socket): void {

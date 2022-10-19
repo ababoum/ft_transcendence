@@ -2,7 +2,7 @@
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from 'svelte';
-	import {game_socket} from "../stores";
+	import {game_socket, is_spectator} from "../stores";
 	import {is_authenticated} from "../auth";
 	import Draw2D from '../Draw2D'
 
@@ -24,6 +24,8 @@
 			height: 0
 		}
 	};
+
+	onMount(async () => { if (!await is_authenticated() && !$is_spectator) await push('/')} );
 
 	function getScalingNumber() {
 		if (innerWidth < innerHeight) {
@@ -81,12 +83,8 @@
 		});
 	})
 
-	onMount(async () => {
-		if (!await is_authenticated())
-			await push('/');
-	});
-
 	onDestroy(() => {
+		$is_spectator = false;
 		try {
 			$game_socket.emit('exit-game');
 			$game_socket.removeListener('get-data');
@@ -121,11 +119,13 @@
     ></canvas>
 </div>
 
-{#if !is_ready && data.field.width !== 0}
+{#if !is_ready && data.field.width !== 0 && !$is_spectator}
     <div class="h-100 d-flex align-items-center justify-content-center">
        <br>
         <button on:click={() => {$game_socket.emit('ready'); is_ready = true}} >Ready</button>
     </div>
+{:else}
+    <br>
 {/if}
 
 
