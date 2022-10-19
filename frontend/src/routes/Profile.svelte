@@ -6,6 +6,7 @@
 	import type { loginBase } from "../types";
 	import ProfileImage from "../components/Profile/ProfileImage.svelte";
 	import { get_current_user_data } from "../auth";
+	import ProfileAbout from "../components/Profile/ProfileAbout.svelte";
 
 	// retrieve current user info
 
@@ -21,7 +22,7 @@
 	}
 
 	let loginPayload = profileBuild();
-	$: login = loginPayload.then( data => data.userLogin);
+	$: login = loginPayload.then((data) => data.userLogin);
 </script>
 
 <Header />
@@ -31,17 +32,18 @@
 {:then loginPayload_loaded}
 	<div class="profile-container">
 		<ProfileImage loginPayload={loginPayload_loaded} />
+		<ProfileAbout loginPayload={loginPayload_loaded} />
 	</div>
 {:catch error}
-	<div class="profile-container">You must log in to view your profile.</div>
+	<div class="profile-container">{error.message}</div>
 {/await}
 
 <style>
 	.profile-container {
-		display: flex;
+		display: grid;
 		width: 100%;
-		flex-direction: column;
-		justify-content: flex-end;
+		justify-items: center;
+		align-items: center;
 		padding: 10px;
 		background-color: var(--white2);
 	}

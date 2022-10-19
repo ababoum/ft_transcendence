@@ -1,8 +1,9 @@
 <script lang="ts">
 	import {push} from "svelte-spa-router";
-	import {CREATE_ACC_URL, LOGIN_PAGE, LOGIN_URL} from "../stores";
+	import {BACKEND_URL, CREATE_ACC_URL, LOGIN_PAGE, LOGIN_URL} from "../stores";
 	import {onMount} from "svelte";
 	import {is_authenticated, setCookie} from "../auth";
+    import { get } from "svelte/store";
 
 	let login: string;
 	let password: string;
@@ -38,6 +39,7 @@
 				result_msg = "Wrong login or password";
 		}
 	};
+
 </script>
 
 <main>
@@ -49,16 +51,16 @@
 						<div class="card-body p-5 text-center">
 
 							<form on:submit|preventDefault={submit}>
-								<div class="mb-md-5 mt-md-4 pb-5">
+								<div class="mb-	md-5 mt-md-4 pb-5">
 
 									<h2 class="fw-bold mb-2 text-uppercase">{is_login ? "Login" : "Registration"} </h2>
 									<p class="text-white-50 mb-5">Please enter your login{!is_login ? ", email" : ""}
-										and password!</p>
+										and password</p>
 
 									<div class="form-outline form-white mb-4">
 										<input type="text" id="typeTextX" class="form-control form-control-lg"
 											   required bind:value={login}/>
-										<label class="form-label" for="typeTextX">User name</label>
+										<label class="form-label" for="typeTextX">Username</label>
 									</div>
 									{#if !is_login}
 										<div class="form-outline form-white mb-4">
@@ -82,20 +84,25 @@
 									{#if result_msg !== undefined}
 										<p>{result_msg}</p>
 									{/if}
+
 									<button class="btn btn-outline-light btn-lg px-5" type="submit">
 										{is_login ? "Login" : "Register"} </button>
 
-
-									<div class="d-flex justify-content-center text-center mt-4 pt-1">
-										<a href="#!" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
-										<a href="#!" class="text-white"><i
-												class="fab fa-twitter fa-lg mx-4 px-2"></i></a>
-										<a href="#!" class="text-white"><i class="fab fa-google fa-lg"></i></a>
+										
 									</div>
-
-								</div>
-							</form>
-
+								</form>
+								
+								
+							<div style="margin-bottom: 1em">
+								<a href={`${get(BACKEND_URL)}/auth/42/return`}>
+									<button class="button is-dark is-large m-auto">
+										<span>
+											<img class="ft-icon" src="static/logo-42-square-reverse.png" alt="42">
+										</span>
+									Connect
+									</button>
+								</a>
+							</div>
 							<div>
 								<p class="mb-0">{is_login ? "Don't h" : "H"}ave an account? <a
 										class="text-white-50 fw-bold"
@@ -111,3 +118,39 @@
 		</div>
 	</section>
 </main>
+
+<style>
+
+	.button {
+		background-color: #fff;
+		border-color: #dbdbdb;
+		border-width: 1px;
+		color: #363636;
+		cursor: pointer;
+		justify-content: center;
+		padding: calc(.375em - 1px) .75em;
+		text-align: center;
+		white-space: nowrap;
+	}
+	
+	.button.is-large {
+		font-size: 1.5rem;
+	}
+	
+	.button.is-dark {
+		background-color: #363636;
+		border-color: transparent;
+		color: #f5f5f5;
+		border-radius: 8px;
+	}
+
+	.m-auto {
+		margin: auto !important;
+	}
+
+	.ft-icon {
+		height: 1.5em;
+		width: 1.5em;
+	}
+
+</style>	
