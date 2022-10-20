@@ -1,33 +1,148 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-	import type { loginBase } from "../../types";
+	import { onMount } from "svelte";
 
-	export let loginPayload: loginBase;
+	const profile_data = $$props;
 
-	$: data = loginPayload;
-	onMount(() => {
-		console.log(loginPayload);
-		loginPayload = loginPayload;
+	let profile = undefined;
+	let updating_email = false;
+	let updating_nickname = false;
+
+	onMount(async () => {
+		profile = profile_data;
 	});
 
+	async function updateEmail(e) {
+		// Get the data from the form
+		const formData = new FormData(e.target);
+		const new_email = formData.get("new_email");
+
+		// Send data to the API
+
+		// if the request fails, send an alert
+
+		// close the 'prompt'
+		updating_email = false;
+	}
+
+	async function updateNickname(e) {
+		// Get the data from the form
+		const formData = new FormData(e.target);
+		const new_nickname = formData.get("new_nickname");
+
+		// Send data to the API
+
+		// if the request fails, send an alert
+
+		// close the 'prompt'
+		updating_nickname = false;
+	}
+
+	function toggleEmail() {
+		updating_email = !updating_email;
+	}
+	function toggleNickname() {
+		updating_nickname = !updating_nickname;
+	}
 </script>
 
-<div class="profile-about">
-	<div class="profile-about-name">Robert</div>
-	<div class="profile-about-job">Software Engineer</div>
-</div>
+{#if profile !== undefined}
+	<div class="profile-about">
+		<!-- LOGIN cannot be modified -->
+		<div><strong>Login:</strong> {profile.login}</div>
+
+		<!-- NICKNAME -->
+		<div>
+			<strong>Nickname:</strong>
+			{profile.nickname}
+			<span class="update-btn" on:click={toggleNickname}>⚙️</span>
+		</div>
+		{#if updating_nickname}
+			<div class="form-container">
+				<form on:submit|preventDefault={updateNickname}>
+					<div class="form-group">
+						<input
+							type="text"
+							id="new_nickname"
+							name="new_nickname"
+							placeholder="Your new nickname"
+						/>
+					</div>
+					<div class="form-group">
+						<button class="submit-btn" type="submit">💾</button>
+					</div>
+				</form>
+			</div>
+		{/if}
+		<!-- EMAIL -->
+		<div>
+			<strong>Email:</strong>
+			{profile.email}
+			<span class="update-btn" on:click={toggleEmail}>⚙️</span>
+		</div>
+		{#if updating_email}
+			<div class="form-container">
+				<form on:submit|preventDefault={updateEmail}>
+					<div class="form-group">
+						<input
+							type="text"
+							id="new_email"
+							name="new_email"
+							placeholder="Your new email address"
+						/>
+					</div>
+					<div class="form-group">
+						<button class="submit-btn" type="submit">💾</button>
+					</div>
+				</form>
+			</div>
+		{/if}
+	</div>
+{:else}
+	<div>Loading...</div>
+{/if}
 
 <style>
+	* {
+		margin: 0px;
+		padding: 0px;
+	}
+
 	.profile-about {
-		text-align: center;
+		text-align: left;
 		margin: 10px;
 	}
 
-	.profile-about-name {
-		font-weight: bold;
+	.update-btn {
+		cursor: pointer;
 	}
 
-	.profile-about-job {
-		text-align: center;
+	.form-container {
+		width: 100%;
+		margin: 10px auto;
+	}
+
+	form {
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		width: 100%;
+	}
+
+	.form-group {
+		margin: 10px;
+		width: auto;
+	}
+
+	.form-group input[type="text"] {
+		padding: 10px;
+	}
+
+	.submit-btn {
+		background-color: transparent;
+		background-repeat: no-repeat;
+		border: none;
+		cursor: pointer;
+		overflow: hidden;
+		outline: none;
 	}
 </style>

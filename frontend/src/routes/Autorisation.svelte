@@ -39,7 +39,7 @@
 				setCookie("jwt", token);
 				await push('/');
 			} else
-				result_msg = "Wrong login or password";
+				result_msg = `<p style="color: red">Wrong login or password</p>`;
 		}
 	};
 
@@ -85,7 +85,7 @@
 									</div>
 
 									{#if result_msg !== undefined}
-										<p>{result_msg}</p>
+										<p>{@html result_msg}</p>
 									{/if}
 
 									<button class="btn btn-outline-light btn-lg px-5" type="submit">

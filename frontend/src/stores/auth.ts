@@ -1,6 +1,6 @@
-import {LOGIN_PAGE} from "./store";
-import {get} from 'svelte/store'
-import {push} from "svelte-spa-router";
+import { LOGIN_PAGE } from "./store";
+import { get } from 'svelte/store'
+import { push } from "svelte-spa-router";
 
 export function getCookie(name: string): string {
 	let cookieArr = document.cookie.split(";");
@@ -21,8 +21,6 @@ export function eraseCookie(name) {
 }
 
 export async function logout() {
-	async function logout() {
-		eraseCookie("jwt");
-		await push(get(LOGIN_PAGE));
-	}
+	eraseCookie("jwt");
+	await push(get(LOGIN_PAGE));
 }

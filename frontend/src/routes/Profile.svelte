@@ -1,43 +1,37 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import { onMount } from "svelte";
-	import type { loginBase } from "../types";
 	import ProfileImage from "../components/Profile/ProfileImage.svelte";
-	import { get_current_user_data } from "../stores/requests";
+	import { get_full_profile } from "../stores/requests";
+	import { user } from "../stores/store";
 	import ProfileAbout from "../components/Profile/ProfileAbout.svelte";
 
 	// retrieve current user info
 
-	async function profileBuild(): Promise<loginBase> {
-		const resp = await get_current_user_data();
-		const payload = await resp.json();
+	let full_profile = undefined;
 
-		if (resp.ok) {
-			return payload;
-		} else {
-			throw new Error("You must be logged in to view your profile");
-		}
-	}
-
-	let loginPayload = undefined;
 	onMount(async () => {
-		loginPayload = profileBuild();
+		$user = await $user.upd();
+		await get_full_profile($user.login).then((data) => {
+			full_profile = data;
+		});
 	});
-	$: login = loginPayload.then((data) => data.userLogin);
 </script>
 
 <Header />
 
-{#await loginPayload}
+{#if full_profile === undefined}
 	<div>Loading...</div>
-{:then loginPayload_loaded}
+{:else if full_profile === null}
 	<div class="profile-container">
-		<ProfileImage loginPayload={loginPayload_loaded} />
-		<ProfileAbout loginPayload={loginPayload_loaded} />
+		You must be logged in to view your profile
 	</div>
-{:catch error}
-	<div class="profile-container">{error.message}</div>
-{/await}
+{:else}
+	<div class="profile-container">
+		<ProfileImage profile_data={full_profile} />
+		<ProfileAbout {...full_profile} />
+	</div>
+{/if}
 
 <style>
 	.profile-container {

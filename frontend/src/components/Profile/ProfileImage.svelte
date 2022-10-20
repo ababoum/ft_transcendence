@@ -1,18 +1,17 @@
 <script lang="ts">
-	import type { loginBase } from "../../types";
 	import { get } from "svelte/store";
-	export let loginPayload: loginBase;
 	import { BACKEND_URL } from "../../stores/store";
-    import { getCookie } from "../../stores/auth";
-    import { push } from "svelte-spa-router";
+	import { getCookie } from "../../stores/auth";
+	import { onMount } from "svelte";
+	export let profile_data: any;
 
 	// default paths
-	let default_imageSrc = "static/default_avatar.png";
-	let loading_imageSrc = "static/loading_icon.gif";
-	let actual_img = default_imageSrc;
+	const default_imageSrc = "static/default_avatar.png";
+	const loading_imageSrc = "static/loading_icon.gif";
+	let imageSrc = undefined;
 
 	// avatar upload
-	let fileinput;
+	let fileinput: any;
 	const onFileSelected = (e) => {
 		let image = e.target.files[0];
 		let data = new FormData();
@@ -21,38 +20,45 @@
 		fetch(get(BACKEND_URL) + "/users/upload_avatar", {
 			method: "POST",
 			body: data,
-			headers: {"Authorization": "Bearer " + getCookie("jwt")}
-		}).then(() => push(""))
+			headers: { Authorization: "Bearer " + getCookie("jwt") },
+		}).then(() => {
+			// reload current page
+			window.location.href = "/#/profile";
+		});
 	};
 
 	// retrieve avatar picture for the logged in user
-	const imageSrc = (async () => {
+
+	onMount(async () => {
 		const resp = await fetch(
-			get(BACKEND_URL) + "/users/image/" + loginPayload.imageId
+			get(BACKEND_URL) + "/users/image/" + profile_data.imageId
 		);
 		const imageBlob = await resp.blob();
-		console.log(imageBlob);
 		const reader = new FileReader();
 		reader.readAsDataURL(imageBlob);
-
 		reader.onload = function (e) {
 			var rawLog = reader.result;
 			if (resp.ok) {
-				actual_img = rawLog as string;
+				imageSrc = rawLog;
 			} else {
-				throw new Error();
+				imageSrc = null;
 			}
 		};
-	})();
+	});
 </script>
 
-{#await imageSrc}
+{#if imageSrc === undefined}
 	<div class="avatar">
 		<img src={loading_imageSrc} alt="profile" class="avatar-img" />
 	</div>
-{:then data}
+{:else if imageSrc === null}
 	<div class="avatar">
-		<img src={actual_img} alt="profile" class="avatar-img" />
+		$${console.log(imageSrc)}
+		<img src={default_imageSrc} alt="profile" class="avatar-img" />
+	</div>
+{:else}
+	<div class="avatar">
+		<img src={imageSrc} alt="profile" class="avatar-img" />
 		<div class="avatar-content">
 			<span
 				class="avatar-text"
@@ -69,11 +75,7 @@
 			bind:this={fileinput}
 		/>
 	</div>
-{:catch error}
-	<div class="avatar">
-		<img src={default_imageSrc} alt="profile" class="avatar-img" />
-	</div>
-{/await}
+{/if}
 
 <style>
 	* {
@@ -104,8 +106,8 @@
 		object-fit: cover;
 		opacity: 1;
 		transition: opacity 0.2s ease-in-out;
-		height: 150px;
-		width: 150px;
+		height: 125px;
+		width: 125px;
 	}
 
 	.avatar-content {
