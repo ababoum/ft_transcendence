@@ -24,3 +24,14 @@ export const user = writable(new User());
 export const CHATROOM_PAGE = readable("/chatroom");
 export const CHATROOM_URL = readable('http://localhost:5678/chatroom');
 export const chatroom_socket = writable(io(get(CHATROOM_URL)));
+
+
+// TRY TO USE THOSE, WE CAN TEST HOW IT WORKS OUT
+export const login = writable(localStorage.getItem("login") || "login");
+login.subscribe((val) => localStorage.setItem("login", val));
+
+export const nickname = writable(localStorage.getItem("nickname") || "nickname");
+nickname.subscribe((val) => localStorage.setItem("nickname", val));
+
+export const avatar_url = writable(localStorage.getItem("avatar_url") || "static/default_avatar.png");
+avatar_url.subscribe((val) => localStorage.setItem("avatar_url", val));
