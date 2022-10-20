@@ -1,39 +1,45 @@
-import {ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
-import {Socket} from "socket.io";
+import { Logger } from "@nestjs/common";
+import {ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
+import { ChatRoom } from "@prisma/client";
+import {Socket, Server} from "socket.io";
+import { ChatroomService } from './chatroom.service';
 
 
-@WebSocketGateway(5678, {cors: '*'})
-export class ChatRoomGateway {
-	@WebSocketServer()
-	private server: any;
-	// private _gameServer: GameServer;
-	// private _interval;
+@WebSocketGateway(5678, {cors: '*', namespace: '/chatroom'})
+export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
-	// constructor() {
-	// 	this._gameServer = new GameServer();
-	// 	this._interval = setInterval(() => {
-	// 			this.server.emit('get-games-list', this._gameServer);
-	// 	} , 3000);
-	// }
+	@WebSocketServer() wss: Server;
 
-	// handleConnection(client: Socket) {
-	// 	// console.log("connect --- " + client.id);
-	// 	this._gameServer._playersOnlineCount++;
-	// }
+	private _interval;
+	private logger: Logger = new Logger('ChatGateway');
+	private chatRoomsList;
 
-	// handleDisconnect(client: Socket) {
-	// 	// console.log("disc --- " + client.id);
-	// 	this._gameServer._playersOnlineCount--;
-	// 	this._gameServer.deletePlayerFromQueue(client);
-	// }
+	constructor(private readonly ChatroomService: ChatroomService) {
+		//this._interval = setInterval(() => this.emitChatRoomsList(), 10000);
+	}
 
-	// @SubscribeMessage('exit-game')
-	// exitGame(@ConnectedSocket() client: Socket): void {
-	// 	this._gameServer.endLeaverGame(client);
-	// }
+	async afterInit(server: any) {
+		this.logger.log('Initialized!');
+		this.chatRoomsList = await this.ChatroomService.chatRooms({})
+		console.log(this.chatRoomsList);
+	 }
 
-	// @SubscribeMessage('get-games-list')
-	// initGameList(@ConnectedSocket() client: Socket): void {
-	// 	client.emit('get-games-list', this._gameServer);
-	// }
+	handleConnection(client: Socket, ...args: any[]) {
+		this.logger.log("connect --- " + client.id);
+		this.emitChatRoomsList();
+	}
+
+	handleDisconnect(client: Socket) {
+		this.logger.log("disconnect --- " + client.id);		
+	}
+
+	emitChatRoomsList() {
+		this.wss.emit('chatrooms-list', this.chatRoomsList);
+		this.logger.log("emitChatRoomsList()" + this.chatRoomsList);		
+	}
+
+	@SubscribeMessage('get-chatrooms-list')
+	handleMessage(client: Socket,): void {
+	}	
+
 }

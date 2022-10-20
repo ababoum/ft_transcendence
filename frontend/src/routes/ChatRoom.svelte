@@ -3,16 +3,37 @@
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
 	import {get_current_user_data, is_authenticated} from "../stores/requests";
+	import {chatroom_socket, GET_CHATROOMS_URL} from "../stores";
+	import {getCookie} from "../auth.js";
+    import { get } from "svelte/store";
+    import { io } from "socket.io-client";
 
 	let tmp: boolean;
-	onMount(async () => { tmp = await is_authenticated(); });
+	let chatrooms_socket = [];
+
+	onMount(async () => { 
+		tmp = await is_authenticated();
+		// chatrooms = await fetch(get(GET_CHATROOMS_URL), {
+		// 	method: 'GET',
+		// 	headers: {"Authorization": "Bearer " + getCookie("jwt")}
+		// }).then(chatrooms => chatrooms.json())
+
+
+		$chatroom_socket.on('chatrooms-list', (data) => {
+			chatrooms_socket = data;
+			console.log("Chatrooms_list received")
+		});
+
+		$chatroom_socket.emit('get-chatrooms-list')
+	})
+
 	$: is_logged = tmp;
 	let is_searching: boolean = false;
 	$: is_searching_resp = is_searching;
 
 	let profile = undefined;
 
-	let chatrooms = [{id: 1, name: "Chatroom1"}, {id: 2, name: "Chatroom2"}]
+	let chatrooms_test = [{id: 1, name: "Chatroom1"}, {id: 2, name: "Chatroom2"}]
 
 	let messages = [{nickname: "User1", content: "Hey !"}, 
 					{nickname: "User2", content: "How are you ?"}, 
@@ -40,15 +61,27 @@
 					
 					
                   <div data-mdb-perfect-scrollbar="true" style="position: relative; height: 400px">
-                    <ul class="list-unstyled mb-0">
-					{#each chatrooms as chatroom}
-                      <li class="p-2 border-bottom">
-                        <div class="pt-1">
-                          <p>{chatroom.name} <button>Enter</button> </p>
-                        </div>
-                      </li>
-					{/each}
-                    </ul>
+					{#if chatrooms_socket[0] }
+					<ul class="list-unstyled mb-0">
+						{#each chatrooms_socket as chatroom}
+						  <li class="p-2 border-bottom">
+							<div class="pt-1">
+							  <p>{chatroom.name} <button>Enter</button> </p>
+							</div>
+						  </li>
+						{/each}
+						</ul>
+					{:else}
+	                    <ul class="list-unstyled mb-0">
+						{#each chatrooms_test as chatroom_test}
+	                      <li class="p-2 border-bottom">
+	                        <div class="pt-1">
+	                          <p>{chatroom_test.name} <button>Enter</button> </p>
+	                        </div>
+	                      </li>
+						{/each}
+	                    </ul>
+					{/if}
                   </div>
 
 

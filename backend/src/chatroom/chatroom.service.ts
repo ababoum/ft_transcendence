@@ -13,7 +13,7 @@ export class ChatroomService {
 	async chatRoom(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
 	  ): Promise<ChatRoom | null> {
-		return this.prisma.chatRoom.findUniqueOrThrow({
+		return await this.prisma.chatRoom.findUniqueOrThrow({
 		  where: userWhereUniqueInput,
 		});
 	  }
@@ -26,7 +26,7 @@ export class ChatroomService {
 		orderBy?: Prisma.UserOrderByWithRelationInput;
 	  }): Promise<ChatRoom[]> {
 		const { skip, take, cursor, where, orderBy } = params;
-		return this.prisma.chatRoom.findMany({
+		return await this.prisma.chatRoom.findMany({
 		  skip,
 		  take,
 		  cursor,
@@ -36,7 +36,7 @@ export class ChatroomService {
 	  }
 
 	async createChatRoom(userlogin: string, CreateChatRoomDto: CreateChatRoomDto): Promise<ChatRoom> {
-		return this.prisma.chatRoom.create({
+		return await this.prisma.chatRoom.create({
 			data: {
 				name: CreateChatRoomDto.name,
 				owner: {connect: {login: userlogin}},
@@ -98,7 +98,7 @@ export class ChatroomService {
 
 // ADMIN //
 	async adminsByChatRoom(chatroomid: number) {
-		return this.prisma.chatRoom.findUniqueOrThrow({
+		return await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
 			select: { admin: { select: { id: true, nickname: true } } },
 		})
@@ -141,7 +141,7 @@ export class ChatroomService {
 
 // BAN //
 	async banListByChatRoom(chatroomid: number) {
-		return this.prisma.chatRoom.findUniqueOrThrow({
+		return await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
 			select: { banList: { select: { id: true, nickname: true } } },
 		})
@@ -184,7 +184,7 @@ export class ChatroomService {
 
 // MUTE //
 	async muteListByChatRoom(chatroomid: number) {
-		return this.prisma.chatRoom.findUniqueOrThrow({
+		return await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
 			select: { muteList: true},
 		})

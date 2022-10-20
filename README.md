@@ -18,3 +18,5 @@ ISSUES:
 	- A chaque message envoye, check si le receiver a mute le sender ?
 	- Conserver en variable local le login des muted users pour filtrer sans appels a la DB ?
 - On utilise login pour identifier les Users dans le back, mais on veut en general afficher le nickname sur le front, il serait mieux d'utiliser le nickname partout, mais on ne recupere que le login via JWTAuth. Sinon on envoie le nickname dans les requetes et les messages Websocket ?
+- Pour socket et Gateway, il faut verifier le token dans handleConnection et disconnect en cas d'erreur, car UseGuards() ne permet pas d'empecher la connection
+- Avec l'authentication avant connection au socket, vaudrait il mieux connecter le socket a l'arrivee sur la route plutot que a l'arrivee sur le site ?

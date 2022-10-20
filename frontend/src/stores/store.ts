@@ -35,3 +35,7 @@ nickname.subscribe((val) => localStorage.setItem("nickname", val));
 
 export const avatar_url = writable(localStorage.getItem("avatar_url") || "static/default_avatar.png");
 avatar_url.subscribe((val) => localStorage.setItem("avatar_url", val));
+
+
+export const GET_CHATROOMS_URL = readable('http://localhost:3000/chatrooms');
+export const chatRooms = writable([])

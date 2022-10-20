@@ -37,6 +37,7 @@ export class ChatroomController {
 
 	@Get()
 	async findAllChatRooms() {
+		console.log("findAllChatRooms() called");
 		return this.ChatroomService.chatRooms({});
 	}
 
