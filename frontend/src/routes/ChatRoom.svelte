@@ -3,8 +3,8 @@
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
 	import {get_current_user_data, is_authenticated} from "../stores/requests";
-	import {chatroom_socket, GET_CHATROOMS_URL} from "../stores";
-	import {getCookie} from "../auth.js";
+	import {chatroom_socket, GET_CHATROOMS_URL} from "../stores/store";
+	import {getCookie} from "../stores/auth";
     import { get } from "svelte/store";
     import { io } from "socket.io-client";
 
