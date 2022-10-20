@@ -88,11 +88,11 @@
 									<button class="btn btn-outline-light btn-lg px-5" type="submit">
 										{is_login ? "Login" : "Register"} </button>
 
-										
+
 									</div>
 								</form>
-								
-								
+
+
 							<div style="margin-bottom: 1em">
 								<a href={`${get(BACKEND_URL)}/auth/42/return`}>
 									<button class="button is-dark is-large m-auto">
@@ -132,11 +132,11 @@
 		text-align: center;
 		white-space: nowrap;
 	}
-	
+
 	.button.is-large {
 		font-size: 1.5rem;
 	}
-	
+
 	.button.is-dark {
 		background-color: #363636;
 		border-color: transparent;
@@ -153,4 +153,4 @@
 		width: 1.5em;
 	}
 
-</style>	
+</style>

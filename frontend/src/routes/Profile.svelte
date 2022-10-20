@@ -21,7 +21,10 @@
 		}
 	}
 
-	let loginPayload = profileBuild();
+	let loginPayload = undefined;
+	onMount(async () => {
+		loginPayload = profileBuild();
+	});
 	$: login = loginPayload.then((data) => data.userLogin);
 </script>
 

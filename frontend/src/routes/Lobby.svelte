@@ -7,15 +7,17 @@
 	import MatchList from "../components/Lobby/MatchList.svelte";
 	import PlayersRating from "../components/Lobby/PlayersRating.svelte";
 
+
 	let tmp: boolean;
-	onMount(async () => {
-		tmp = await is_authenticated();
-	});
+	let profile = undefined;
 	$: is_logged = tmp;
 	let is_searching: boolean = false;
 	$: is_searching_resp = is_searching;
 
-	let profile = undefined;
+	onMount(async () => {
+		tmp = await is_authenticated();
+		profile = await get_current_user_json(); //FIXME if is not ok protection
+	});
 
 	async function findGame() {
 		tmp = await is_authenticated();
@@ -36,7 +38,6 @@
 				$game_socket.off('find-game');
 			}
 		});
-		profile = await get_current_user_json(); //FIXME if is not ok protection
 		$game_socket.emit('find-game', profile);
 	}
 
@@ -47,6 +48,9 @@
 
 <main>
     <Header/>
+    {#if profile !== undefined}
+            <p class="mb-3"> Hello, [login: {profile.login}], [id: {profile.id}], [nickname: {profile.nickname}]</p>
+    {/if}
     <div class="h-100 d-flex align-items-center justify-content-center">
         {#if !is_logged}
             <p> You are not login </p>
