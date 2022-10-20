@@ -6,7 +6,7 @@ import Game from "./routes/Game.svelte";
 import ChatRoom from "./routes/ChatRoom.svelte";
 import {get} from 'svelte/store'
 
-import { PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE} from "./stores";
+import { PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE} from "./stores/store";
 
 //FIXME ADD VARIABLES USING
 export const routes = {

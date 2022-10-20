@@ -2,8 +2,7 @@
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from 'svelte';
-	import {game_socket, is_spectator} from "../stores";
-	import {is_authenticated} from "../auth";
+	import {game_socket, is_spectator, user} from "../stores/store";
 	import Draw2D from '../Draw2D'
 
 	const UP_KEY: number = 38;
@@ -25,7 +24,11 @@
 		}
 	};
 
-	onMount(async () => { if (!await is_authenticated() && !$is_spectator) await push('/')} );
+	onMount(async ()=> {
+		$user = await $user.upd();
+		if (!$user.isLogged && !$is_spectator)
+			await push('/');
+	});
 
 	function getScalingNumber() {
 		if (innerWidth < innerHeight) {

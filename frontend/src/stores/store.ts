@@ -1,5 +1,6 @@
 import { get, readable, writable } from "svelte/store";
 import { io } from "socket.io-client";
+import { User } from "../types";
 
 export const PROFILE_PAGE = readable("/profile");
 export const GAME_PAGE = readable("/game");
@@ -18,7 +19,7 @@ export const GET_LOGIN_AVATAR = readable('http://localhost:3000/users/avatar/')
 
 export const game_socket = writable(io(get(GAME_URL)));
 export const is_spectator = writable(false);
-
+export const user = writable(new User());
 
 export const CHATROOM_PAGE = readable("/chatroom");
 export const CHATROOM_URL = readable('http://localhost:5678/chatroom');

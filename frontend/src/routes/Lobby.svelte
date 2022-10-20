@@ -1,27 +1,18 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
-	import {game_socket} from "../stores";
+	import {game_socket, user} from "../stores/store";
 	import {onDestroy, onMount} from "svelte";
-	import {get_current_user_json, is_authenticated} from "../auth.js";
 	import MatchList from "../components/Lobby/MatchList.svelte";
 	import PlayersRating from "../components/Lobby/PlayersRating.svelte";
 
-
-	let tmp: boolean;
-	let profile = undefined;
-	$: is_logged = tmp;
 	let is_searching: boolean = false;
 	$: is_searching_resp = is_searching;
 
-	onMount(async () => {
-		tmp = await is_authenticated();
-		profile = await get_current_user_json(); //FIXME if is not ok protection
-	});
+	onMount(async ()=> $user = await $user.upd());
 
 	async function findGame() {
-		tmp = await is_authenticated();
-		if (!tmp) {
+		if (!$user.isLogged) {
 			await push('/log');
 			return;
 		}
@@ -38,7 +29,7 @@
 				$game_socket.off('find-game');
 			}
 		});
-		$game_socket.emit('find-game', profile);
+		$game_socket.emit('find-game', $user);
 	}
 
 	onDestroy(() => {
@@ -48,11 +39,11 @@
 
 <main>
     <Header/>
-    {#if profile !== undefined}
-            <p class="mb-3"> Hello, [login: {profile.login}], [id: {profile.id}], [nickname: {profile.nickname}]</p>
+    {#if $user.isLogged !== undefined}
+            <p class="mb-3"> Hello, [login: {$user.login}], [id: {$user.id}], [nickname: {$user.nickname}]</p>
     {/if}
     <div class="h-100 d-flex align-items-center justify-content-center">
-        {#if !is_logged}
+        {#if !$user.isLogged}
             <p> You are not login </p>
         {:else}
             <button on:click={findGame}> {is_searching_resp ? "Searching..." : "Find Game" }</button>

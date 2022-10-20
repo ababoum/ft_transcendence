@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {onMount} from "svelte";
-	import {get_top_10} from "../../auth";
+	import {get_top_10} from "../../stores/requests";
 
 	let stats: any = undefined;
 	onMount(async () => {

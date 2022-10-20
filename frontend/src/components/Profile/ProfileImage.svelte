@@ -2,8 +2,8 @@
 	import type { loginBase } from "../../types";
 	import { get } from "svelte/store";
 	export let loginPayload: loginBase;
-	import { BACKEND_URL } from "../../stores";
-    import { getCookie } from "../../auth";
+	import { BACKEND_URL } from "../../stores/store";
+    import { getCookie } from "../../stores/auth";
     import { push } from "svelte-spa-router";
 
 	// default paths

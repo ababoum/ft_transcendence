@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {onDestroy, onMount} from "svelte";
-	import {GAME_PAGE, game_socket, is_spectator} from "../../stores";
+	import {GAME_PAGE, game_socket, is_spectator} from "../../stores/store";
 	import {push} from "svelte-spa-router";
 
 	let game_list;

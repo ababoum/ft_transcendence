@@ -1,17 +1,10 @@
 <script lang="ts">
-	import {PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE, CHATROOM_PAGE} from "../stores";
+	import {PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE, CHATROOM_PAGE, user} from "../stores/store";
 	import {onMount} from "svelte";
 	import {link, push} from "svelte-spa-router";
-	import {eraseCookie, is_authenticated} from "../auth.js";
+	import {logout} from "../stores/auth";
 
-	let tmp: boolean;
-	onMount(async () => { tmp = await is_authenticated(); });
-	$: is_logged = tmp;
-
-	async function logout() {
-		eraseCookie("jwt");
-		await push($LOGIN_PAGE);
-	}
+	onMount(async ()=> $user = await $user.upd());
 </script>
 
 <main>
@@ -36,7 +29,7 @@
 					<li class="nav-item">
 						<a class="nav-link" href={$CHATROOM_PAGE} use:link>CHATROOM</a>
 					</li>
-					{#if !is_logged}
+					{#if !$user.isLogged}
 						<li class="nav-item">
 							<a class="nav-link" href="{$LOGIN_PAGE}" use:link>LOGIN</a>
 						</li>

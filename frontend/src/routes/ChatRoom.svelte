@@ -2,7 +2,7 @@
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
-	import {get_current_user_data, is_authenticated} from "../auth.js";
+	import {get_current_user_data, is_authenticated} from "../stores/requests";
 
 	let tmp: boolean;
 	onMount(async () => { tmp = await is_authenticated(); });
