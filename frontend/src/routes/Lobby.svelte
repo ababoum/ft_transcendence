@@ -5,6 +5,7 @@
 	import {onDestroy, onMount} from "svelte";
 	import MatchList from "../components/Lobby/MatchList.svelte";
 	import PlayersRating from "../components/Lobby/PlayersRating.svelte";
+	import Avatar from "../components/Avatar.svelte";
 
 	let is_searching: boolean = false;
 	$: is_searching_resp = is_searching;
@@ -39,7 +40,7 @@
 
 <main>
     <Header/>
-    {#if $user.isLogged !== undefined}
+    {#if $user.isLogged}
             <p class="mb-3"> Hello, [login: {$user.login}], [id: {$user.id}], [nickname: {$user.nickname}]</p>
     {/if}
     <div class="h-100 d-flex align-items-center justify-content-center">

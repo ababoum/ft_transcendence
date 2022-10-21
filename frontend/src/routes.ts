@@ -11,6 +11,7 @@ import { PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE } from "./stores/store"
 //FIXME ADD VARIABLES USING
 export const routes = {
 	"/log": Autorisation,
+	"/login": Autorisation,
 	"/profile": Profile,
 	"/game": Game,
 	"/chatroom": ChatRoom,

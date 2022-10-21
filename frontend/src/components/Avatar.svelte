@@ -14,6 +14,7 @@
 	let actual_img = default_imageSrc;
 
 	const fetchImage = (async () => {
+		console.log("log " + login);
 		const resp = await fetch($GET_LOGIN_AVATAR + login)
 		const imageBlob = await resp.blob();
 		const reader = new FileReader();
