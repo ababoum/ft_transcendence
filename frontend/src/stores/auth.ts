@@ -40,12 +40,14 @@ export async function signIn(login: string, password: string) {
 }
 
 export async function signUp(login: string, password: string, email: string, nickname: string) {
-	let is_registered = true;
-	await fetch(get(CREATE_ACC_URL), {
+	let msg: string = "";
+	const resp = await fetch(get(CREATE_ACC_URL), {
 		method: 'POST',
 		headers: {'Content-Type': 'application/json'},
 		body: JSON.stringify({ login, password, email, nickname })
-	}).catch((error) => { is_registered = false });
-	console.log(is_registered);
-	return is_registered;
+	});
+	if (resp.ok)
+		return msg;
+	await resp.json().then((data)=> msg  = data.message);
+	return msg;
 }

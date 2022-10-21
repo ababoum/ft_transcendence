@@ -8,11 +8,12 @@
 	let email: string;
 	let nickname: string;
 
-	let result: boolean = undefined;
+	let result: string = "";
 
 	async function call_log() {
+		result = "";
 		result = await signUp(login, password, email, nickname);
-		if (result) {
+		if (result == "") {
 			if ($location === '/log')
 			    await push('/login');
 			else
@@ -50,8 +51,8 @@
                 <label class="form-label" for="typePasswordX">Password</label>
             </div>
 
-            {#if result === false}
-                <p style="color: red">Login or email is already registered</p>
+            {#if result !== undefined && result !== ""}
+                <p style="color: red">{result}</p>
             {/if}
 
             <button class="btn btn-outline-light btn-lg px-5" type="submit">Register</button>
