@@ -9,6 +9,7 @@
 	// retrieve current user info
 
 	let full_profile = undefined;
+	const loading_imageSrc = "static/loading_icon.gif";
 
 	onMount(async () => {
 		$user = await $user.upd();
@@ -21,7 +22,9 @@
 <Header />
 
 {#if full_profile === undefined}
-	<div>Loading...</div>
+	<div class="profile-container">
+		<img src={loading_imageSrc} alt="avatar" class="avatar-img" />
+	</div>
 {:else if full_profile === null}
 	<div class="profile-container">
 		You must be logged in to view your profile

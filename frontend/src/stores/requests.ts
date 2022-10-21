@@ -51,3 +51,39 @@ export async function is_authenticated() {
 	eraseCookie("jwt");
 	return false;
 }
+
+export async function update_email(new_email: string) {
+
+	let msg: string = null;
+	const resp = await fetch(get(BACKEND_URL) + "/users/update/email", {
+		method: 'PATCH',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt"),
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ new_email })
+	});
+
+	if (resp.ok)
+		return msg;
+	await resp.json().then((data) => msg = data.message);
+	return msg;
+}
+
+export async function update_nickname(new_nickname: string) {
+
+	let msg: string = null;
+	const resp = await fetch(get(BACKEND_URL) + "/users/update/nickname", {
+		method: 'PATCH',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt"),
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ new_nickname })
+	});
+
+	if (resp.ok)
+		return msg;
+	await resp.json().then((data) => msg = data.message);
+	return msg;
+}

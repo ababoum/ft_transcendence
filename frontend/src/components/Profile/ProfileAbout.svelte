@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { update_email, update_nickname } from "../../stores/requests";
 
 	const profile_data = $$props;
 
@@ -14,12 +15,16 @@
 	async function updateEmail(e) {
 		// Get the data from the form
 		const formData = new FormData(e.target);
-		const new_email = formData.get("new_email");
+		const new_email = formData.get("new_email").toString();
 
 		// Send data to the API
+		const msg: string = await update_email(new_email);
 
 		// if the request fails, send an alert
-
+		if (msg != null) {
+			alert(msg);
+			return;
+		}
 		// close the 'prompt'
 		updating_email = false;
 	}
@@ -27,11 +32,16 @@
 	async function updateNickname(e) {
 		// Get the data from the form
 		const formData = new FormData(e.target);
-		const new_nickname = formData.get("new_nickname");
+		const new_nickname = formData.get("new_nickname").toString();
 
 		// Send data to the API
+		const msg: string = await update_nickname(new_nickname);
 
 		// if the request fails, send an alert
+		if (msg != null) {
+			alert(msg);
+			return;
+		}
 
 		// close the 'prompt'
 		updating_nickname = false;

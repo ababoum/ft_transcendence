@@ -14,6 +14,7 @@ import {
 	FileTypeValidator,
 	Res,
 	StreamableFile,
+	Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -28,7 +29,7 @@ import { diskStorage } from 'multer';
 import * as shortid from 'shortid';
 import * as mime from 'mime-types';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './user.dto';
+import { CreateUserDto, UpdateEmailDto, UpdateNicknameDto } from './user.dto';
 import { RequestWithUser } from '../auth/auth.interfaces';
 import { createReadStream } from 'fs';
 import type { Response } from 'express';
@@ -75,6 +76,30 @@ export class UserController {
 	@Delete('login/:login')
 	async deleteUserByLogin(@Param('login') login: string): Promise<UserModel> {
 		return this.userService.deleteUser({ login: login });
+	}
+
+	///////////////////////   UPDATE USER    ///////////////////////
+
+	@UseGuards(JwtAuthGuard)
+	@Patch('update/email')
+	async updateUserEmail(@Request() req, @Body() body: UpdateEmailDto) {
+		const update = this.userService.updateUser(
+			{
+				where: { login: req.user.login },
+				data: { email: body.new_email }
+			}
+		)
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Patch('update/nickname')
+	async updateUserNickname(@Request() req, @Body() body: UpdateNicknameDto) {
+		const update = this.userService.updateUser(
+			{
+				where: { login: req.user.login },
+				data: { nickname: body.new_nickname }
+			}
+		)
 	}
 
 
@@ -154,7 +179,7 @@ export class UserController {
 		: Promise<StreamableFile> {
 
 		let id_number: number = parseInt(id);
-		if (isNaN(id_number)) { id_number = 0 };
+		if (isNaN(id_number) || id_number === null) { id_number = 0 };
 
 		const img_object: ImageModel = await this.userService.image({ id: id_number });
 

@@ -20,7 +20,7 @@ ifneq (${IMG_TO_DEL}, 0)
 endif
 
 test_env:
-	docker-compose up postgres adminer -d
+	docker-compose up -d postgres adminer
 	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data/"
 # update_scheme:
 # 	docker-compose up postgres -d

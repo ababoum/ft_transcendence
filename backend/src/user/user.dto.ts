@@ -25,6 +25,18 @@ export class CreateUserDto {
 	password: string;
 }
 
+export class UpdateEmailDto {
+	@IsNotEmpty()
+	@IsEmail()
+	new_email: string;
+}
+
+export class UpdateNicknameDto {
+
+	@IsNotEmpty()
+	new_nickname: string;
+}
+
 export class DeleteUserDto {
 	
 }

@@ -49,16 +49,15 @@
 
 {#if imageSrc === undefined}
 	<div class="avatar">
-		<img src={loading_imageSrc} alt="profile" class="avatar-img" />
+		<img src={loading_imageSrc} alt="avatar" class="avatar-img" />
 	</div>
 {:else if imageSrc === null}
 	<div class="avatar">
-		$${console.log(imageSrc)}
-		<img src={default_imageSrc} alt="profile" class="avatar-img" />
+		<img src={default_imageSrc} alt="avatar" class="avatar-img" />
 	</div>
 {:else}
 	<div class="avatar">
-		<img src={imageSrc} alt="profile" class="avatar-img" />
+		<img src={imageSrc} alt="avatar" class="avatar-img" />
 		<div class="avatar-content">
 			<span
 				class="avatar-text"

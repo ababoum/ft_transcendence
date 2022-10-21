@@ -2,7 +2,7 @@
 	import {push, location} from "svelte-spa-router";
 	import {user} from "../stores/store";
 	import {onMount} from "svelte";
-	import SignIn from "../components/Login/Signin.svelte";
+	import SignIn from "../components/Login/SignIn.svelte";
 	import SignUp from "../components/Login/SignUp.svelte";
 	import Nav from "../components/Nav.svelte";
 	import Auth42 from "../components/Login/Auth42.svelte";

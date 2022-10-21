@@ -50,7 +50,6 @@ export class UserService {
 			});
 		}
 		catch (e) {
-			console.log(e);
 			if (e instanceof Prisma.PrismaClientKnownRequestError) {
 				if (e.code === 'P2002') {
 					throw new HttpException(
@@ -66,10 +65,23 @@ export class UserService {
 		data: Prisma.UserUpdateInput;
 	}): Promise<User> {
 		const { where, data } = params;
-		return this.prisma.user.update({
-			data,
-			where,
-		});
+
+		try {
+
+			return this.prisma.user.update({
+				data,
+				where,
+			});
+		}
+		catch (e) {
+			if (e instanceof Prisma.PrismaClientKnownRequestError) {
+				if (e.code === 'P2002') {
+					throw new HttpException(
+						`${capitalizeFirstLetter(e.meta.target as string)} already exists`,
+						400);
+				}
+			}
+		}
 	}
 
 	async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
