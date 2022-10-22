@@ -29,7 +29,7 @@ import { diskStorage } from 'multer';
 import * as shortid from 'shortid';
 import * as mime from 'mime-types';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto, UpdateEmailDto, UpdateNicknameDto } from './user.dto';
+import { CreateUserDto, UpdateEmailDto, UpdateNicknameDto, UpdatePasswordDto } from './user.dto';
 import { RequestWithUser } from '../auth/auth.interfaces';
 import { createReadStream } from 'fs';
 import type { Response } from 'express';
@@ -82,7 +82,9 @@ export class UserController {
 
 	@UseGuards(JwtAuthGuard)
 	@Patch('update/email')
-	async updateUserEmail(@Request() req, @Body() body: UpdateEmailDto) {
+	async updateUserEmail(
+		@Request() req,
+		@Body() body: UpdateEmailDto) {
 		const update = this.userService.updateUser(
 			{
 				where: { login: req.user.login },
@@ -93,11 +95,26 @@ export class UserController {
 
 	@UseGuards(JwtAuthGuard)
 	@Patch('update/nickname')
-	async updateUserNickname(@Request() req, @Body() body: UpdateNicknameDto) {
+	async updateUserNickname(
+		@Request() req,
+		@Body() body: UpdateNicknameDto) {
 		const update = this.userService.updateUser(
 			{
 				where: { login: req.user.login },
 				data: { nickname: body.new_nickname }
+			}
+		)
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Patch('update/password')
+	async updateUserPassword(
+		@Request() req,
+		@Body() body: UpdatePasswordDto) {
+		const update = this.userService.updateUser(
+			{
+				where: { login: req.user.login },
+				data: { password: body.new_password }
 			}
 		)
 	}

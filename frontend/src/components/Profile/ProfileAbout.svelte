@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { update_email, update_nickname } from "../../stores/requests";
+	import {
+		update_email,
+		update_nickname,
+		update_password,
+	} from "../../stores/requests";
 
 	const profile_data = $$props;
 
 	let profile = undefined;
 	let updating_email = false;
 	let updating_nickname = false;
+	let updating_password = false;
 
 	onMount(async () => {
 		profile = profile_data;
@@ -47,11 +52,40 @@
 		updating_nickname = false;
 	}
 
+	async function updatePassword(e) {
+		// Get the data from the form
+		const formData = new FormData(e.target);
+		const old_password = formData.get("old_password").toString();
+		const new_password = formData.get("new_password").toString();
+		const confirm_new_password = formData.get("confirm_new_password").toString();
+
+		if (new_password !== confirm_new_password)
+		{
+			alert("The new password and its confirmation should correspond. Please retry!")
+			return ;
+		}
+		// Send data to the API
+		const msg: string = await update_password(old_password, new_password);
+
+		// if the request fails, send an alert
+		if (msg != null) {
+			alert(msg);
+			return;
+		}
+
+		// close the 'prompt'
+		updating_password = false;
+	}
+
 	function toggleEmail() {
 		updating_email = !updating_email;
 	}
 	function toggleNickname() {
 		updating_nickname = !updating_nickname;
+	}
+
+	function togglePassword() {
+		updating_password = !updating_password;
 	}
 </script>
 
@@ -83,7 +117,9 @@
 				</form>
 			</div>
 		{/if}
+
 		<!-- EMAIL -->
+
 		<div>
 			<strong>Email:</strong>
 			{profile.email}
@@ -98,6 +134,45 @@
 							id="new_email"
 							name="new_email"
 							placeholder="Your new email address"
+						/>
+					</div>
+					<div class="form-group">
+						<button class="submit-btn" type="submit">💾</button>
+					</div>
+				</form>
+			</div>
+		{/if}
+
+		<!-- PASSWORD MANAGEMENT -->
+
+		<div>
+			<strong>Do you want to change your password?</strong>
+			<span class="update-btn" on:click={togglePassword}>⚙️</span>
+		</div>
+		{#if updating_password}
+			<div class="form-container">
+				<form on:submit|preventDefault={updatePassword}>
+					<div class="form-group">
+						<input
+							type="password"
+							placeholder="Old password"
+							id="old_password"
+							name="old_password"
+							required
+						/>
+						<input
+							type="password"
+							placeholder="New password"
+							id="password"
+							name="new_password"
+							required
+						/>
+						<input
+							type="password"
+							placeholder="Confirm new password"
+							id="confirm_password"
+							name="confirm_new_password"
+							required
 						/>
 					</div>
 					<div class="form-group">
