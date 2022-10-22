@@ -7,6 +7,7 @@
 
 	export let size;
     export let login = "";
+	export let classes = "";
 
 	// default paths
 	let default_imageSrc = "static/default_avatar.png";
@@ -14,7 +15,6 @@
 	let actual_img = default_imageSrc;
 
 	const fetchImage = (async () => {
-		console.log("log " + login);
 		const resp = await fetch($GET_LOGIN_AVATAR + login)
 		const imageBlob = await resp.blob();
 		const reader = new FileReader();
@@ -31,17 +31,14 @@
 	})();
 </script>
 
-<main>
+<div class="{classes}">
     {#await fetchImage}
-        <div class="avatar">
             <img src={loading_imageSrc} alt="profile" class="avatar-img" style="width: {size}px;" />
-        </div>
     {:then data}
-        <img src="{actual_img}" class="rounded-circle" style="width: {size}px;"
-             alt="Avatar" />
+        <img src="{actual_img}" class="{classes}" style="width: {size}px;" alt="Avatar" />
     {:catch error}
-        <div class="avatar">
-            <img src={default_imageSrc} alt="profile" class="avatar-img" style="width: {size}px;"/>
-        </div>
+            <img src={default_imageSrc} alt="profile" class="{classes}" style="width: {size}px;"/>
+
     {/await}
-</main>
+</div>
+

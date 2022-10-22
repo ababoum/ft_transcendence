@@ -1,55 +1,87 @@
 <script lang="ts">
-	import {onDestroy, onMount} from "svelte";
-	import {GAME_PAGE, game_socket, is_spectator} from "../../stores/store";
-	import {push} from "svelte-spa-router";
+	import {onDestroy} from "svelte";
+	import {game_socket} from "../../stores/store";
+	import Avatar from "../Avatar.svelte";
+	import {Modal} from "svelte-simple-modal";
+	import SpectatorPopup from "../Game/SpectatorPopup.svelte";
 
-	let game_list;
-	let interval;
-
-	async function spectate(id1: string, id2: string) {
-		$game_socket.emit('spectate', {
-			id1: id1,
-			id2: id2
-		});
-		$is_spectator = true;
-		await push($GAME_PAGE);
-    }
-
-	onMount(() => {
-		$game_socket.on('get-games-list', (data) => {
-			game_list = data;
-		});
-	});
+	export let game_list;
 
 	onDestroy(() => {
-		clearInterval(interval);
 		$game_socket.removeListener('get-games-list');
 	});
 </script>
 
-<main>
-    <h3 class="mb-3">Online: </h3>
-    {#if game_list !== undefined}
-        <p> Games online: {game_list.games_online}</p>
-        <p> Players online: {game_list.players_online}</p>
-        <p> Players in queue: {game_list.players_in_queue}</p>
 
-        <div class="d-inline-flex p-2">
-            <ol class="list-group list-group-numbered">
-                {#each game_list.games as game}
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">{game.leftPlayer.nickname + "(" + game.leftPlayer.score + ") vs "
-                            + game.rightPlayer.nickname + "(" + game.rightPlayer.score + ")"}</div>
-                        </div>
-                        <span class="badge bg-primary rounded-pill" style="cursor: default"
-                              on:click={spectate(game.leftPlayer.id, game.rightPlayer.id)}>Spectate</span>
-                    </li>
-                {/each}
-            </ol>
+    <div class="card mt-5 container-xl">
+        <div class="card-header bg-white border-bottom-0 py-4">
+            <h4 class="mb-0">Game List</h4>
         </div>
-    {:else}
-        <p> Loading statistics ... </p>
-    {/if}
+        <div class="table-responsive">
+            <table class="table text-nowrap mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Player</th>
+                    <th>Score</th>
+                    <th>Watch</th>
+                    <th>Score</th>
+                    <th>Player</th>
+                </tr>
+                </thead>
+                <tbody>
+                {#if game_list !== undefined}
+                    {#if game_list.games.length === 0}
+                        <div class="align-middle text-danger">
+                            <p> No games online </p>
+                        </div>
+                    {/if}
+                    {#each game_list.games as game}
+                        <tr>
+                            <td class="align-middle">
+                                <div class="d-flex
+                            align-items-center">
+                                    <div>
+                                        <Avatar login="{game.leftPlayer.login}" size="50"/>
+                                    </div>
+                                    <div class="ms-3 lh-1">
+                                        <h5 class="fw-bold mb-1">{game.leftPlayer.nickname}</h5>
+                                    </div>
+                                </div>
+                            <td class="align-middle">{game.leftPlayer.score}</td>
+                            <td class="align-middle">
+                                <Modal>
+                                    <SpectatorPopup id1="{game.leftPlayer.id}" id2="{game.rightPlayer.id}"/>
+                                </Modal>
+                            </td>
+                            <td class="align-middle">{game.rightPlayer.score}</td>
+                            <td class="align-middle">
+                                <div class="d-flex
+                            align-items-center">
+                                    <div>
+                                        <Avatar login="{game.rightPlayer.login}" size="50"/>
+                                    </div>
+                                    <div class="ms-3 lh-1">
+                                        <h5 class="fw-bold mb-1">{game.rightPlayer.nickname}</h5>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {/each}
+                {:else}
+                    <div class="align-middle text-danger">
+                        <p> No games online </p>
+                    </div>
+                {/if}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-</main>
+<style>
+    .card-header {
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 0;
+        background-color: rgba(0, 0, 0, 0.03);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>

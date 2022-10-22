@@ -157,6 +157,7 @@ export class Game {
 				score: this._leftPlayer.score,
 				id: this.leftPlayer._id,
 				nickname: this._leftPlayer.nickname,
+				login: this._leftPlayer.login,
 				score_x: Game.FIELD_WIDTH / 4,
 				score_y: Game.FIELD_HEIGHT / 5
 			},
@@ -166,6 +167,7 @@ export class Game {
 				score: this._rightPlayer.score,
 				id: this._rightPlayer._id,
 				nickname: this._rightPlayer.nickname,
+				login: this._rightPlayer.login,
 				score_x: 3 * Game.FIELD_WIDTH / 4,
 				score_y: Game.FIELD_HEIGHT / 5
 			},

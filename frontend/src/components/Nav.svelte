@@ -21,7 +21,7 @@
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav">
 					<li class="nav-item">
-						<a class="nav-link" href={$PROFILE_PAGE} use:link>PROFILE</a>
+						<a id="prof-page" class="nav-link" href={$PROFILE_PAGE} use:link>PROFILE</a>
 					</li>
 					<li class="nav-item">
 						<a class="nav-link" href={$GAME_PAGE} use:link>GAME</a>
@@ -42,5 +42,4 @@
 			</div>
 		</div>
 	</nav>
-	<br><br>
 </main>

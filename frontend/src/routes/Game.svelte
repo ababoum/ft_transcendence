@@ -2,7 +2,7 @@
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from 'svelte';
-	import {game_socket, is_spectator, user} from "../stores/store";
+	import {game_socket, user} from "../stores/store";
 	import Draw2D from '../Draw2D'
 
 	const UP_KEY: number = 38;
@@ -26,7 +26,7 @@
 
 	onMount(async ()=> {
 		$user = await $user.upd();
-		if (!$user.isLogged && !$is_spectator)
+		if (!$user.isLogged)
 			await push('/');
 	});
 
@@ -87,7 +87,6 @@
 	})
 
 	onDestroy(() => {
-		$is_spectator = false;
 		try {
 			$game_socket.emit('exit-game');
 			$game_socket.removeListener('get-data');
@@ -122,7 +121,7 @@
     ></canvas>
 </div>
 
-{#if !is_ready && data.field.width !== 0 && !$is_spectator}
+{#if !is_ready && data.field.width !== 0}
     <div class="h-100 d-flex align-items-center justify-content-center">
        <br>
         <button on:click={() => {$game_socket.emit('ready'); is_ready = true}} >Ready</button>

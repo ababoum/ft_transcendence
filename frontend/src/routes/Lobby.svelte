@@ -1,16 +1,27 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
-	import {game_socket, user} from "../stores/store";
+	import {game_socket, is_spectator, user} from "../stores/store";
 	import {onDestroy, onMount} from "svelte";
 	import MatchList from "../components/Lobby/MatchList.svelte";
 	import PlayersRating from "../components/Lobby/PlayersRating.svelte";
-	import Avatar from "../components/Avatar.svelte";
+	import Statistics from "../components/Lobby/Statistics.svelte";
 
+	//GAME STAT
+
+	let game_list;
+
+	onMount(() => {
+		$game_socket.on('get-games-list', (data) => {
+			game_list = data;
+		});
+	});
+
+    //OLD
 	let is_searching: boolean = false;
 	$: is_searching_resp = is_searching;
 
-	onMount(async ()=> $user = await $user.upd());
+	onMount(async () => $user = await $user.upd());
 
 	async function findGame() {
 		if (!$user.isLogged) {
@@ -35,20 +46,28 @@
 
 	onDestroy(() => {
 		$game_socket.removeListener('find-game');
+		$game_socket.removeListener('get-games-list');
 	})
 </script>
 
 <main>
+
     <Header/>
-    {#if $user.isLogged}
-            <p class="mb-3"> Hello, [login: {$user.login}], [id: {$user.id}], [nickname: {$user.nickname}]</p>
-    {/if}
+    <Statistics game_list="{game_list}"/>
+    <MatchList game_list="{game_list}"/>
+    <PlayersRating/>
+
     <div class="h-100 d-flex align-items-center justify-content-center">
         {#if !$user.isLogged}
             <p> You are not login </p>
         {:else}
             <button on:click={findGame}> {is_searching_resp ? "Searching..." : "Find Game" }</button>
         {/if}
+    <!--
+    {#if $user.isLogged}
+            <p class="mb-3"> Hello, [login: {$user.login}], [id: {$user.id}], [nickname: {$user.nickname}]</p>
+    {/if}
+
     </div>
     <div class="container mt-4">
         <div class="row">
@@ -59,5 +78,7 @@
                 <PlayersRating/>
             </div>
         </div>
-    </div>
+    </div> -->
+
+
 </main>
