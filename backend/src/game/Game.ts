@@ -7,7 +7,7 @@ export class Game {
 	public static readonly FIELD_WIDTH: number = 600;
 	public static readonly PADDLE_HEIGHT: number = 100;
 	public static readonly PADDLE_WIDTH: number = 10;
-	public static readonly MAX_SCORE: number = 1000;
+	public static readonly MAX_SCORE: number = 42;
 
 	/*** VARS ***/
 	private _leftPlayer: Player;

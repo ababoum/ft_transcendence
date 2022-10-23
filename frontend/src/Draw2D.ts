@@ -33,4 +33,7 @@ export default class Draw2D {
 		this._font = value;
 	}
 
+	get text_size(): number {
+		return this._text_size;
+	}
 }

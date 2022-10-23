@@ -24,9 +24,6 @@
 						<a id="prof-page" class="nav-link" href={$PROFILE_PAGE} use:link>PROFILE</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href={$GAME_PAGE} use:link>GAME</a>
-					</li>
-					<li class="nav-item">
 						<a class="nav-link" href={$CHATROOM_PAGE} use:link>CHATROOM</a>
 					</li>
 					{#if !$user.isLogged}

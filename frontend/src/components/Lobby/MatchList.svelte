@@ -38,8 +38,7 @@
                     {#each game_list.games as game}
                         <tr>
                             <td class="align-middle">
-                                <div class="d-flex
-                            align-items-center">
+                                <div class="d-flex align-items-center">
                                     <div>
                                         <Avatar login="{game.leftPlayer.login}" size="50"/>
                                     </div>

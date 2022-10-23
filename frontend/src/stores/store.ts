@@ -3,7 +3,6 @@ import { io } from "socket.io-client";
 import { User } from "../types";
 
 export const PROFILE_PAGE = readable("/profile");
-export const GAME_PAGE = readable("/game");
 export const LOBBY_PAGE = readable("/");
 export const LOGIN_PAGE = readable("/log");
 

@@ -7,8 +7,12 @@
 
 	export let id1: string;
 	export let id2: string;
-	const showSurprise = () => {
-		open(Spectator);
+	const run = () => {
+		open(Spectator, {}, {
+			styleWindow: {
+				width: '100%'
+			}
+		});
 		spectate(id1, id2)
 	};
 
@@ -22,5 +26,5 @@
 </script>
 
 <span class="badge bg-primary rounded-pill" style="cursor: default"
-      on:click={showSurprise}>Spectate</span>
+      on:click={run}>Spectate</span>
 
