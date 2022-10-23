@@ -61,7 +61,7 @@
 
 		if (new_password !== confirm_new_password)
 		{
-			alert("The new password and its confirmation should correspond. Please retry!")
+			alert("The new password and its confirmation should correspond.\nPlease retry!")
 			return ;
 		}
 		// Send data to the API

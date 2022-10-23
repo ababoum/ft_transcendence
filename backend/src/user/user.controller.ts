@@ -15,6 +15,7 @@ import {
 	Res,
 	StreamableFile,
 	Patch,
+	HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -22,7 +23,7 @@ import {
 	Friend as FriendModel,
 	Image as ImageModel
 } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/auth.guards';
+import { JwtAuthGuard, LocalAuthGuard } from '../auth/auth.guards';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -33,12 +34,15 @@ import { CreateUserDto, UpdateEmailDto, UpdateNicknameDto, UpdatePasswordDto } f
 import { RequestWithUser } from '../auth/auth.interfaces';
 import { createReadStream } from 'fs';
 import type { Response } from 'express';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('users')
 @ApiTags('users')
 export class UserController {
 
-	constructor(private readonly userService: UserService) { }
+	constructor(
+		private readonly userService: UserService,
+		private readonly authService: AuthService) { }
 
 
 	/////////////////////// ACCESS USER INFO ////////////////////////
@@ -111,7 +115,13 @@ export class UserController {
 	async updateUserPassword(
 		@Request() req,
 		@Body() body: UpdatePasswordDto) {
-		const update = this.userService.updateUser(
+
+		const user = await this.authService.validateUser(req.user.login, body.old_password);
+		if (!user) {
+			throw new HttpException("Old password is incorrect. Try again!", 401);
+		}
+	
+		const update = await this.userService.updateUser(
 			{
 				where: { login: req.user.login },
 				data: { password: body.new_password }
@@ -196,7 +206,7 @@ export class UserController {
 		: Promise<StreamableFile> {
 
 		let id_number: number = parseInt(id);
-		if (isNaN(id_number) || id_number === null) { id_number = 0 };
+		if (isNaN(id_number)) { id_number = 0 };
 
 		const img_object: ImageModel = await this.userService.image({ id: id_number });
 
