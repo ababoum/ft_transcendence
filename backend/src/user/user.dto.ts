@@ -37,6 +37,16 @@ export class UpdateNicknameDto {
 	new_nickname: string;
 }
 
+export class UpdatePasswordDto {
+
+	@MinLength(8)
+	old_password: string;
+
+	@MinLength(8)
+	new_password: string;
+}
+
+
 export class DeleteUserDto {
 	
 }

@@ -15,6 +15,7 @@ import {
 	Res,
 	StreamableFile,
 	Patch,
+	HttpException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -22,23 +23,26 @@ import {
 	Friend as FriendModel,
 	Image as ImageModel
 } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/auth.guards';
+import { JwtAuthGuard, LocalAuthGuard } from '../auth/auth.guards';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as shortid from 'shortid';
 import * as mime from 'mime-types';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto, UpdateEmailDto, UpdateNicknameDto } from './user.dto';
+import { CreateUserDto, UpdateEmailDto, UpdateNicknameDto, UpdatePasswordDto } from './user.dto';
 import { RequestWithUser } from '../auth/auth.interfaces';
 import { createReadStream } from 'fs';
 import type { Response } from 'express';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('users')
 @ApiTags('users')
 export class UserController {
 
-	constructor(private readonly userService: UserService) { }
+	constructor(
+		private readonly userService: UserService,
+		private readonly authService: AuthService) { }
 
 
 	/////////////////////// ACCESS USER INFO ////////////////////////
@@ -82,7 +86,9 @@ export class UserController {
 
 	@UseGuards(JwtAuthGuard)
 	@Patch('update/email')
-	async updateUserEmail(@Request() req, @Body() body: UpdateEmailDto) {
+	async updateUserEmail(
+		@Request() req,
+		@Body() body: UpdateEmailDto) {
 		const update = this.userService.updateUser(
 			{
 				where: { login: req.user.login },
@@ -93,11 +99,32 @@ export class UserController {
 
 	@UseGuards(JwtAuthGuard)
 	@Patch('update/nickname')
-	async updateUserNickname(@Request() req, @Body() body: UpdateNicknameDto) {
+	async updateUserNickname(
+		@Request() req,
+		@Body() body: UpdateNicknameDto) {
 		const update = this.userService.updateUser(
 			{
 				where: { login: req.user.login },
 				data: { nickname: body.new_nickname }
+			}
+		)
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Patch('update/password')
+	async updateUserPassword(
+		@Request() req,
+		@Body() body: UpdatePasswordDto) {
+
+		const user = await this.authService.validateUser(req.user.login, body.old_password);
+		if (!user) {
+			throw new HttpException("Old password is incorrect. Try again!", 401);
+		}
+	
+		const update = await this.userService.updateUser(
+			{
+				where: { login: req.user.login },
+				data: { password: body.new_password }
 			}
 		)
 	}
@@ -179,7 +206,7 @@ export class UserController {
 		: Promise<StreamableFile> {
 
 		let id_number: number = parseInt(id);
-		if (isNaN(id_number) || id_number === null) { id_number = 0 };
+		if (isNaN(id_number)) { id_number = 0 };
 
 		const img_object: ImageModel = await this.userService.image({ id: id_number });
 

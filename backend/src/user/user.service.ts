@@ -203,6 +203,9 @@ export class UserService {
 		imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
 	): Promise<Image | null> {
 
+		if (imageWhereUniqueInput.id === null)
+			throw new HttpException("Requested image not found", 404);
+
 		const img = await this.prisma.image.findUnique({
 			where: imageWhereUniqueInput,
 		});
