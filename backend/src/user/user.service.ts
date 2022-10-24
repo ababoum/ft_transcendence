@@ -125,6 +125,7 @@ export class UserService {
 	async friends(userId: number): Promise<User[]> {
 
 		// retrieve the list of friendships
+
 		const friends_list = await this.prisma.friend.findMany({
 			where: {
 				userId: userId

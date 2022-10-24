@@ -27,12 +27,6 @@
 		$chatroom_socket.emit('get-chatrooms-list')
 	})
 
-	$: is_logged = tmp;
-	let is_searching: boolean = false;
-	$: is_searching_resp = is_searching;
-
-	let profile = undefined;
-
 	let chatrooms_test = [{id: 1, name: "Chatroom1"}, {id: 2, name: "Chatroom2"}]
 
 	let messages = [{nickname: "User1", content: "Hey !"}, 
@@ -41,6 +35,12 @@
 
 	onDestroy(() => {
 	})
+
+	async function createChatRoom(){
+		console.log("In createChatRoom")
+		let newRoom = {name: "test", mode: "PUBLIC", password: "string"}
+		$chatroom_socket.emit('create-chatroom', newRoom);
+	}
 </script>
 
 <main>
@@ -83,6 +83,7 @@
 	                    </ul>
 					{/if}
                   </div>
+				  <button class="create" on:click|preventDefault={createChatRoom}>Create new room</button>
 
 
                 </div>

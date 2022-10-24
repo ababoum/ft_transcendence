@@ -1,6 +1,7 @@
 import { get, readable, writable } from "svelte/store";
 import { io } from "socket.io-client";
 import { User } from "../types";
+import { getCookie } from "./auth";
 
 export const PROFILE_PAGE = readable("/profile");
 export const LOBBY_PAGE = readable("/");
@@ -16,7 +17,7 @@ export const CREATE_ACC_URL = readable('http://localhost:3000/users/create');
 export const TOP_10 = readable('http://localhost:3000/match_history/top10');
 export const GET_LOGIN_AVATAR = readable('http://localhost:3000/users/avatar/')
 
-export const game_socket = writable(io(get(GAME_URL)));
+export const game_socket = writable(io(get(GAME_URL), {query: {token: getCookie("jwt")}}));
 export const user = writable(new User());
 
 export const CHATROOM_PAGE = readable("/chatroom");
