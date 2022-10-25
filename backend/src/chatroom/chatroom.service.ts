@@ -32,6 +32,10 @@ export class ChatroomService {
 		  cursor,
 		  where,
 		  orderBy,
+		  include :{admin: {select: {login: true, nickname: true}},
+		  			participants: {select: {login: true, nickname: true}},
+					banList: {select: {login: true, nickname: true}},
+					muteList: {select: {user: {select: {login: true, nickname: true}}, mutedUntil: true}}}
 		});
 	  }
 
@@ -43,7 +47,14 @@ export class ChatroomService {
 				mode: CreateChatRoomDto.mode,
 				admin: {connect: {login: userlogin}},
 				participants: {connect: {login: userlogin}},
-		}});
+			},
+			include :{
+				admin: {select: {login: true, nickname: true}},
+				participants: {select: {login: true, nickname: true}},
+		 		banList: {select: {login: true, nickname: true}},
+		 		muteList: {select: {user: {select: {login: true, nickname: true}}, mutedUntil: true}}
+			}
+		});
 	}
 
 // PARTICIPANTS //
@@ -80,15 +91,15 @@ export class ChatroomService {
 				},
 				select: {ownerlogin: true, participants: {select: {id: true, nickname: true}}}
 			});
-			if (res.ownerlogin == userlogin) {
-				res = await this.prisma.chatRoom.update({
-					where: {id:chatroomid},
-					data: {
-						owner: {connect: {login: "ellacroi"}},
-					},
-					select: {ownerlogin: true, participants: {select: {id: true, nickname: true}}}
-				})
-			}
+			// if (res.ownerlogin == userlogin) {
+			// 	res = await this.prisma.chatRoom.update({
+			// 		where: {id:chatroomid},
+			// 		data: {
+			// 			owner: {connect: {login: "ellacroi"}},
+			// 		},
+			// 		select: {ownerlogin: true, participants: {select: {id: true, nickname: true}}}
+			// 	})
+			// }
 			return res;
 		}
 		catch {

@@ -1,4 +1,4 @@
-import { Logger } from "@nestjs/common";
+import { Body, Logger, UsePipes, ValidationPipe } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import {ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
 import { JwtPayload } from "jsonwebtoken";
@@ -7,6 +7,9 @@ import { jwtConstants } from "../auth/auth.constants";
 import { UserService } from "../user/user.service";
 import { ChatroomService } from './chatroom.service';
 import { CreateChatRoomDto } from "./dto/create-chatroom.dto";
+import { MessageDto } from './dto/message.dto';
+
+
 
 @WebSocketGateway(5678, {cors: '*', namespace: "/chatroom"})
 export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -15,7 +18,7 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 
 	private _interval;
 	private logger: Logger = new Logger('ChatGateway');
-	private chatRoomsList;
+	private chatRoomsList = [];
 	private users: {connectionId: string, login: string, nickname: string}[] = [];
 
 	constructor(private readonly ChatroomService: ChatroomService,
@@ -55,19 +58,86 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		client.emit('chatrooms-list', this.chatRoomsList);
 	}
 
+	@UsePipes(new ValidationPipe())
 	@SubscribeMessage('create-chatroom')
 	async createChatroom(client: Socket, CreateChatRoomDto:CreateChatRoomDto) {
+		// Retrieve informations about the user sending the request
 		const user = this.users[this.users.findIndex(x => x.connectionId === client.id)]
+		this.logger.log("create-chatroom request from " + user.login)
 
-		this.logger.log("Create-chatroom request from " + user.login)
+		// Update DB to create this chatRoom
 		const res = await this.ChatroomService.createChatRoom(user.login, CreateChatRoomDto)
+
+		// Update this.chatRoomsList to add this user as participant
 		this.chatRoomsList.push(res)
+
+		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
 
-	@SubscribeMessage('join-room')
-	handleMessage(client: Socket, room: string): void {
-		client.join(room);
+	@SubscribeMessage('join-chatroom')
+	async joinChatroom(client: Socket, chatRoomId: number) {
+		// Retrieve informations about the user sending the request
+		const user = this.users[this.users.findIndex(x => x.connectionId === client.id)]
+		this.logger.log("join-chatroom request from " + user.login + " to chatRoom " + chatRoomId)
+
+		// Update DB to add this user as participant
+		const res = await this.ChatroomService.joinChatRoom(user.login, chatRoomId)
+
+		// Update this.chatRoomsList to add this user as participant
+		const chatRoomIndex = this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].participants.push({login: user.login, nickname: user.nickname})
+		
+		// Emit update to everyone
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	@SubscribeMessage('leave-chatroom')
+	async leaveChatroom(client: Socket, chatRoomId: number) {
+		// Retrieve informations about the user sending the request
+		const user = this.users[this.users.findIndex(x => x.connectionId === client.id)]
+		this.logger.log("leave-chatroom request from " + user.login + " to chatRoom " + chatRoomId)
+
+		// Update DB to add this user as participant
+		const res = await this.ChatroomService.leaveChatRoom(user.login, chatRoomId)
+
+		//Update this.chatRoomsList to remove this user as participant
+		const chatRoomIndex = this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		const userIndex = this.chatRoomsList[chatRoomIndex].participants.findIndex(x => x.login === user.login)
+		this.chatRoomsList[chatRoomIndex].participants.splice(userIndex, 1)
+		
+		// Emit update to everyone
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	@SubscribeMessage('enter-chatroom')
+	async enterChatroom(client: Socket, chatRoomId: string) {
+		// Retrieve informations about the user sending the request
+		const user = this.users[this.users.findIndex(x => x.connectionId === client.id)]
+		this.logger.log("enter-chatroom request from " + user.login + " to chatRoom " + chatRoomId)
+
+		// Retrieve messages from this chatRoom
+		const res = await this.ChatroomService.getMessages(Number(chatRoomId))
+
+		// Emit messages to the client
+		client.emit('messages-list', res.messages)		
+
+		// Join client to the room
+		client.join(chatRoomId);
+	}
+
+	@UsePipes(new ValidationPipe())
+	@SubscribeMessage('post-message')
+	async postMessage(@ConnectedSocket() client: Socket, MessageDto: MessageDto) {
+		console.log(MessageDto)
+		// Retrieve informations about the user sending the request
+		const user = this.users[this.users.findIndex(x => x.connectionId === client.id)]
+		this.logger.log("post-message request from " + user.login + " to chatRoom " + MessageDto.chatRoomId)
+
+		// Update DB to add this message to the chatRoom
+		//const res = await this.ChatroomService.postMessage(user.login, payload.chatRoomId, payload.MessageDto)
+
+		// Emit update to this room
 	}
 
 }
