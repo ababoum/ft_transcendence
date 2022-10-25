@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
-	import {push} from "svelte-spa-router";
-	import {game_socket, is_spectator, user} from "../stores/store";
-	import {onDestroy, onMount} from "svelte";
+	import {game_socket, user} from "../stores/store";
+	import {onMount} from "svelte";
 	import MatchList from "../components/Lobby/MatchList.svelte";
 	import PlayersRating from "../components/Lobby/PlayersRating.svelte";
 	import Statistics from "../components/Lobby/Statistics.svelte";
@@ -12,19 +11,23 @@
 	//GAME STAT
 
 	let game_list;
+	let players_count;
 
 	onMount(async () => {
 		$user = await $user.upd()
-		$game_socket.on('get-games-list', (data) => {
+		$game_socket.on('get-games-list', (data, pc) => {
 			game_list = data;
+			players_count = pc;
 		});
 	});
+
+	let log;
 </script>
 
 <main>
-
     <Header/>
-    <Statistics game_list="{game_list}"/>
+
+    <Statistics game_list="{game_list}" players_count="{players_count}"/>
 
     <div class="h-100 d-flex align-items-center justify-content-center mt-5">
         {#if !$user.isLogged}

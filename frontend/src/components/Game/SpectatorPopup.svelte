@@ -5,22 +5,18 @@
 
 	const {open} = getContext('simple-modal');
 
-	export let id1: string;
-	export let id2: string;
+	export let login: string;
 	const run = () => {
 		open(Spectator, {}, {
 			styleWindow: {
 				width: '100%'
 			}
 		});
-		spectate(id1, id2)
+		spectate(login);
 	};
 
-	async function spectate(id1: string, id2: string) {
-		$game_socket.emit('spectate', {
-			id1: id1,
-			id2: id2
-		});
+	async function spectate(login: string) {
+		$game_socket.emit('spectate', login);
 	}
 
 </script>

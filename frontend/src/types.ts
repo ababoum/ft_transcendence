@@ -1,4 +1,6 @@
 import {get_current_user_data} from "./stores/requests";
+import {game_socket, login, user} from "./stores/store";
+import {get} from "svelte/store";
 
 export class loginBase {
 
@@ -22,7 +24,7 @@ export class User {
 	nickname: string;
 	isLogged: boolean;
 
-	public async upd(){
+	public async upd() {
 		const resp: any = await get_current_user_data();
 		let nu: User = new User();
 		if (resp.ok) {
@@ -34,5 +36,14 @@ export class User {
 		} else
 			nu.isLogged = false;
 		return nu;
+	}
+
+	toJSON() {
+		return {
+			is_logged: this.isLogged,
+			id: this.id,
+			login: this.login,
+			nickname: this.nickname,
+		}
 	}
 }

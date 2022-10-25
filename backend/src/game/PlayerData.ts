@@ -1,24 +1,14 @@
-import {Socket} from "socket.io";
 import {Game} from "./Game";
 
-export class Player {
-
+export class PlayerData {
     private				_x: number;
     private				_y: number;
-    private				_score: number;
-    readonly _id: number;
-	private readonly	_nickname: string;
-	private readonly _login: string;
-    private readonly	_socket: Socket;
-	private _is_ready: boolean;
+	private 			_score: number;
+	private 			_is_ready: boolean;
 
-    constructor(player_socket: Socket, profile: any) {
+    constructor() {
         this._score = 0;
-        this._socket = player_socket;
-		this._id = profile.id;
-		this._nickname = profile.nickname;
 		this._is_ready = false;
-		this._login = profile.login;
     }
 
 	public getPaddleTop(): number {
@@ -47,11 +37,6 @@ export class Player {
 			this.y -= 3.5;
 	}
 
-
-    get socket(): Socket {
-        return this._socket;
-    }
-
     get x(): number {
         return this._x;
     }
@@ -76,26 +61,11 @@ export class Player {
         this._score = value;
     }
 
-
-	get nickname(): string {
-		return this._nickname;
-	}
-
-
 	get is_ready(): boolean {
 		return this._is_ready;
 	}
 
 	set is_ready(value: boolean) {
 		this._is_ready = value;
-	}
-
-	get id(): number {
-		return this._id;
-	}
-
-
-	get login(): string {
-		return this._login;
 	}
 }

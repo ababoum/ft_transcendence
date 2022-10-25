@@ -5,6 +5,8 @@
 	import { get_full_profile } from "../stores/requests";
 	import { user } from "../stores/store";
 	import ProfileAbout from "../components/Profile/ProfileAbout.svelte";
+	import {Modal} from "svelte-simple-modal";
+	import InvitationButton from "../components/Game/Invitations/InvitationButton.svelte";
 
 	// retrieve current user info
 
@@ -17,9 +19,16 @@
 			full_profile = data;
 		});
 	});
+	let log;
 </script>
 
 <Header />
+
+<input type="text" id="typeTextX" class="form-control form-control-lg"
+	   required bind:value={log}/>
+<Modal>
+	<InvitationButton login="{log}"/>
+</Modal>
 
 {#if full_profile === undefined}
 	<div class="profile-container">

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import {PROFILE_PAGE, GAME_PAGE, LOBBY_PAGE, LOGIN_PAGE, CHATROOM_PAGE, user} from "../stores/store";
+	import {PROFILE_PAGE, LOBBY_PAGE, LOGIN_PAGE, CHATROOM_PAGE, user} from "../stores/store";
 	import {onMount} from "svelte";
-	import {link, push} from "svelte-spa-router";
+	import {link} from "svelte-spa-router";
 	import {logout} from "../stores/auth";
 
 	onMount(async ()=> $user = await $user.upd());

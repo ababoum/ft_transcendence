@@ -1,8 +1,9 @@
 <script lang="ts">
 	export let game_list;
+	export let players_count;
 
 	$: games_online = game_list === undefined ? 0 : game_list.games_online;
-	$: players_online = game_list === undefined ? 0 : game_list.players_online;
+	$: players_online = players_count === undefined ? 0 : players_count.players_online;
 	$: players_in_queue = game_list === undefined ? 0 : game_list.players_in_queue;
 </script>
 

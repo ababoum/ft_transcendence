@@ -49,7 +49,7 @@
                             <td class="align-middle">{game.leftPlayer.score}</td>
                             <td class="align-middle">
                                 <Modal>
-                                    <SpectatorPopup id1="{game.leftPlayer.id}" id2="{game.rightPlayer.id}"/>
+                                    <SpectatorPopup login="{game.leftPlayer.login}"/>
                                 </Modal>
                             </td>
                             <td class="align-middle">{game.rightPlayer.score}</td>

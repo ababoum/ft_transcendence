@@ -1,5 +1,4 @@
-import {Player} from "./Player";
-import {Socket} from "socket.io";
+import {SiteUser} from "./SiteUser";
 
 export class Game {
 	/*** CONSTANTS ***/
@@ -10,8 +9,9 @@ export class Game {
 	public static readonly MAX_SCORE: number = 42;
 
 	/*** VARS ***/
-	private _leftPlayer: Player;
-	private _rightPlayer: Player;
+	private readonly _leftPlayer: SiteUser;
+	private readonly _rightPlayer: SiteUser;
+
 	private ball = new class {
 		public x: number;
 		public y: number;
@@ -44,22 +44,24 @@ export class Game {
 		}
 	};
 
-	constructor(player1: Player, player2: Player) {
+	constructor(player1: SiteUser, player2: SiteUser) {
 		this._leftPlayer = player1;
 		this._rightPlayer = player2;
+		this.leftPlayer.is_playing = true;
+		this.rightPlayer.is_playing = true;
 
-		this._leftPlayer.x = 0;
-		this._leftPlayer.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
-		this._rightPlayer.x = Game.FIELD_WIDTH - Game.PADDLE_WIDTH;
-		this._rightPlayer.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
+		this._leftPlayer.gameData.x = 0;
+		this._leftPlayer.gameData.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
+		this._rightPlayer.gameData.x = Game.FIELD_WIDTH - Game.PADDLE_WIDTH;
+		this._rightPlayer.gameData.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
 		this.ball.x = Game.FIELD_WIDTH / 2;
 		this.ball.y = Game.FIELD_HEIGHT / 2;
 		this.ball.reset();
 	}
 
-	private collision(player: Player): boolean {
-		return (this.ball.getRight() > player.getPaddleLeft() && this.ball.getTop() < player.getPaddleBottom() &&
-			this.ball.getLeft() < player.getPaddleRight() && this.ball.getBottom() > player.getPaddleTop());
+	private collision(player: SiteUser): boolean {
+		return (this.ball.getRight() > player.gameData.getPaddleLeft() && this.ball.getTop() < player.gameData.getPaddleBottom() &&
+			this.ball.getLeft() < player.gameData.getPaddleRight() && this.ball.getBottom() > player.gameData.getPaddleTop());
 	}
 
 	public update(): void {
@@ -71,10 +73,10 @@ export class Game {
 			this.ball.velocityY = -this.ball.velocityY;
 		}
 		//collision check
-		let player: Player = this.ball.x < Game.FIELD_WIDTH / 2 ? this._leftPlayer : this._rightPlayer;
+		let player: SiteUser = this.ball.x < Game.FIELD_WIDTH / 2 ? this._leftPlayer : this._rightPlayer;
 		if (this.collision(player)) {
 			//if collision, need check where exactly ball touched paddle to change ball direction
-			let collidePoint = (this.ball.y - (player.y + Game.PADDLE_HEIGHT / 2));
+			let collidePoint = (this.ball.y - (player.gameData.y + Game.PADDLE_HEIGHT / 2));
 			collidePoint = collidePoint / (Game.PADDLE_HEIGHT / 2);
 			let angeRad = (Math.PI / 4) * collidePoint;
 			let direction = (this.ball.x < Game.FIELD_WIDTH / 2) ? 1 : -1;
@@ -84,88 +86,60 @@ export class Game {
 			this.ball.speed += 0.1;
 		}
 		if (this.ball.x - this.ball.radius < 0) {
-			this.rightPlayer.score++;
+			this.rightPlayer.gameData.score++;
 			this.ball.reset();
 		} else if (this.ball.x + this.ball.radius > Game.FIELD_WIDTH) {
-			this.leftPlayer.score++;
+			this.leftPlayer.gameData.score++;
 			this.ball.reset();
 		}
 	}
 
-	public movePaddle(socket: Socket, direction: string): boolean {
-		if (this._leftPlayer.socket == socket) {
+	public movePaddle(siteUser: SiteUser, direction: string): boolean {
+		if (this._leftPlayer.nickname == siteUser.nickname) {
 			direction == "up" ?
-				this._leftPlayer.move_up(0) :
-				this._leftPlayer.move_down(Game.FIELD_HEIGHT - Game.PADDLE_HEIGHT);
+				this._leftPlayer.gameData.move_up(0) :
+				this._leftPlayer.gameData.move_down(Game.FIELD_HEIGHT - Game.PADDLE_HEIGHT);
 			return true;
-		} else if (this._rightPlayer.socket == socket) {
+		} else if (this._rightPlayer.nickname == siteUser.nickname) {
 			direction == "up" ?
-				this._rightPlayer.move_up(0) :
-				this._rightPlayer.move_down(Game.FIELD_HEIGHT - Game.PADDLE_HEIGHT);
+				this._rightPlayer.gameData.move_up(0) :
+				this._rightPlayer.gameData.move_down(Game.FIELD_HEIGHT - Game.PADDLE_HEIGHT);
 			return true;
 		}
 		return false;
 	}
 
-	public endGameByLeaverSocket(socket: Socket): boolean {
-		if (socket == this._leftPlayer.socket) {
-			if (this._leftPlayer.score != Game.MAX_SCORE)
-				this._rightPlayer.score = Game.MAX_SCORE;
-			console.log("leaver has been deleted from the game");
-			return true;
-		} else if (socket == this._rightPlayer.socket) {
-			if (this._rightPlayer.score != Game.MAX_SCORE)
-				this._leftPlayer.score = Game.MAX_SCORE;
-			console.log("leaver has been deleted from the game");
-			return true;
-		}
-		return false;
-	}
-
-	public pressReady(socket: Socket): boolean {
-		if (socket == this._leftPlayer.socket) {
-			this._leftPlayer.is_ready = true;
-			return true;
-		} else if (socket == this.rightPlayer.socket) {
-			this.rightPlayer.is_ready = true;
-			return true;
-		}
-		return false;
-	}
-	
 	public isFinished(): boolean {
-		if (this.rightPlayer.socket.disconnected)
-			this.leftPlayer.score = Game.MAX_SCORE;
-		if (this.leftPlayer.socket.disconnected)
-			this.rightPlayer.score = Game.MAX_SCORE;
-		return (this.leftPlayer.score == Game.MAX_SCORE || this._rightPlayer.score == Game.MAX_SCORE);
+		if (this.rightPlayer.disconnected || this.rightPlayer.is_leaved)
+			this.leftPlayer.gameData.score = Game.MAX_SCORE;
+		else if (this.leftPlayer.disconnected || this.leftPlayer.is_leaved)
+			this.rightPlayer.gameData.score = Game.MAX_SCORE;
+		return (this.leftPlayer.gameData.score == Game.MAX_SCORE || this._rightPlayer.gameData.score == Game.MAX_SCORE);
 	}
 
-	get leftPlayer(): Player {
+	get leftPlayer(): SiteUser {
 		return this._leftPlayer;
 	}
 
-	get rightPlayer(): Player {
+	get rightPlayer(): SiteUser {
 		return this._rightPlayer;
 	}
 
 	public toJSON() {
 		return {
 			leftPlayer: {
-				x: this._leftPlayer.x,
-				y: this._leftPlayer.y,
-				score: this._leftPlayer.score,
-				id: this.leftPlayer._id,
+				x: this._leftPlayer.gameData.x,
+				y: this._leftPlayer.gameData.y,
+				score: this._leftPlayer.gameData.score,
 				nickname: this._leftPlayer.nickname,
 				login: this._leftPlayer.login,
 				score_x: Game.FIELD_WIDTH / 4,
 				score_y: Game.FIELD_HEIGHT / 5
 			},
 			rightPlayer: {
-				x: this._rightPlayer.x,
-				y: this._rightPlayer.y,
-				score: this._rightPlayer.score,
-				id: this._rightPlayer._id,
+				x: this._rightPlayer.gameData.x,
+				y: this._rightPlayer.gameData.y,
+				score: this._rightPlayer.gameData.score,
 				nickname: this._rightPlayer.nickname,
 				login: this._rightPlayer.login,
 				score_x: 3 * Game.FIELD_WIDTH / 4,
@@ -184,7 +158,7 @@ export class Game {
 				y: this.ball.y,
 				radius: this.ball.radius
 			},
-			winner: (this.leftPlayer.score == Game.MAX_SCORE ? this.leftPlayer.nickname : this.rightPlayer.nickname)
+			winner: (this.leftPlayer.gameData.score == Game.MAX_SCORE ? this.leftPlayer.nickname : this.rightPlayer.nickname)
 		}
 	}
 }

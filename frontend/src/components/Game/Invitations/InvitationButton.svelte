@@ -1,0 +1,11 @@
+<script lang="ts">
+	import {game_socket} from "../../../stores/store";
+
+	export let login;
+
+	async function findGame() {
+		$game_socket.emit('game-invite', login);
+	}
+</script>
+
+<button on:click={findGame}>Invite</button>
