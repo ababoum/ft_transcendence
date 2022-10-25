@@ -1,7 +1,7 @@
 import { get, readable, writable } from "svelte/store";
 import { io } from "socket.io-client";
 import { User } from "../types";
-import {getCookie} from "./auth";
+import { getCookie } from "./auth";
 
 export const PROFILE_PAGE = readable("/profile");
 export const LOBBY_PAGE = readable("/");
