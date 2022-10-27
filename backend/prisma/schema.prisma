@@ -23,6 +23,8 @@ model User {
     // authentication
     isTwoFAEnabled    Boolean                 @default(false)
     TwoFA_secret      String?
+    // 42 login/id
+    FT_id             Int?
     // friendships
     userFriends       Friend[]                @relation(name: "user")
     friendUserFriends Friend[]                @relation(name: "friend_user")
