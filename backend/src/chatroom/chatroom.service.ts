@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChatRoom, User, UsersMutedinChatRooms, Prisma } from '@prisma/client';
 import { CreateChatRoomDto } from './dto/create-chatroom.dto';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
-import { networkInterfaces } from 'os';
 import { MessageDto } from './dto/message.dto';
 
 @Injectable()
@@ -40,7 +39,7 @@ export class ChatroomService {
 	  }
 
 	async createChatRoom(userlogin: string, CreateChatRoomDto: CreateChatRoomDto): Promise<ChatRoom> {
-		return await this.prisma.chatRoom.create({
+		const res = await this.prisma.chatRoom.create({
 			data: {
 				name: CreateChatRoomDto.name,
 				owner: {connect: {login: userlogin}},
@@ -55,6 +54,7 @@ export class ChatroomService {
 		 		muteList: {select: {user: {select: {login: true, nickname: true}}, mutedUntil: true}}
 			}
 		});
+		return res;
 	}
 
 // PARTICIPANTS //
@@ -239,10 +239,11 @@ export class ChatroomService {
 
 
 	async getMessages(chatroomid: number) {
-		return await this.prisma.chatRoom.findUniqueOrThrow({
+		const res =  await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
 			select: { messages: { select: { author: {select: {login: true, nickname: true}}, creationDate: true, content: true } } },
 		})
+		return res.messages
 	}
 
 	async postMessage(userlogin: string, chatroomid: number, MessageDto: MessageDto) {
@@ -256,7 +257,8 @@ export class ChatroomService {
 					authorLogin: userlogin,
 					content: MessageDto.content,
 					chatRoomId: chatroomid
-				}
+				},
+				select: { author: {select: {login: true, nickname: true}}, creationDate: true, content: true },
 			})
 		}
 		throw new HttpException("You are not participant of this chatroom", 401)

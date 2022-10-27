@@ -6,6 +6,7 @@ import { getCookie } from "./auth";
 export const PROFILE_PAGE = readable("/profile");
 export const LOBBY_PAGE = readable("/");
 export const LOGIN_PAGE = readable("/log");
+export const CHATROOM_PAGE = readable("/chatroom");
 
 export const FRONTEND_URL = readable('http://localhost:8080');
 export const BACKEND_URL = readable('http://localhost:3000');
@@ -24,9 +25,9 @@ export const game_socket = writable(io(get(GAME_URL), {
 	}
 }));
 
-export const CHATROOM_PAGE = readable("/chatroom");
-export const CHATROOM_URL = readable('http://localhost:5678/chatroom');
-export const chatroom_socket = writable(io(get(CHATROOM_URL)));
+
+export const chatroom_socket = writable(io('http://localhost:5678/chatroom'));
+export const GET_CHATROOMS_URL = readable('http://localhost:3000/chatrooms');
 
 
 // TRY TO USE THOSE, WE CAN TEST HOW IT WORKS OUT
@@ -40,5 +41,4 @@ export const avatar_url = writable(localStorage.getItem("avatar_url") || "static
 avatar_url.subscribe((val) => localStorage.setItem("avatar_url", val));
 
 
-export const GET_CHATROOMS_URL = readable('http://localhost:3000/chatrooms');
-export const chatRooms = writable([])
+

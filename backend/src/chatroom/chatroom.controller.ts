@@ -26,6 +26,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/auth.guards';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 import { MessageDto } from './dto/message.dto';
+import { ChatRoomGateway } from './chatroom.gateway';
 
 @Controller('chatrooms')
 @ApiTags('chatrooms')
@@ -33,7 +34,8 @@ import { MessageDto } from './dto/message.dto';
 @ApiBearerAuth()
 export class ChatroomController {
 
-	constructor(private readonly ChatroomService: ChatroomService) { }
+	constructor(private readonly ChatroomService: ChatroomService,
+		private readonly ChatroomGateway: ChatRoomGateway) { }
 
 	@Get()
 	async findAllChatRooms() {
@@ -49,7 +51,9 @@ export class ChatroomController {
  	@Post()
 	async createChatRoom(@Request() req, @Body() CreateChatRoomDto: CreateChatRoomDto) {
 		console.log(req.user)
-		return await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
+		const res = await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
+		this.ChatroomGateway.createChatroom(res)
+		return res;
 	}
 
 // PARTICIPANTS //
@@ -60,13 +64,16 @@ export class ChatroomController {
 
 	@Patch(':id/join')
 	async join(@Request() req, @Param('id') id: string) {
-		return this.ChatroomService.joinChatRoom(req.user.login, +id);
+		const res = this.ChatroomService.joinChatRoom(req.user.login, +id);
+		this.ChatroomGateway.joinChatroom(req.user, Number(id))
+		return res;
 	}
 
 	@Patch(':id/leave')
 	async leave(@Request() req, @Param('id') id: string) {
-		return this.ChatroomService.leaveChatRoom(req.user.login, +id);
-	}
+		const res = this.ChatroomService.leaveChatRoom(req.user.login, +id);
+		this.ChatroomGateway.leaveChatroom(req.user, Number(id))
+		return res;	}
 
 // ADMIN //
 	@Get(':id/adminList')
@@ -118,12 +125,23 @@ export class ChatroomController {
 
 // MESSAGES //
 	@Get(':id/messages')
-	async getMessages(@Param('id') id: string) {
-		return this.ChatroomService.getMessages(+id);
+	async getMessages(@Request() req, @Param('id') id: string) {
+		const res = await this.ChatroomService.getMessages(+id);
+		this.ChatroomGateway.enterChatroom(req.user, id)
+		return res
 	}
 
 	@Post(':id/messages')
 	async postMessage(@Request() req, @Param('id') id: string, @Body() MessageDto: MessageDto) {
-		return this.ChatroomService.postMessage(req.user.login, +id, MessageDto);
+		const res = await this.ChatroomService.postMessage(req.user.login, +id, MessageDto);
+		await this.ChatroomGateway.postMessage(id, res)
+		return res;
+	}
+
+// ROOMS //
+	@Patch(':id/exit')
+	async exitRoom(@Request() req, @Param('id') id: string) {
+		const res = await this.ChatroomGateway.exitChatroom(req.user, id)
+		return res
 	}
 }
