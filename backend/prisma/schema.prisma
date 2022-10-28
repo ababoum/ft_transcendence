@@ -56,29 +56,29 @@ model Friend {
 }
 
 model ChatRoom {
-    id           Int                     @id @default(autoincrement())
-    name         String
-    creationDate DateTime                @default(now())
-    mode         chatRoomType            @default(PUBLIC)
-    password     String?
-    owner        User                    @relation(fields: [ownerlogin], references: [login], name: "OwnerTable")
-    ownerlogin   String
-    admin        User[]                  @relation(name: "AdminTable")
-    participants User[]                  @relation(name: "ParticipantTable")
-    banList      User[]                  @relation(name: "BanTable")
-    muteList     UsersMutedinChatRooms[]
-    messages     Messages[]
+    id          	Int                     @id @default(autoincrement())
+    name         	String
+    creationDate 	DateTime                @default(now())
+    mode         	chatRoomType            @default(PUBLIC)
+    password     	String?
+    owner        	User                    @relation(fields: [ownerNickname], references: [nickname], name: "OwnerTable")
+    ownerNickname   String
+    admin        	User[]                  @relation(name: "AdminTable")
+    participants 	User[]                  @relation(name: "ParticipantTable")
+    banList      	User[]                  @relation(name: "BanTable")
+    muteList     	UsersMutedinChatRooms[]
+    messages     	Messages[]
 }
 
 model UsersMutedinChatRooms {
     chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
     chatRoomId Int
-    user       User     @relation(fields: [userLogin], references: [login])
-    userLogin  String
+    user       User     @relation(fields: [nickname], references: [nickname])
+    nickname  String
     mutedAt    DateTime @default(now())
     mutedUntil DateTime
 
-    @@id([chatRoomId, userLogin])
+    @@id([chatRoomId, nickname])
 }
 
 model Messages {

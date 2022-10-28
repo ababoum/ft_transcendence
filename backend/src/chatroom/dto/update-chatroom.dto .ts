@@ -5,7 +5,7 @@ import { CreateChatRoomDto } from './create-chatroom.dto';
 export class UpdateChatRoomDto extends PartialType(CreateChatRoomDto) {
 	@IsOptional()
 	@ApiProperty()
-	login: string;
+	nickname: string;
 
 	@IsOptional()
 	@IsNumber()

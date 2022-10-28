@@ -52,7 +52,7 @@ export class ChatroomController {
 	async createChatRoom(@Request() req, @Body() CreateChatRoomDto: CreateChatRoomDto) {
 		console.log(req.user)
 		const res = await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
-		this.ChatroomGateway.createChatroom(res)
+		await this.ChatroomGateway.createChatroom(res)
 		return res;
 	}
 
@@ -64,15 +64,15 @@ export class ChatroomController {
 
 	@Patch(':id/join')
 	async join(@Request() req, @Param('id') id: string) {
-		const res = this.ChatroomService.joinChatRoom(req.user.login, +id);
-		this.ChatroomGateway.joinChatroom(req.user, Number(id))
+		const res = await this.ChatroomService.joinChatRoom(req.user.login, +id);
+		await this.ChatroomGateway.joinChatroom(req.user, Number(id), res)
 		return res;
 	}
 
 	@Patch(':id/leave')
 	async leave(@Request() req, @Param('id') id: string) {
-		const res = this.ChatroomService.leaveChatRoom(req.user.login, +id);
-		this.ChatroomGateway.leaveChatroom(req.user, Number(id))
+		const res = await this.ChatroomService.leaveChatRoom(req.user.login, +id);
+		await this.ChatroomGateway.leaveChatroom(req.user, Number(id), res)
 		return res;	}
 
 // ADMIN //
@@ -83,12 +83,16 @@ export class ChatroomController {
 
 	@Patch(':id/adminUser')
 	async adminUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
-		return this.ChatroomService.adminUser(req.user.login, +id, UpdateChatRoomDto);
+		const res = await this.ChatroomService.adminUser(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.adminUser(Number(id), UpdateChatRoomDto.nickname, res)
+		return res
 	}
 
 	@Patch(':id/unadminUser')
 	async unadminUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
-		return this.ChatroomService.unadminUser(req.user.login, +id, UpdateChatRoomDto);
+		const res = await this.ChatroomService.unadminUser(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.unadminUser(Number(id), UpdateChatRoomDto.nickname, res)
+		return res
 	}
 
 // BAN //
@@ -99,12 +103,16 @@ export class ChatroomController {
 
 	@Patch(':id/banUser')
 	async banUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
-		return this.ChatroomService.banUser(req.user.login, +id, UpdateChatRoomDto);
+		const res = await this.ChatroomService.banUser(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.banUser(Number(id), UpdateChatRoomDto.nickname, res)
+		return res;
 	}
 
 	@Patch(':id/unbanUser')
 	async unbanUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
-		return this.ChatroomService.unbanUser(req.user.login, +id, UpdateChatRoomDto);
+		const res = await this.ChatroomService.unbanUser(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.unbanUser(Number(id), UpdateChatRoomDto.nickname, res)
+		return res;
 	}
 
 // MUTE //
@@ -115,19 +123,24 @@ export class ChatroomController {
 
 	@Patch(':id/muteUser')
 	async muteUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
-		return this.ChatroomService.muteUser(req.user.login, +id, UpdateChatRoomDto);
+		const res = await this.ChatroomService.muteUser(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.muteUser(Number(id), UpdateChatRoomDto.nickname, res)
+		return res
 	}
 
 	@Patch(':id/unmuteUser')
 	async unmuteUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
-		return this.ChatroomService.unmuteUser(req.user.login, +id, UpdateChatRoomDto);
+		console.log(UpdateChatRoomDto)
+		const res = await this.ChatroomService.unmuteUser(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.unmuteUser(Number(id), UpdateChatRoomDto.nickname, res)
+		return res
 	}
 
 // MESSAGES //
 	@Get(':id/messages')
 	async getMessages(@Request() req, @Param('id') id: string) {
 		const res = await this.ChatroomService.getMessages(+id);
-		this.ChatroomGateway.enterChatroom(req.user, id)
+		await this.ChatroomGateway.enterChatroom(req.user, id)
 		return res
 	}
 

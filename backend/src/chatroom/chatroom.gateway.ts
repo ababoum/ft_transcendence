@@ -41,6 +41,8 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 			client.emit('chatrooms-list', this.chatRoomsList);
 			const user = await this.UserService.user({login: verified.username})
 			this.users.push({connectionId: client, login: verified.username, nickname: user.nickname})
+			client.emit('chatrooms-list', this.chatRoomsList)
+			//console.log(this.users)
 		}
 		catch {
 			this.logger.log("Disconnection because of bad token --- " + client.id);
@@ -61,21 +63,24 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
 
-	async joinChatroom(user, chatRoomId: number) {
+	async joinChatroom(user, chatRoomId: number, res) {
 		//Update this.chatRoomsList to add this user as participant
-		const chatRoomIndex = this.chatRoomsList.findIndex(x => x.id === chatRoomId)
-		this.chatRoomsList[chatRoomIndex].participants.push({login: user.login, nickname: user.nickname})
-		
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].participants = res.participants
+				
+		console.log([chatRoomIndex])
+
 		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
 
-	async leaveChatroom(user, chatRoomId: number) {
+	async leaveChatroom(user, chatRoomId: number, res) {
 		//Update this.chatRoomsList to remove this user as participant
-		const chatRoomIndex = this.chatRoomsList.findIndex(x => x.id === chatRoomId)
-		const userIndex = this.chatRoomsList[chatRoomIndex].participants.findIndex(x => x.login === user.login)
-		this.chatRoomsList[chatRoomIndex].participants.splice(userIndex, 1)
-		
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].participants = res
+
+		console.log([chatRoomIndex])
+
 		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
@@ -88,11 +93,83 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 	}
 
 	async exitChatroom(user, chatRoomId: string) {
-		console.log(user)
 		const client = await this.users.find(x => x.login === user.login).connectionId
 
 		// Join client to the room
 		await client.leave(chatRoomId);
+	}
+
+	async adminUser(chatRoomId: number, nickname, res) {
+		console.log("adminUser " + nickname + " from room " + chatRoomId)
+		console.log(res)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].admin = await res.admin
+		this.chatRoomsList[chatRoomIndex].participants = await res.participants
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async unadminUser(chatRoomId: number, nickname, res) {
+		console.log("unadminUser " + nickname + " from room " + chatRoomId)
+		console.log(res)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].admin = await res.admin
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async banUser(chatRoomId: number, nickname, res) {
+		console.log("banUser " + nickname + " from room " + chatRoomId)
+		console.log(res)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].banList = await res.banList
+		this.chatRoomsList[chatRoomIndex].participants = await res.participants
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+
+		const client = await this.users.find(x => x.nickname === nickname)
+		if (client){
+			await client.connectionId.leave(String(chatRoomId))
+			client.connectionId.emit('you-have-been-banned', chatRoomId)
+		}
+
+	}
+
+	async unbanUser(chatRoomId: number, nickname, res) {
+		console.log("unbanUser " + nickname + " from room " + chatRoomId)
+		console.log(res)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].banList = await res.banList
+
+		await this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async muteUser(chatRoomId: number, nickname, res) {
+		console.log("muteUser " + nickname + " from room " + chatRoomId)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		const alreadyMutedIndex = await this.chatRoomsList[chatRoomIndex].muteList.findIndex(x => x.user.nickname === res.nickname)
+		if (alreadyMutedIndex != -1)
+			this.chatRoomsList[chatRoomIndex].muteList[alreadyMutedIndex].mutedUntil = await res.mutedUntil
+		else
+			await this.chatRoomsList[chatRoomIndex].muteList.push({ user: {id: undefined, nickname: res.nickname}, mutedUntil: res.mutedUntil})
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async unmuteUser(chatRoomId: number, nickname, res) {
+		console.log("unmuteUser " + nickname + " from room " + chatRoomId)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		const alreadyMutedIndex = await this.chatRoomsList[chatRoomIndex].muteList.findIndex(x => x.user.nickname === res.nickname)
+		await this.chatRoomsList[chatRoomIndex].muteList.splice(alreadyMutedIndex, 1)
+		// this.chatRoomsList[chatRoomIndex].admin = await res.admin
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
 
 	async postMessage(chatRoomId, message) {

@@ -7,12 +7,14 @@
 	import {getCookie} from "../stores/auth";
     import { get } from "svelte/store";
     import { io } from "socket.io-client";
-    import { fix_and_destroy_block, xlink_attr } from "svelte/internal";
+    import { fix_and_destroy_block, identity, xlink_attr } from "svelte/internal";
 
 	let tmp: boolean;
-	let chatRoomsList = [];
+	let chatRoomsList = undefined;
 	let messagesList = [];
 	let activeChatRoomId;
+	let message, adminNickname, banNickname, muteNickname: string;
+	let muteDuration: number = 1
 
 	onMount(async () => { 
 		tmp = await is_authenticated();
@@ -20,7 +22,9 @@
 		await getChatRoomsList();
 
 		$chatroom_socket.on('chatrooms-list', (data) => {
+			console.log("Received chatrooms-list")
 			chatRoomsList = data;
+			console.log(chatRoomsList)
 		});
 
 		$chatroom_socket.on('message', (data) => {
@@ -28,13 +32,17 @@
 			messagesList = [...messagesList]
 			console.log("Received message: " + data.content)
 		})
+
+		$chatroom_socket.on('you-have-been-banned', (data) => {
+			console.log(data)
+			if (data = activeChatRoomId){
+				activeChatRoomId = undefined
+				messagesList = []
+			}
+		});
 	})
 
 	let chatrooms_test = [{id: 1, name: "Chatroom1"}, {id: 2, name: "Chatroom2"}]
-
-	let messages_test = [{nickname: "User1", content: "Hey !"}, 
-					{nickname: "User2", content: "How are you ?"}, 
-					{nickname: "User3", content: "Frontend sucks."}]
 
 	onDestroy(() => {
 	})
@@ -44,6 +52,7 @@
 			method: 'GET',
 			headers: {"Authorization": "Bearer " + getCookie("jwt")}
 		}).then(chatrooms => chatrooms.json())
+		console.log(chatRoomsList)
 	}
 
 	async function createChatRoom(name: string, mode?: string, password?: string){
@@ -62,7 +71,6 @@
 	async function joinChatRoom(chatRoomId: number){
 		console.log("In joinChatRoom " + chatRoomId)
 		
-
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/join', {
 			method: 'PATCH',
 			headers: {	
@@ -111,6 +119,102 @@
 		messagesList = res
 	}
 
+	async function banUser(chatRoomId: number, usernickname: string){
+		console.log("In banUser " + usernickname + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/banUser', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: usernickname})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
+	async function unbanUser(chatRoomId: number, usernickname: string){
+		console.log("In banUser " + usernickname + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/unbanUser', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: usernickname})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
+	async function adminUser(chatRoomId: number, usernickname: string){
+		console.log("In adminUser " + usernickname + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/adminUser', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: usernickname})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
+	async function unadminUser(chatRoomId: number, usernickname: string){
+		console.log("In unadminUser " + usernickname + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/unadminUser', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: usernickname})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
+	async function muteUser(chatRoomId: number, usernickname: string, duration: number){
+		console.log("In muteUser " + usernickname + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/muteUser', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: usernickname, duration: duration})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
+	async function unmuteUser(chatRoomId: number, usernickname: string){
+		console.log("In unmuteUser " + usernickname + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/unmuteUser', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: usernickname})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
 	async function postMessage(chatRoomId: number, message: string){
 		console.log("In postMessage " + chatRoomId + " - message: " + message)
 
@@ -140,23 +244,23 @@
           <div class="card-body">
 
             <div class="row">
+
               <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
 
                 <div class="p-3">
 					
-					
                   <div data-mdb-perfect-scrollbar="true" style="position: relative; height: 400px">
-					{#if chatRoomsList[0] }
+					{#if chatRoomsList !== undefined }
 					<ul class="list-unstyled mb-0">
-						{#each chatRoomsList as chatroom}
+						{#each chatRoomsList as chatroom (chatroom)}
 						  <li class="p-2 border-bottom">
 							<div class="pt-1">
-							  {#if chatroom.participants.find(x => x.login === $user.login) !== undefined}
+							  {#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
 							  <p>{chatroom.name} 
 								<button on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 								<button on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
 							  </p>
-							  {:else if chatroom.banList.find(x => x.login === $user.login)}
+							  {:else if chatroom.banList.find(x => x.nickname === $user.nickname) !== undefined}
 							  <p>{chatroom.name} <button>Banned</button> </p>
 							  {:else}
 							  <p>{chatroom.name} <button on:click={() => joinChatRoom(chatroom.id)}>Join</button> </p>
@@ -165,16 +269,6 @@
 						  </li>
 						{/each}
 						</ul>
-					{:else}
-	                    <ul class="list-unstyled mb-0">
-						{#each chatrooms_test as chatroom_test}
-	                      <li class="p-2 border-bottom">
-	                        <div class="pt-1">
-	                          <p>{chatroom_test.name} <button>Enter</button> </p>
-	                        </div>
-	                      </li>
-						{/each}
-	                    </ul>
 					{/if}
                   </div>
 				  <button class="create" on:click={() => createChatRoom("test")}>Create new room</button>
@@ -204,19 +298,41 @@
 		              </div>
 
 					  {/each}
-					  {#if activeChatRoomId != undefined}
-					  <button on:click={() => postMessage(activeChatRoomId, "test")}>Post</button>
-					  {/if}
 		            </div>
-
+					{#if activeChatRoomId != undefined}
 		            <div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-		              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
-		                alt="avatar 3" style="width: 40px; height: 100%;">
-		              <input type="text" class="form-control form-control-lg" id="exampleFormControlInput2"
-		                placeholder="Type message">
+		              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" style="width: 40px; height: 100%;">
+		              <input type="text" class="form-control form-control-lg" placeholder="Type message" bind:value={message}>
+					  <button on:click={() => postMessage(activeChatRoomId, message)}>Send</button>
 		            </div>
+					<div>
+						<ul>
+							{#if chatRoomsList[activeChatRoomId - 1].ownerNickname === $user.nickname}
+							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+								<input type="text" class="form-control" placeholder="nickname" bind:value={adminNickname}>
+								<button on:click={() => adminUser(activeChatRoomId, adminNickname)}>Admin</button>
+								<button on:click={() => unadminUser(activeChatRoomId, adminNickname)}>Unadmin</button>
+							</div>
+							{/if}
+							{#if chatRoomsList[activeChatRoomId - 1].admin.find(x => x.nickname === $user.nickname) !== undefined}
+							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+								<input type="text" class="form-control" placeholder="nickname" bind:value={banNickname}>
+								<button on:click={() => banUser(activeChatRoomId, banNickname)}>Ban</button>
+								<button on:click={() => unbanUser(activeChatRoomId, banNickname)}>Unban</button>
+							</div>
+							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+								<input type="text" class="form-control" placeholder="nickname" bind:value={muteNickname}>
+								<input type="range" min="1" max="1440" bind:value={muteDuration}>
+								<button on:click={() => muteUser(activeChatRoomId, muteNickname, muteDuration)}>Mute {muteDuration}m </button>
+								<button on:click={() => unmuteUser(activeChatRoomId, muteNickname)}>Unmute</button>
+							</div>
+							{/if}
+						</ul>
+					</div>
+					{/if}
 
 		          </div>
+
             </div>
 
           </div>
