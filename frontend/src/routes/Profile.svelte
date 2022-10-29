@@ -10,7 +10,7 @@
 
 	// retrieve current user info
 
-	let full_profile = undefined;
+	$: full_profile = undefined;
 	const loading_imageSrc = "static/loading_icon.gif";
 
 	onMount(async () => {
@@ -41,7 +41,7 @@
 {:else}
 	<div class="profile-container">
 		<ProfileImage profile_data={full_profile} />
-		<ProfileAbout {...full_profile} />
+		<ProfileAbout profile_data={full_profile} />
 	</div>
 {/if}
 

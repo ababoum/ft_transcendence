@@ -116,17 +116,24 @@ export class UserController {
 		@Request() req,
 		@Body() body: UpdatePasswordDto) {
 
-		const user = await this.authService.validateUser(req.user.login, body.old_password);
-		if (!user) {
-			throw new HttpException("Old password is incorrect. Try again!", 401);
+		const usr = await this.userService.user({ login: req.user.login });
+		// check old password only if it was not random (42-logged in user)
+		if (!usr.random_password) {
+			const valid_user = await this.authService.validateUser(req.user.login, body.old_password);
+			if (!valid_user) {
+				throw new HttpException("Old password is incorrect. Try again!", 401);
+			}
 		}
-	
+
 		const update = await this.userService.updateUser(
 			{
 				where: { login: req.user.login },
-				data: { password: body.new_password }
+				data: {
+					password: body.new_password,
+					random_password: false
+				}
 			}
-		)
+		);
 	}
 
 

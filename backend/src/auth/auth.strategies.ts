@@ -1,13 +1,18 @@
-import { Strategy as local_Strategy } from 'passport-local';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+// General imports
 import { AuthService } from './auth.service';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
 
+// Local (user/pwd)
+import { Strategy as local_Strategy } from 'passport-local';
+
+// JWT strategy
 import { ExtractJwt, Strategy as jwt_Strategy } from 'passport-jwt';
 import { jwtConstants } from './auth.constants';
 
-import { Strategy as ft_Strategy, Profile, VerifyCallback } from 'passport-42';
-import { TokenPayload } from './auth.interfaces';
+// 42 OAuth strategy
+import { Strategy as ft_Strategy } from 'passport-42';
+import { ft_profile, TokenPayload } from './auth.interfaces';
 import { UserService } from '../user/user.service';
 import { Request } from 'express';
 
@@ -52,30 +57,26 @@ export class JwtStrategy extends PassportStrategy(jwt_Strategy) {
 
 ///////////////////// 42 OAUTH STRATEGY /////////////////////
 
-@Injectable()
+// @Injectable()
 export class FtStrategy extends PassportStrategy(ft_Strategy, '42') {
-	constructor() {
+	constructor(private readonly authService: AuthService) {
 		super({
 			clientID: process.env.FORTYTWO_APP_ID,
 			clientSecret: process.env.FORTYTWO_APP_SECRET,
-			callbackURL: '/auth/42/return',
-			passReqToCallback: true,
+			callbackURL: process.env.CALLBACK_URI,
+			profileFields: {
+				id: 'id',
+				username: 'login',
+				email: 'email',
+			},
 		});
 	}
 
-	async validate(
-		request: { session: { accessToken: string } },
-		accessToken: string,
-		refreshToken: string,
-		profile: Profile,
-		cb: VerifyCallback,
-	): Promise<any> {
-		request.session.accessToken = accessToken;
-		console.log('accessToken', accessToken, 'refreshToken', refreshToken); // TO DELETE
-		console.log(profile); // TO DELETE
-		return cb(null, profile);
+	validate(accessToken: string, refreshToken: string, profile: ft_profile) {
+		return profile;
 	}
 }
+
 
 ///////////////////// TWO FA STRATEGY /////////////////////
 

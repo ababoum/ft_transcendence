@@ -1,10 +1,9 @@
-import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping, Body } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping, Body, Res, Param, Query, HttpStatus } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import {
 	JwtAuthGuard,
 	LocalAuthGuard,
-	FT_OAuthGuard,
-	AuthenticatedGuard
+	FT_OAuthGuard
 } from './auth.guards';
 import { RequestWithUser } from './auth.interfaces';
 import { ApiBody, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -21,15 +20,13 @@ export class AuthController {
 	) { }
 
 	@UseGuards(LocalAuthGuard)
-	@ApiBody({type: LoginDto})
+	@ApiBody({ type: LoginDto })
 	@Post('login')
 	async login(@Body() body: LoginDto, @Request() req: RequestWithUser) {
 
-		const {access_token} = await this.authService.login(req.user);
-
+		const { access_token } = await this.authService.login(req.user);
 		req.res.setHeader('Set-Cookie', [access_token]);
-
-		return {access_token: access_token};
+		return { access_token: access_token };
 
 	}
 
@@ -48,26 +45,27 @@ export class AuthController {
 	/////////////////////// 42 AUTHENTICATION ///////////////////////
 
 
+	@Get('42')
 	@UseGuards(FT_OAuthGuard)
-	@Get('42/return')
-	@Redirect('/')
-	ftAuthCallback() {
-		return;
-	}
-
-	/////////////////////// 42 PROFILE ACCESS ///////////////////////
+	ft_auth() { }
 
 
-	@Get('42/login')
+	@Get('42/redirect')
 	@UseGuards(FT_OAuthGuard)
-	logIn() {
-		return;
-	}
+	async ft_authRedirect(@Req() req, @Res() res) {
 
-	@Get('42/profile')
-	@UseGuards(AuthenticatedGuard)
-	profile(@Request() req) {
-		return req.user;
+		const usr = await this.userService.userFindOrCreate(
+			req.user.username,
+			req.user.email,
+			req.user.id);
+
+		// emit a token after successful login
+		const { access_token } = await this.authService.login({
+			login: usr.login,
+			sub: usr.id
+		});
+		res.cookie('jwt', access_token);
+		res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
 	}
 
 

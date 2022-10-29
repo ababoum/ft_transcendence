@@ -10,6 +10,13 @@ export class UserService {
 
 	/////////////////////// ACCESS USER INFO ////////////////////////
 
+	// For 42 users
+	private generate_random_password(): string {
+		const password =
+			Math.random().toString(36).slice(2, 15) +
+			Math.random().toString(36).slice(2, 15);
+		return password;
+	}
 
 	async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput)
 		: Promise<User | null> {
@@ -20,6 +27,36 @@ export class UserService {
 		if (!usr)
 			throw new HttpException("User not found", 404);
 		return usr;
+	}
+
+	async userFindOrCreate(login: string, email: string, FT_id: number)
+	{
+		const usr = await this.prisma.user.findUnique({
+			where: {
+				login: login
+			},
+		});
+
+		// if user not found, create it with 42 info
+		if (!usr)
+		{
+			const new_usr = await this.prisma.user.create({
+				data: {
+					email: email,
+					login: login,
+					nickname: login,
+					password: this.generate_random_password(),
+					FT_id: FT_id,
+					random_password: true
+				}
+			});
+
+			return new_usr;
+		}
+		else
+		{
+			return usr;
+		}
 	}
 
 	async users(params: {

@@ -10,3 +10,9 @@ export interface TokenPayload {
 	userId: number;
 	isSecondFactorAuthenticated: boolean;
 }
+
+export interface ft_profile {
+	id: number;
+	username: string;
+	email: string;
+}

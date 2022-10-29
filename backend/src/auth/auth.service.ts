@@ -51,6 +51,9 @@ export class AuthService {
 		});
 	}
 
+
+
+
 	/////////////////// FOR 2FA AUTHENTICATION ///////////////////
 
 	public getCookieWith_2FAJwtAccessToken(userId: number, isSecondFactorAuthenticated = false) {

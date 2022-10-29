@@ -24,7 +24,8 @@ model User {
     isTwoFAEnabled    Boolean                 @default(false)
     TwoFA_secret      String?
     // 42 login/id
-    FT_id             Int?
+    FT_id             Int?                    @unique
+    random_password   Boolean                 @default(false)
     // friendships
     userFriends       Friend[]                @relation(name: "user")
     friendUserFriends Friend[]                @relation(name: "friend_user")

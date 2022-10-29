@@ -1,21 +1,20 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { push } from "svelte-spa-router";
 	import {
 		update_email,
 		update_nickname,
 		update_password,
 	} from "../../stores/requests";
 
-	const profile_data = $$props;
-
+	export let profile_data;
 	let profile = undefined;
 	let updating_email = false;
 	let updating_nickname = false;
 	let updating_password = false;
+	$: profile = profile_data;
 
-	onMount(async () => {
-		profile = profile_data;
-	});
+	onMount(async () => {});
 
 	async function updateEmail(e) {
 		// Get the data from the form
@@ -32,6 +31,8 @@
 		}
 		// close the 'prompt'
 		updating_email = false;
+
+		window.location.reload();
 	}
 
 	async function updateNickname(e) {
@@ -50,19 +51,28 @@
 
 		// close the 'prompt'
 		updating_nickname = false;
+
+		window.location.reload();
 	}
 
 	async function updatePassword(e) {
 		// Get the data from the form
 		const formData = new FormData(e.target);
-		const old_password = formData.get("old_password").toString();
-		const new_password = formData.get("new_password").toString();
-		const confirm_new_password = formData.get("confirm_new_password").toString();
+		let old_password = "undefined";
 
-		if (new_password !== confirm_new_password)
-		{
-			alert("The new password and its confirmation should correspond.\nPlease retry!")
-			return ;
+		if (!profile.random_password)
+			old_password = formData.get("old_password").toString();
+
+		const new_password = formData.get("new_password").toString();
+		const confirm_new_password = formData
+			.get("confirm_new_password")
+			.toString();
+
+		if (new_password !== confirm_new_password) {
+			alert(
+				"The new password and its confirmation should correspond.\nPlease retry!"
+			);
+			return;
 		}
 		// Send data to the API
 		const msg: string = await update_password(old_password, new_password);
@@ -109,6 +119,7 @@
 							id="new_nickname"
 							name="new_nickname"
 							placeholder="Your new nickname"
+							autofocus
 						/>
 					</div>
 					<div class="form-group">
@@ -134,6 +145,7 @@
 							id="new_email"
 							name="new_email"
 							placeholder="Your new email address"
+							autofocus
 						/>
 					</div>
 					<div class="form-group">
@@ -153,13 +165,15 @@
 			<div class="form-container">
 				<form on:submit|preventDefault={updatePassword}>
 					<div class="form-group">
-						<input
-							type="password"
-							placeholder="Old password"
-							id="old_password"
-							name="old_password"
-							required
-						/>
+						{#if !profile.random_password}
+							<input
+								type="password"
+								placeholder="Old password"
+								id="old_password"
+								name="old_password"
+								required
+							/>
+						{/if}
 						<input
 							type="password"
 							placeholder="New password"

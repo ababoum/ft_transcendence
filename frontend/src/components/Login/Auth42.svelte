@@ -4,7 +4,7 @@
 
 <main>
     <div style="margin-bottom: 1em">
-        <a href="{$BACKEND_URL}/auth/42/return">
+        <a href="{$BACKEND_URL}/auth/42">
             <button class="button is-dark is-large m-auto">
                 <span>
                     <img class="ft-icon" src="static/logo-42-square-reverse.png" alt="42">
