@@ -31,10 +31,10 @@ export class ChatroomService {
 		  cursor,
 		  where,
 		  orderBy,
-		  include :{admin: {select: {login: true, nickname: true}},
-		  			participants: {select: {login: true, nickname: true}},
-					banList: {select: {login: true, nickname: true}},
-					muteList: {select: {user: {select: {login: true, nickname: true}}, mutedUntil: true}}}
+		  include :{admin: {select: {id: true, nickname: true}},
+		  			participants: {select: {id: true, nickname: true}},
+					banList: {select: {id: true, nickname: true}},
+					muteList: {select: {user: {select: {id: true, nickname: true}}, mutedUntil: true}}}
 		});
 	  }
 
@@ -48,10 +48,10 @@ export class ChatroomService {
 				participants: {connect: {login: userlogin}},
 			},
 			include :{
-				admin: {select: {login: true, nickname: true}},
-				participants: {select: {login: true, nickname: true}},
-		 		banList: {select: {login: true, nickname: true}},
-		 		muteList: {select: {user: {select: {login: true, nickname: true}}, mutedUntil: true}}
+				admin: {select: {id: true, nickname: true}},
+				participants: {select: {id: true, nickname: true}},
+		 		banList: {select: {id: true, nickname: true}},
+		 		muteList: {select: {user: {select: {id: true, nickname: true}}, mutedUntil: true}}
 			}
 		});
 		return res;
@@ -89,9 +89,9 @@ export class ChatroomService {
 					admin: { disconnect : { login: userlogin } },
 					participants: { disconnect : { login: userlogin } },
 				},
-				select: {ownerlogin: true, participants: {select: {id: true, nickname: true}}}
+				select: {owner: true, participants: {select: {id: true, nickname: true}}}
 			});
-			// if (res.ownerlogin == userlogin) {
+			// if (res.owner.login == userlogin) {
 			// 	res = await this.prisma.chatRoom.update({
 			// 		where: {id:chatroomid},
 			// 		data: {
@@ -100,7 +100,7 @@ export class ChatroomService {
 			// 		select: {ownerlogin: true, participants: {select: {id: true, nickname: true}}}
 			// 	})
 			// }
-			return res;
+			return res.participants;
 		}
 		catch {
 			throw new HttpException("This room doesn't exist", 404)
@@ -118,16 +118,19 @@ export class ChatroomService {
 	async adminUser(userlogin: string, chatroomid: number, UpdateChatRoomDto: UpdateChatRoomDto) {
 		const res = await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { ownerlogin: true }
+			select: { owner: true }
 		})
-		if (res.ownerlogin == userlogin) {
+		if (res.owner.login == userlogin) {
 			return await this.prisma.chatRoom.update({
 			where: { id: chatroomid },
 			data: {
-				admin: { connect: { login: UpdateChatRoomDto.login } },
-				participants: {connect: {login: UpdateChatRoomDto.login}}
+				admin: { connect: { nickname: UpdateChatRoomDto.nickname } },
+				participants: {connect: {nickname: UpdateChatRoomDto.nickname}}
 			},
-			select: {admin: {select: {id: true, nickname: true}}}
+			select: {
+				admin: {select: {id: true, nickname: true}},
+				participants: {select: {id: true, nickname: true}}
+			}
 			});
 		}
 		throw new HttpException("You are not the owner of this chatroom", 401)
@@ -136,13 +139,13 @@ export class ChatroomService {
 	async unadminUser(userlogin: string, chatroomid: number, UpdateChatRoomDto: UpdateChatRoomDto) {
 		const res = await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { ownerlogin: true }
+			select: { owner: true }
 		})
-		if (res.ownerlogin == userlogin) {
+		if (res.owner.login == userlogin) {
 			return await this.prisma.chatRoom.update({
 			where: { id: chatroomid },
 			data: {
-				admin: { disconnect: { login: UpdateChatRoomDto.login } },
+				admin: { disconnect: { nickname: UpdateChatRoomDto.nickname } },
 			},
 			select: {admin: {select: {id: true, nickname: true}}}
 			});
@@ -167,10 +170,13 @@ export class ChatroomService {
 			return await this.prisma.chatRoom.update({
 				where: {id: chatroomid},
 				data: {
-					banList: {connect: {login: UpdateChatRoomDto.login}},
-					participants: {disconnect: {login: UpdateChatRoomDto.login}}
+					banList: {connect: {nickname: UpdateChatRoomDto.nickname}},
+					participants: {disconnect: {nickname: UpdateChatRoomDto.nickname}}
 				},
-				select: {banList: {select: {id: true, nickname: true}}}
+				select: {
+					banList: {select: {id: true, nickname: true}},
+					participants: {select: {id: true, nickname: true}}
+				}
 			})
 		}
 		throw new HttpException("You are not admin of this chatroom", 401)
@@ -185,7 +191,7 @@ export class ChatroomService {
 			return await this.prisma.chatRoom.update({
 				where: {id: chatroomid},
 				data: {
-					banList: {disconnect: {login: UpdateChatRoomDto.login}}
+					banList: {disconnect: {nickname: UpdateChatRoomDto.nickname}}
 				},
 				select: {banList: {select: {id: true, nickname: true}}}
 			})
@@ -210,10 +216,10 @@ export class ChatroomService {
 			let t = new Date()
 			t.setSeconds(t.getSeconds() + UpdateChatRoomDto.duration)
 			return await this.prisma.usersMutedinChatRooms.upsert({
-				where: {chatRoomId_userLogin: {chatRoomId: chatroomid, userLogin: UpdateChatRoomDto.login}},
+				where: {chatRoomId_nickname: {chatRoomId: chatroomid, nickname: UpdateChatRoomDto.nickname}},
 				create: {
 					chatRoom: {connect: {id: chatroomid}},
-					user: {connect: {login: UpdateChatRoomDto.login}},
+					user: {connect: {nickname: UpdateChatRoomDto.nickname}},
 					mutedUntil:  t.toISOString(),
 				},
 				update: {
@@ -231,7 +237,7 @@ export class ChatroomService {
 		})
 		if (res.admin[0]) {
 			return await this.prisma.usersMutedinChatRooms.delete({
-				where: {chatRoomId_userLogin: {chatRoomId: chatroomid, userLogin: UpdateChatRoomDto.login}}
+				where: {chatRoomId_nickname: {chatRoomId: chatroomid, nickname: UpdateChatRoomDto.nickname}}
 			})
 		}
 		throw new HttpException("You are not admin of this chatroom", 401)
