@@ -9,8 +9,10 @@ import {
 	HttpCode,
 	Body,
 	UnauthorizedException,
+	Patch,
 } from '@nestjs/common';
 import { TwoFactorAuthenticationService } from './twoFactorAuthentication.service';
+import { TwoFactorAuthenticationCodeDto } from './twoFactorAuthentication.dto'
 import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/auth.guards';
 import { RequestWithUser } from '../auth/auth.interfaces';
@@ -31,7 +33,7 @@ export class TwoFactorAuthenticationController {
 	@UseGuards(JwtAuthGuard)
 	async register(@Res() response: Response, @Req() request: RequestWithUser) {
 
-		const { otpauthUrl } = await this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(request.user);
+		const { otpauthUrl } = await this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(request.user.login);
 
 		return this.twoFactorAuthenticationService.pipeQrCodeStream(response, otpauthUrl);
 	}
@@ -45,11 +47,13 @@ export class TwoFactorAuthenticationController {
 	@UseGuards(JwtAuthGuard)
 	async turnOnTwoFactorAuthentication(
 		@Req() request: RequestWithUser,
-		// @Body() { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto
-		@Body() twoFactorAuthenticationCode
+		@Body() { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto
 	) {
+		// retrieve user
+		const usr = await this.userService.user({login: request.user.login});
+
 		const isCodeValid = this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
-			twoFactorAuthenticationCode, request.user
+			twoFactorAuthenticationCode, usr
 		);
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
@@ -80,5 +84,12 @@ export class TwoFactorAuthenticationController {
 		return request.user;
 	}
 
+	@Patch('disable')
+	@UseGuards(JwtAuthGuard)
+	async disable_2fa(
+		@Req() request: RequestWithUser
+	) {
+		this.twoFactorAuthenticationService.disable_TwoFA(request.user.login);
+	}
 
 }

@@ -21,7 +21,7 @@ export async function get_full_profile(login: string) {
 	const resp = await fetch(get(BACKEND_URL) + "/users/profile/" + login, {
 		method: 'GET',
 		headers: { "Authorization": "Bearer " + getCookie("jwt") }
-	})
+	});
 	const payload = resp.json();
 
 	if (resp.ok) {
@@ -110,4 +110,30 @@ export async function update_password(
 		return msg;
 	await resp.json().then((data) => msg = data.message);
 	return msg;
+}
+
+export async function validate_2fa_code(twoFactorAuthenticationCode: string) {
+	const resp = await fetch(get(BACKEND_URL) + "/2fa/turn-on", {
+		method: 'POST',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt"),
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(
+			{
+				twoFactorAuthenticationCode: twoFactorAuthenticationCode
+			})
+	});
+
+	if (resp.ok) {
+		return `<p class="text-success">Two factor authentication successfully enabled</p>`;
+	}
+	else {
+		const msg = await resp.json().then(data => data.message);
+		return `<p class="text-danger">${msg}</p>`;
+	}
+}
+
+export async function disable_2fa() {
+	
 }

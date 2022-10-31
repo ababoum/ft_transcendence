@@ -35,6 +35,10 @@
 	// retrieve avatar picture for the logged in user
 
 	onMount(async () => {
+		if (!profile_data.imageId) {
+			imageSrc = null;
+			return ;
+		}
 		const resp = await fetch(
 			get(BACKEND_URL) + "/users/image/" + profile_data.imageId
 		);
