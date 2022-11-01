@@ -255,8 +255,13 @@ export class ChatroomService {
 	async postMessage(userlogin: string, chatroomid: number, MessageDto: MessageDto) {
 		const res = await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { participants: {where: {login: userlogin}} }
+			select: { 
+				participants: {where: {login: userlogin}},
+				muteList: {where: {user: {login: userlogin}}}
+			}
 		})
+		if (res.muteList[0] && new Date(res.muteList[0].mutedUntil) > new Date())
+			throw new HttpException("You are currently muted in this chatroom", 401)
 		if (res.participants[0]) {
 			return await this.prisma.messages.create({
 				data: {

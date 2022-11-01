@@ -8,18 +8,25 @@
     import { get } from "svelte/store";
     import { io } from "socket.io-client";
     import { fix_and_destroy_block, identity, xlink_attr } from "svelte/internal";
+    import ChatRoomList from "../components/ChatRoom/ChatRoomList.svelte";
 
 	let tmp: boolean;
-	let chatRoomsList = undefined;
+	let chatRoomsList = [];
 	let messagesList = [];
 	let activeChatRoomId;
 	let message, adminNickname, banNickname, muteNickname: string;
 	let muteDuration: number = 1
+	let mutedUntil;
+	let currentTime;
 
 	onMount(async () => { 
 		tmp = await is_authenticated();
 		$user = await $user.upd()
 		await getChatRoomsList();
+
+		const interval = setInterval(() => {
+			currentTime = new Date();
+		}, 1000);
 
 		$chatroom_socket.on('chatrooms-list', (data) => {
 			console.log("Received chatrooms-list")
@@ -250,7 +257,7 @@
                 <div class="p-3">
 					
                   <div data-mdb-perfect-scrollbar="true" style="position: relative; height: 400px">
-					{#if chatRoomsList !== undefined }
+					{#if chatRoomsList[0] }
 					<ul class="list-unstyled mb-0">
 						{#each chatRoomsList as chatroom (chatroom)}
 						  <li class="p-2 border-bottom">
@@ -270,8 +277,11 @@
 						{/each}
 						</ul>
 					{/if}
+					<button class="create" on:click={() => createChatRoom("test")}>Create new room</button>
                   </div>
-				  <button class="create" on:click={() => createChatRoom("test")}>Create new room</button>
+				  <div class="p-3">
+					<p>Private Messages List</p>
+				  </div>
 
 
                 </div>
@@ -300,11 +310,22 @@
 					  {/each}
 		            </div>
 					{#if activeChatRoomId != undefined}
-		            <div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-		              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" style="width: 40px; height: 100%;">
-		              <input type="text" class="form-control form-control-lg" placeholder="Type message" bind:value={message}>
-					  <button on:click={() => postMessage(activeChatRoomId, message)}>Send</button>
-		            </div>
+					<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+						<img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" style="width: 40px; height: 100%;">
+						{#key activeChatRoomId}
+						{#if mutedUntil = chatRoomsList[activeChatRoomId - 1].muteList.find(x => x.user.nickname === $user.nickname)}
+							{#if new Date(mutedUntil.mutedUntil) > currentTime}
+							<p>You are muted until {new Date(mutedUntil.mutedUntil).toLocaleTimeString("en-US")}, the current time is {currentTime.toLocaleTimeString("en-US")}</p>
+							{:else}
+							<input type="text" class="form-control form-control-lg" placeholder="Type message" bind:value={message}>
+							<button on:click={() => postMessage(activeChatRoomId, message)}>Send</button>
+							{/if}
+						{:else}
+							<input type="text" class="form-control form-control-lg" placeholder="Type message" bind:value={message}>
+							<button on:click={() => postMessage(activeChatRoomId, message)}>Send</button>
+						{/if}
+						{/key}
+					</div>
 					<div>
 						<ul>
 							{#if chatRoomsList[activeChatRoomId - 1].ownerNickname === $user.nickname}
@@ -322,8 +343,8 @@
 							</div>
 							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 								<input type="text" class="form-control" placeholder="nickname" bind:value={muteNickname}>
-								<input type="range" min="1" max="1440" bind:value={muteDuration}>
-								<button on:click={() => muteUser(activeChatRoomId, muteNickname, muteDuration)}>Mute {muteDuration}m </button>
+								<input type="range" min="1" max="60" bind:value={muteDuration}>
+								<button on:click={() => muteUser(activeChatRoomId, muteNickname, muteDuration)}>Mute {muteDuration}s </button>
 								<button on:click={() => unmuteUser(activeChatRoomId, muteNickname)}>Unmute</button>
 							</div>
 							{/if}
