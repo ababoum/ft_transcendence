@@ -7,19 +7,26 @@
 	import {getCookie} from "../stores/auth";
     import { get } from "svelte/store";
     import { io } from "socket.io-client";
-    import { fix_and_destroy_block, identity, xlink_attr } from "svelte/internal";
+    import Modal, { getModal } from "../components/Profile/Modal.svelte";
+    import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
 
 	let tmp: boolean;
-	let chatRoomsList = undefined;
+	let chatRoomsList = [];
 	let messagesList = [];
 	let activeChatRoomId;
 	let message, adminNickname, banNickname, muteNickname: string;
 	let muteDuration: number = 1
+	let mutedUntil;
+	let currentTime;
 
 	onMount(async () => { 
 		tmp = await is_authenticated();
 		$user = await $user.upd()
 		await getChatRoomsList();
+
+		const interval = setInterval(() => {
+			currentTime = new Date();
+		}, 1000);
 
 		$chatroom_socket.on('chatrooms-list', (data) => {
 			console.log("Received chatrooms-list")
@@ -42,8 +49,6 @@
 		});
 	})
 
-	let chatrooms_test = [{id: 1, name: "Chatroom1"}, {id: 2, name: "Chatroom2"}]
-
 	onDestroy(() => {
 	})
 
@@ -55,21 +60,24 @@
 		console.log(chatRoomsList)
 	}
 
-	async function createChatRoom(name: string, mode?: string, password?: string){
-		const rawresponse = await fetch('http://localhost:3000/chatrooms', {
-			method: 'POST',
+	async function joinChatRoom(chatRoomId: number){
+		console.log("In joinChatRoom " + chatRoomId)
+		
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/join', {
+			method: 'PATCH',
 			headers: {	
 				"Authorization": "Bearer " + getCookie("jwt"),
-				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({name: "nametest", mode: mode, password: password})
 		})
 		const res = await rawresponse.json()
 		console.log(res)
 	}
 
-	async function joinChatRoom(chatRoomId: number){
-		console.log("In joinChatRoom " + chatRoomId)
+	async function joinProtectedChatRoom(e){
+		const formData = new FormData(e.target);
+		const chatRoomId = formData.get("chatroomId"); 
+		const password = formData.get("password"); 
+		console.log("In joinProtectedChatRoom: " + chatRoomId + " password: " + password)
 		
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/join', {
 			method: 'PATCH',
@@ -215,10 +223,12 @@
 		console.log(res)
 	}
 
-	async function postMessage(chatRoomId: number, message: string){
-		console.log("In postMessage " + chatRoomId + " - message: " + message)
+	async function postMessageForm(e){
+		const formData = new FormData(e.target);
+		const message = formData.get("message");
+		console.log("In postMessage " + activeChatRoomId + " - message: " + message)
 
-		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/messages', {
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/messages', {
 			method: 'POST',
 			headers: {	
 				"Authorization": "Bearer " + getCookie("jwt"),
@@ -228,6 +238,8 @@
 		})
 		const res = await rawresponse.json()
 		console.log("Successfully posted message: " + res.content)
+
+		e.target.reset()
 	}
 
 </script>
@@ -250,10 +262,12 @@
                 <div class="p-3">
 					
                   <div data-mdb-perfect-scrollbar="true" style="position: relative; height: 400px">
-					{#if chatRoomsList !== undefined }
+					{#key chatRoomsList}
+					{#if chatRoomsList[0] }
 					<ul class="list-unstyled mb-0">
 						{#each chatRoomsList as chatroom (chatroom)}
 						  <li class="p-2 border-bottom">
+							{#if chatroom.mode === "PUBLIC"}
 							<div class="pt-1">
 							  {#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
 							  <p>{chatroom.name} 
@@ -266,12 +280,46 @@
 							  <p>{chatroom.name} <button on:click={() => joinChatRoom(chatroom.id)}>Join</button> </p>
 							  {/if}
 							</div>
+							{:else if chatroom.mode === "PROTECTED"}
+							<div class="pt-1">
+								{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
+								<p>{chatroom.name} 
+								  <button on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
+								  <button on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
+								</p>
+								{:else if chatroom.banList.find(x => x.nickname === $user.nickname) !== undefined}
+								<p>{chatroom.name} <button>Banned</button> </p>
+								{:else}
+								<form on:submit|preventDefault={joinProtectedChatRoom}>
+									<label>{chatroom.name} <input type="text" name="password" placeholder="password"/>
+										<input type="hidden" name="chatroomId" value={chatroom.id}/>
+									</label>
+								</form>
+								{/if}
+							</div>
+							{:else if chatroom.mode === "PRIVATE"}
+							<div class="pt-1">
+								{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
+								<p>{chatroom.name} 
+								  <button on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
+								  <button on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
+								</p>
+								{/if}
+							</div>
+							{/if}
 						  </li>
 						{/each}
 						</ul>
 					{/if}
+					{/key}
+					<button
+					type="button"
+					class="btn btn-primary btn-sm update-btn"
+					on:click={getModal().open}>Create Room Form</button>
                   </div>
-				  <button class="create" on:click={() => createChatRoom("test")}>Create new room</button>
+				  <div class="p-3">
+					<p>Private Messages List</p>
+				  </div>
 
 
                 </div>
@@ -293,18 +341,31 @@
 						  {:else} 
 						  <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: green;">{message.author.nickname}: {message.content}</p>
 						  {/if}
-						  <p class="small ms-3 mb-3 rounded-3 text-muted">{message.creationDate}</p>
+						  <p class="small ms-3 mb-3 rounded-3 text-muted">{new Date(message.creationDate).toLocaleTimeString("en-US")}</p>
 		                </div>
 		              </div>
 
 					  {/each}
 		            </div>
 					{#if activeChatRoomId != undefined}
-		            <div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-		              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" style="width: 40px; height: 100%;">
-		              <input type="text" class="form-control form-control-lg" placeholder="Type message" bind:value={message}>
-					  <button on:click={() => postMessage(activeChatRoomId, message)}>Send</button>
-		            </div>
+					<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+						<img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" style="width: 40px; height: 100%;">
+						{#key activeChatRoomId}
+						{#if mutedUntil = chatRoomsList[activeChatRoomId - 1].muteList.find(x => x.user.nickname === $user.nickname)}
+							{#if new Date(mutedUntil.mutedUntil) > currentTime}
+							<p>You are muted until {new Date(mutedUntil.mutedUntil).toLocaleTimeString("en-US")}, the current time is {currentTime.toLocaleTimeString("en-US")}</p>
+							{:else}
+							<form on:submit|preventDefault|stopPropagation={postMessageForm}>
+							<input name="message" type="text" minlength="1" maxlength="150" size="50" class="form-control form-control-lg" placeholder="Type here" required/>
+							</form>
+							{/if}
+						{:else}
+							<form on:submit|preventDefault|stopPropagation={postMessageForm}>
+							<input name="message" type="text" minlength="1" maxlength="150" size="50" class="form-control form-control-lg" placeholder="Type here" required/>
+							</form>
+						{/if}
+						{/key}
+					</div>
 					<div>
 						<ul>
 							{#if chatRoomsList[activeChatRoomId - 1].ownerNickname === $user.nickname}
@@ -322,8 +383,8 @@
 							</div>
 							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 								<input type="text" class="form-control" placeholder="nickname" bind:value={muteNickname}>
-								<input type="range" min="1" max="1440" bind:value={muteDuration}>
-								<button on:click={() => muteUser(activeChatRoomId, muteNickname, muteDuration)}>Mute {muteDuration}m </button>
+								<input type="range" min="1" max="60" bind:value={muteDuration}>
+								<button on:click={() => muteUser(activeChatRoomId, muteNickname, muteDuration)}>Mute {muteDuration}s </button>
 								<button on:click={() => unmuteUser(activeChatRoomId, muteNickname)}>Unmute</button>
 							</div>
 							{/if}
@@ -344,3 +405,7 @@
   </div>
 </section>
 </main>
+
+<Modal>
+	<CreateChatRoomForm/>
+</Modal>

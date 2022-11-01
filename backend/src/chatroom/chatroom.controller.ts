@@ -51,6 +51,7 @@ export class ChatroomController {
  	@Post()
 	async createChatRoom(@Request() req, @Body() CreateChatRoomDto: CreateChatRoomDto) {
 		console.log(req.user)
+		//ENCRYPTION OF PASSWORD HERE
 		const res = await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
 		await this.ChatroomGateway.createChatroom(res)
 		return res;

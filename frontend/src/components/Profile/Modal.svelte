@@ -45,7 +45,7 @@
 		onTop = prevOnTop;
 		if (onTop == null) document.body.style.overflow = "";
 		visible = false;
-		if (closeCallback) closeCallback(retVal);
+		//if (closeCallback) closeCallback(retVal);
 	}
 
 	// expose the API
