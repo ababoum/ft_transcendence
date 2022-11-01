@@ -47,6 +47,8 @@ export class UpdatePasswordDto {
 }
 
 
-export class DeleteUserDto {
-	
+export class NicknameDTO {
+
+	@MinLength(1)
+	nickname: string;
 }

@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, Friend, Prisma, Image } from '@prisma/client';
+import { User, Prisma, Image } from '@prisma/client';
 import { capitalizeFirstLetter } from '../utils';
 
 @Injectable()
@@ -29,8 +29,7 @@ export class UserService {
 		return usr;
 	}
 
-	async userFindOrCreate(login: string, email: string, FT_id: number)
-	{
+	async userFindOrCreate(login: string, email: string, FT_id: number, avatar_url: string) {
 		const usr = await this.prisma.user.findUnique({
 			where: {
 				login: login
@@ -38,8 +37,7 @@ export class UserService {
 		});
 
 		// if user not found, create it with 42 info
-		if (!usr)
-		{
+		if (!usr) {
 			const new_usr = await this.prisma.user.create({
 				data: {
 					email: email,
@@ -47,14 +45,14 @@ export class UserService {
 					nickname: login,
 					password: this.generate_random_password(),
 					FT_id: FT_id,
+					profile_picture: avatar_url,
 					random_password: true
 				}
 			});
 
 			return new_usr;
 		}
-		else
-		{
+		else {
 			return usr;
 		}
 	}
@@ -133,150 +131,138 @@ export class UserService {
 	/////////////////////// MANAGE USER'S FRIENDSHIP ////////////////////////
 
 
-	async addFriend(userId: number, friendId: number): Promise<Friend> {
+	async addFriend(userLogin: string, friendNickname: string): Promise<User> {
 
-		// create the friendship
-		const new_friendship = await this.prisma.friend.create({
-			data: {
-				userId: userId,
-				friendUserId: friendId
-			}
+		const friend = await this.prisma.user.findUnique({
+			where: { nickname: friendNickname }
 		});
 
-		await this.prisma.user.update({
+		if (!friend)
+			throw new HttpException("User not found", 404);
+
+		const updated_user = await this.prisma.user.update({
 			where: {
-				id: userId,
+				login: userLogin
 			},
 			data: {
-				userFriends: {
+				friends: {
 					connect: {
-						id: new_friendship.id
-					},
-				},
-			}
-		});
-
-		return new_friendship;
-	}
-
-	async friends(userId: number): Promise<User[]> {
-
-		// retrieve the list of friendships
-
-		const friends_list = await this.prisma.friend.findMany({
-			where: {
-				userId: userId
-			},
-			select: {
-				friendUserId: true
-			}
-		}
-		);
-
-		// retrieve the list of users listed in the friendships
-		const result = await this.prisma.user.findMany({
-			where: {
-				id: {
-					in: friends_list.map(object => object.friendUserId)
+						id: friend.id
+					}
 				}
 			}
 		});
 
-		return result;
+		console.log(updated_user);
+
+		return updated_user;
 	}
 
-	async deleteFriend(userId: number, friendId: number) {
+	async friendsbyLogin(login: string): Promise<User[]> {
 
-		const result = await this.prisma.friend.deleteMany({
+		const me = await this.prisma.user.findUnique({ where: { login: login } });
+
+		const list = await this.prisma.user.findMany({
 			where: {
-				OR: [
-					{
-						AND: [
-							{ userId: userId },
-							{ friendUserId: friendId }
-						]
-					},
-					{
-						AND: [
-							{ userId: friendId },
-							{ friendUserId: userId }
-						]
-					}
-				]
+				befrienderId: me.id
 			}
-		})
-		return result;
+		});
+
+		return list;
 	}
+
+	async deleteFriend(login: string, friendNickname: string): Promise<User> {
+
+		const friend = await this.prisma.user.findUnique({
+			where: { nickname: friendNickname }
+		});
+
+		if (!friend)
+			throw new HttpException("User not found", 404);
+
+		const act = this.prisma.user.update({
+			where: { login: login},
+			data: {
+				friends: {
+					disconnect: {
+						id: friend.id
+					}
+				}
+			}
+
+	})
+}
 
 
 	/////////////////////// MANAGE USER'S AVATAR ////////////////////////
 
-	async createImage(imageData: Express.Multer.File): Promise<Image> {
-		return this.prisma.image.create({
-			data: {
-				filename: imageData.filename,
-				filepath: imageData.path,
-				mimetype: imageData.mimetype,
-				size: imageData.size,
-			},
-		});
-	}
+	async createImage(imageData: Express.Multer.File): Promise < Image > {
+	return this.prisma.image.create({
+		data: {
+			filename: imageData.filename,
+			filepath: imageData.path,
+			mimetype: imageData.mimetype,
+			size: imageData.size,
+		},
+	});
+}
 
-	async linkAvatar(image: Image, login: string): Promise<User> {
-		return this.prisma.user.update({
-			where: {
-				login: login
-			},
-			data: {
-				avatar: {
-					connect: {
-						id: image.id
-					}
+	async linkAvatar(image: Image, login: string): Promise < User > {
+	return this.prisma.user.update({
+		where: {
+			login: login
+		},
+		data: {
+			avatar: {
+				connect: {
+					id: image.id
 				}
 			}
-		})
-	}
+		}
+	})
+}
 
 	async image(
-		imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
-	): Promise<Image | null> {
+	imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
+): Promise < Image | null > {
 
-		if (imageWhereUniqueInput.id === null)
+	if(imageWhereUniqueInput.id === null)
+	throw new HttpException("Requested image not found", 404);
+
+	const img = await this.prisma.image.findUnique({
+		where: imageWhereUniqueInput,
+	});
+
+	if(!img)
 			throw new HttpException("Requested image not found", 404);
-
-		const img = await this.prisma.image.findUnique({
-			where: imageWhereUniqueInput,
-		});
-
-		if (!img)
-			throw new HttpException("Requested image not found", 404);
-		return img;
-	}
+	return img;
+}
 
 	/////////////////////// MANAGE USER'S 2FA ////////////////////////
 
 	async turnOnTwoFactorAuthentication(login: string) {
-		return this.prisma.user.update({
-			where: {
-				login: login
-			},
-			data: {
-				isTwoFAEnabled: true
-			}
-		});
-	}
+	return this.prisma.user.update({
+		where: {
+			login: login
+		},
+		data: {
+			isTwoFAEnabled: true
+		}
+	});
+}
 
 	async setTwoFactorAuthenticationSecret(secret: string, login: string)
-		: Promise<User> {
-		return this.prisma.user.update({
-			where: {
-				login: login
-			},
-			data: {
-				TwoFA_secret: secret
-			}
-		});
-	}
+		: Promise < User > {
+	return this.prisma.user.update({
+		where: {
+			login: login
+		},
+		data: {
+			TwoFA_secret: secret
+		}
+	});
+}
+
 
 
 }

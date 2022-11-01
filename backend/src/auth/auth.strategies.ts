@@ -68,6 +68,7 @@ export class FtStrategy extends PassportStrategy(ft_Strategy, '42') {
 				id: 'id',
 				username: 'login',
 				email: 'email',
+				avatar: 'image_url'
 			},
 		});
 	}

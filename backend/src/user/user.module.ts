@@ -8,6 +8,7 @@ import { TwoFactorAuthenticationService } from '../2FA/twoFactorAuthentication.s
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/auth.guards';
 import { JwtService } from '@nestjs/jwt';
+import { HttpModule } from '@nestjs/axios';
 
 
 @Module({

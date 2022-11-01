@@ -135,5 +135,56 @@ export async function validate_2fa_code(twoFactorAuthenticationCode: string) {
 }
 
 export async function disable_2fa() {
-	
+	const resp = await fetch(get(BACKEND_URL) + "/2fa/disable", {
+		method: 'PATCH',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt")
+		}
+	});
+}
+
+
+///////////////////////////////// FRIENDS /////////////////////////////////
+
+export async function get_friends(login: string) {
+	const resp = await fetch(get(BACKEND_URL) + "/users/myfriends", {
+		method: 'GET',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt")
+		}
+	});
+
+	return resp.json();
+}
+
+export async function add_friend(nickname: string) {
+	const resp = await fetch(get(BACKEND_URL) + "/users/add_friend", {
+		method: 'POST',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt"),
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(
+			{
+				nickname: nickname
+			})
+	});
+
+	return resp;
+}
+
+export async function delete_friend(nickname: string) {
+	const resp = await fetch(get(BACKEND_URL) + "/users/add_friend", {
+		method: 'DELETE',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt"),
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(
+			{
+				nickname: nickname
+			})
+	});
+
+	return resp;
 }

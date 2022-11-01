@@ -11,71 +11,63 @@ datasource db {
 }
 
 model User {
-    id                Int                     @id @default(autoincrement())
+    id              Int                     @id @default(autoincrement())
     // personal info and avatar
-    email             String                  @unique
-    login             String                  @unique
-    nickname          String                  @unique
-    password          String
-    status            UserStatus              @default(OFFLINE)
-    avatar            Image?                  @relation(fields: [imageId], references: [id])
-    imageId           Int?
+    email           String                  @unique
+    login           String                  @unique
+    nickname        String                  @unique
+    password        String
+    status          UserStatus              @default(OFFLINE)
+    avatar          Image?                  @relation(fields: [imageId], references: [id])
+    imageId         Int?
     // authentication
-    isTwoFAEnabled    Boolean                 @default(false)
-    TwoFA_secret      String?
-    // 42 login/id
-    FT_id             Int?                    @unique
-    random_password   Boolean                 @default(false)
+    isTwoFAEnabled  Boolean                 @default(false)
+    TwoFA_secret    String?
+    // 42 login: id / profile_picture
+    FT_id           Int?                    @unique
+    profile_picture String?
+    random_password Boolean                 @default(false)
     // friendships
-    userFriends       Friend[]                @relation(name: "user")
-    friendUserFriends Friend[]                @relation(name: "friend_user")
-    blockerId         Int?
-    blocker           User?                   @relation("blocking", fields: [blockerId], references: [id])
-    blockedList       User[]                  @relation("blocking")
+    befrienderId    Int?
+    befriender      User?                   @relation("Friends", fields: [befrienderId], references: [id])
+    friends         User[]                  @relation("Friends")
+    // block from receiving messages
+    blockerId       Int?
+    blocker         User?                   @relation("blocking", fields: [blockerId], references: [id])
+    blockedList     User[]                  @relation("blocking")
     // chats
-    chatRoomOwned     ChatRoom[]              @relation(name: "OwnerTable")
-    chatRoomAdmined   ChatRoom[]              @relation(name: "AdminTable")
-    chatRoomJoined    ChatRoom[]              @relation(name: "ParticipantTable")
-    chatRoomBanned    ChatRoom[]              @relation(name: "BanTable")
-    chatRoomMuted     UsersMutedinChatRooms[]
-    messages          Messages[]
+    chatRoomOwned   ChatRoom[]              @relation(name: "OwnerTable")
+    chatRoomAdmined ChatRoom[]              @relation(name: "AdminTable")
+    chatRoomJoined  ChatRoom[]              @relation(name: "ParticipantTable")
+    chatRoomBanned  ChatRoom[]              @relation(name: "BanTable")
+    chatRoomMuted   UsersMutedinChatRooms[]
+    messages        Messages[]
     // games
-    matchWinner       Match[]                 @relation(name: "match_winner")
-    matchLoser        Match[]                 @relation(name: "match_loser")
-    rating            Int                     @default(0)
-}
-
-// bi-directional
-model Friend {
-    id           Int  @id @default(autoincrement())
-    userId       Int
-    friendUserId Int
-    User         User @relation(name: "user", fields: [userId], references: [id])
-    FriendUser   User @relation(name: "friend_user", fields: [friendUserId], references: [id])
-
-    @@unique([userId, friendUserId])
+    matchWinner     Match[]                 @relation(name: "match_winner")
+    matchLoser      Match[]                 @relation(name: "match_loser")
+    rating          Int                     @default(0)
 }
 
 model ChatRoom {
-    id          	Int                     @id @default(autoincrement())
-    name         	String
-    creationDate 	DateTime                @default(now())
-    mode         	chatRoomType            @default(PUBLIC)
-    password     	String?
-    owner        	User                    @relation(fields: [ownerNickname], references: [nickname], name: "OwnerTable")
-    ownerNickname   String
-    admin        	User[]                  @relation(name: "AdminTable")
-    participants 	User[]                  @relation(name: "ParticipantTable")
-    banList      	User[]                  @relation(name: "BanTable")
-    muteList     	UsersMutedinChatRooms[]
-    messages     	Messages[]
+    id            Int                     @id @default(autoincrement())
+    name          String
+    creationDate  DateTime                @default(now())
+    mode          chatRoomType            @default(PUBLIC)
+    password      String?
+    owner         User                    @relation(fields: [ownerNickname], references: [nickname], name: "OwnerTable")
+    ownerNickname String
+    admin         User[]                  @relation(name: "AdminTable")
+    participants  User[]                  @relation(name: "ParticipantTable")
+    banList       User[]                  @relation(name: "BanTable")
+    muteList      UsersMutedinChatRooms[]
+    messages      Messages[]
 }
 
 model UsersMutedinChatRooms {
     chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
     chatRoomId Int
     user       User     @relation(fields: [nickname], references: [nickname])
-    nickname  String
+    nickname   String
     mutedAt    DateTime @default(now())
     mutedUntil DateTime
 

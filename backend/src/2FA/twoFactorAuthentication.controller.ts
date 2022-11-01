@@ -50,7 +50,7 @@ export class TwoFactorAuthenticationController {
 		@Body() { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto
 	) {
 		// retrieve user
-		const usr = await this.userService.user({login: request.user.login});
+		const usr = await this.userService.user({ login: request.user.login });
 
 		const isCodeValid = this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
 			twoFactorAuthenticationCode, usr

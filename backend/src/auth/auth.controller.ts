@@ -57,7 +57,8 @@ export class AuthController {
 		const usr = await this.userService.userFindOrCreate(
 			req.user.username,
 			req.user.email,
-			req.user.id);
+			req.user.id,
+			req.user.avatar);
 
 		// emit a token after successful login
 		const { access_token } = await this.authService.login({

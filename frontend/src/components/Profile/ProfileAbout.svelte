@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getContext, onMount } from "svelte";
-	import { push } from "svelte-spa-router";
+	import { onMount } from "svelte";
 	import {
+		disable_2fa,
 		update_email,
 		update_nickname,
 		update_password,
@@ -97,9 +97,12 @@
 
 	async function disable2FA() {
 		// send request to backend to disable 2FA for current user
+		await disable_2fa();
+
+		window.location.reload();
 	}
 
-	let twoFA_msg = "";
+	let twoFA_msg = ""; // to signal errors to the user
 	async function enable2FA(e) {
 		// send access code to backend to validate 2FA activation
 
@@ -292,9 +295,15 @@
 				{#if twoFA_msg}
 					{@html twoFA_msg}
 				{/if}
-			</div></Modal
-		>
+			</div>
+		</Modal>
 	</div>
+
+	<hr />
+
+	<!-- Friends list -->
+
+	<div />
 {:else}
 	<div>Loading...</div>
 {/if}

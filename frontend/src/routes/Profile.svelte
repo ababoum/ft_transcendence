@@ -7,6 +7,8 @@
 	import ProfileAbout from "../components/Profile/ProfileAbout.svelte";
 	import {Modal} from "svelte-simple-modal";
 	import InvitationButton from "../components/Game/Invitations/InvitationButton.svelte";
+    import Friends from "../components/Profile/Friends.svelte";
+    import AddFriend from "../components/Profile/AddFriend.svelte";
 
 	// retrieve current user info
 
@@ -40,8 +42,13 @@
 	</div>
 {:else}
 	<div class="profile-container">
+		<h1 class="profile-title">Your profile</h1>
 		<ProfileImage profile_data={full_profile} />
 		<ProfileAbout profile_data={full_profile} />
+		<h1 class="profile-title">Add new friends</h1>
+		<AddFriend profile_data={full_profile} />
+		<h1 class="profile-title">Your friends</h1>
+		<Friends profile_data={full_profile} />
 	</div>
 {/if}
 
@@ -53,5 +60,14 @@
 		align-items: center;
 		padding: 10px;
 		background-color: var(--white2);
+	}
+
+	.profile-title {
+		width: 100%;
+		background-color: rgb(0,80,160);
+		color: white;
+		text-align: center;
+		padding: 10px;
+		border-radius: 10px;
 	}
 </style>

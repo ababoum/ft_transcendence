@@ -16,11 +16,11 @@ import {
 	StreamableFile,
 	Patch,
 	HttpException,
+	Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
 	User as UserModel,
-	Friend as FriendModel,
 	Image as ImageModel
 } from '@prisma/client';
 import { JwtAuthGuard, LocalAuthGuard } from '../auth/auth.guards';
@@ -30,7 +30,7 @@ import { diskStorage } from 'multer';
 import * as shortid from 'shortid';
 import * as mime from 'mime-types';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto, UpdateEmailDto, UpdateNicknameDto, UpdatePasswordDto } from './user.dto';
+import { CreateUserDto, NicknameDTO, UpdateEmailDto, UpdateNicknameDto, UpdatePasswordDto } from './user.dto';
 import { RequestWithUser } from '../auth/auth.interfaces';
 import { createReadStream } from 'fs';
 import type { Response } from 'express';
@@ -139,34 +139,29 @@ export class UserController {
 
 	/////////////////////// MANAGE USER'S FRIENDSHIP ////////////////////////
 
+
 	@Post('add_friend')
-	async addFriend(
-		@Body() friendData: { userId: string; friendId: string })
-		: Promise<FriendModel[]> {
-
-		return [
-			await this.userService.addFriend(
-				Number(friendData.userId),
-				Number(friendData.friendId)),
-			await this.userService.addFriend(
-				Number(friendData.friendId),
-				Number(friendData.userId))
-		]
+	@UseGuards(JwtAuthGuard)
+	async addFriendbyNickname(
+		@Req() req: RequestWithUser,
+		@Body() body: NicknameDTO) {
+			return await this.userService.addFriend(req.user.login, body.nickname);
 	}
 
-	@Get('/:userId/friends')
-	async getFriendsList(@Param('userId') userId: string)
+	@UseGuards(JwtAuthGuard)
+	@Get('/myfriends')
+	async getMyFriendsList(@Req() req)
 		: Promise<UserModel[]> {
-		return this.userService.friends(Number(userId));
+		return this.userService.friendsbyLogin(req.user.login);
 	}
 
-	@Delete('/friends')
+	@Delete('/friend')
+	@UseGuards(JwtAuthGuard)
 	async deleteFriend(
-		@Body() friendData: { userId: string; friendId: string }) {
-		return this.userService.deleteFriend(
-			Number(friendData.userId),
-			Number(friendData.friendId)
-		);
+		@Req() req: RequestWithUser,
+		@Body() body: NicknameDTO) {
+		
+			return this.userService.deleteFriend(req.user.login, body.nickname);
 	}
 
 	/////////////////////// MANAGE USER'S AVATAR ////////////////////////
@@ -242,5 +237,15 @@ export class UserController {
 			'Content-Disposition': `attachment; filename="${img_object.filename}"`,
 		});
 		return new StreamableFile(file);
+	}
+
+	// Get avatar from 42 by userLogin
+	@Get('ft_avatar/:login')
+	async getFTAvatarByLogin(
+		@Param('login') login: string)
+		: Promise<string> {
+
+		return await this.userService.user({ login: login })
+			.then(user => user.profile_picture);
 	}
 }
