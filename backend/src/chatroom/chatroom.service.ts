@@ -46,6 +46,7 @@ export class ChatroomService {
 				mode: CreateChatRoomDto.mode,
 				admin: {connect: {login: userlogin}},
 				participants: {connect: {login: userlogin}},
+				password: CreateChatRoomDto.password
 			},
 			include :{
 				admin: {select: {id: true, nickname: true}},
