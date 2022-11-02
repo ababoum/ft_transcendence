@@ -33,12 +33,12 @@
             <div class="form-outline form-white mb-4">
                 <input type="text" id="typeTextX" class="form-control form-control-lg"
                        required bind:value={login}/>
-                <label class="form-label" for="typeTextX">Username</label>
+                <label class="form-label" for="typeTextX">Login</label>
             </div>
             <div class="form-outline form-white mb-4">
                 <input type="text" id="typeNicknameX" class="form-control form-control-lg"
                        required bind:value={nickname}/>
-                <label class="form-label" for="typeNicknameX">Nickname</label>
+                <label class="form-label" for="typeNicknameX">Nickname <i>(visible to the other users)</i></label>
             </div>
             <div class="form-outline form-white mb-4">
                 <input type="email" id="typeEmailX" class="form-control form-control-lg"

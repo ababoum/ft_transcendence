@@ -57,7 +57,7 @@ export class JwtStrategy extends PassportStrategy(jwt_Strategy) {
 
 ///////////////////// 42 OAUTH STRATEGY /////////////////////
 
-// @Injectable()
+@Injectable()
 export class FtStrategy extends PassportStrategy(ft_Strategy, '42') {
 	constructor(private readonly authService: AuthService) {
 		super({

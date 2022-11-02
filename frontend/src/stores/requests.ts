@@ -174,7 +174,7 @@ export async function add_friend(nickname: string) {
 }
 
 export async function delete_friend(nickname: string) {
-	const resp = await fetch(get(BACKEND_URL) + "/users/add_friend", {
+	const resp = await fetch(get(BACKEND_URL) + "/users/friend", {
 		method: 'DELETE',
 		headers: {
 			"Authorization": "Bearer " + getCookie("jwt"),

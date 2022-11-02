@@ -8,4 +8,4 @@
 	}
 </script>
 
-<button on:click={findGame}>Invite</button>
+<button class="btn btn-primary pull-right" on:click={findGame}>Invite to play</button>

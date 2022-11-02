@@ -35,7 +35,7 @@
 					required
 					bind:value={login}
 				/>
-				<label class="form-label" for="typeTextX">Username</label>
+				<label class="form-label" for="typeTextX">Login</label>
 			</div>
 			<div class="form-outline form-white mb-4">
 				<input

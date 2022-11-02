@@ -12,12 +12,12 @@ import {
 	Patch,
 } from '@nestjs/common';
 import { TwoFactorAuthenticationService } from './twoFactorAuthentication.service';
-import { TwoFactorAuthenticationCodeDto } from './twoFactorAuthentication.dto'
+import { TwoFactorAuthenticationCodeDto, TwoFactorAuthenticationDto } from './twoFactorAuthentication.dto'
 import { Response } from 'express';
-import { JwtAuthGuard } from '../auth/auth.guards';
-import { RequestWithUser } from '../auth/auth.interfaces';
-import { UserService } from '../user/user.service';
-import { AuthService } from '../auth/auth.service';
+import { JwtAuthGuard } from '../auth.guards';
+import { RequestWithUser } from '../auth.interfaces';
+import { UserService } from '../../user/user.service';
+import { AuthService } from '../auth.service';
 
 
 @Controller('2fa')
@@ -49,11 +49,9 @@ export class TwoFactorAuthenticationController {
 		@Req() request: RequestWithUser,
 		@Body() { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto
 	) {
-		// retrieve user
-		const usr = await this.userService.user({ login: request.user.login });
 
 		const isCodeValid = this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
-			twoFactorAuthenticationCode, usr
+			twoFactorAuthenticationCode, request.user.login
 		);
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
@@ -65,19 +63,18 @@ export class TwoFactorAuthenticationController {
 
 	@Post('authenticate')
 	@HttpCode(200)
-	@UseGuards(JwtAuthGuard)
 	async authenticate(
 		@Req() request: RequestWithUser,
-		@Body() twoFactorAuthenticationCode // maybe add DTO later?
+		@Body() body: TwoFactorAuthenticationDto
 	) {
-		const isCodeValid = this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
-			twoFactorAuthenticationCode, request.user
+		const isCodeValid = await this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
+			body.twoFactorAuthenticationCode, body.login
 		);
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		}
 
-		const accessTokenCookie = this.authenticationService.getCookieWith_2FAJwtAccessToken(request.user.id, true);
+		const accessTokenCookie = await this.authenticationService.getCookieWith_2FAJwtAccessToken(body.login, true);
 
 		request.res.setHeader('Set-Cookie', [accessTokenCookie]);
 

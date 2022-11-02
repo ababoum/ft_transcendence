@@ -28,9 +28,8 @@ model User {
     profile_picture String?
     random_password Boolean                 @default(false)
     // friendships
-    befrienderId    Int?
-    befriender      User?                   @relation("Friends", fields: [befrienderId], references: [id])
-    friends         User[]                  @relation("Friends")
+    friend          Friendship[]            @relation("friendWith")
+    friendWith      Friendship[]            @relation("friend")
     // block from receiving messages
     blockerId       Int?
     blocker         User?                   @relation("blocking", fields: [blockerId], references: [id])
@@ -46,6 +45,15 @@ model User {
     matchWinner     Match[]                 @relation(name: "match_winner")
     matchLoser      Match[]                 @relation(name: "match_loser")
     rating          Int                     @default(0)
+}
+
+model Friendship {
+    friend       User @relation("friend", fields: [friendId], references: [id])
+    friendId     Int
+    friendWith   User @relation("friendWith", fields: [friendWithId], references: [id])
+    friendWithId Int
+
+    @@id([friendId, friendWithId])
 }
 
 model ChatRoom {

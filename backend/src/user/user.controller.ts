@@ -137,7 +137,7 @@ export class UserController {
 	}
 
 
-	/////////////////////// MANAGE USER'S FRIENDSHIP ////////////////////////
+	/////////////////////// MANAGE USER'S FRIENDSHIPS ////////////////////////
 
 
 	@Post('add_friend')

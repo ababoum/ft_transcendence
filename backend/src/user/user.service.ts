@@ -131,7 +131,11 @@ export class UserService {
 	/////////////////////// MANAGE USER'S FRIENDSHIP ////////////////////////
 
 
-	async addFriend(userLogin: string, friendNickname: string): Promise<User> {
+	async addFriend(userLogin: string, friendNickname: string) {
+
+		const me = await this.prisma.user.findUnique({
+			where: { login: userLogin }
+		});
 
 		const friend = await this.prisma.user.findUnique({
 			where: { nickname: friendNickname }
@@ -140,128 +144,134 @@ export class UserService {
 		if (!friend)
 			throw new HttpException("User not found", 404);
 
-		const updated_user = await this.prisma.user.update({
-			where: {
-				login: userLogin
-			},
+		const new_friendship = await this.prisma.friendship.create({
 			data: {
-				friends: {
-					connect: {
-						id: friend.id
-					}
-				}
+				friendId: me.id,
+				friendWithId: friend.id,
 			}
 		});
 
-		console.log(updated_user);
-
-		return updated_user;
+		return new_friendship;
 	}
 
 	async friendsbyLogin(login: string): Promise<User[]> {
 
-		const me = await this.prisma.user.findUnique({ where: { login: login } });
+		const me = await this.prisma.user.findUnique({
+			where: { login: login }
+		});
+
+		const friendList = await this.prisma.friendship.findMany({
+			where: {
+				friendId: me.id
+			}
+		});
+
+		let friendsListId = [];
+		friendList.forEach(data => friendsListId.push(data.friendWithId));
 
 		const list = await this.prisma.user.findMany({
 			where: {
-				befrienderId: me.id
+				id: {
+					in: friendsListId
+				}
 			}
 		});
 
 		return list;
 	}
 
-	async deleteFriend(login: string, friendNickname: string): Promise<User> {
+	async deleteFriend(login: string, friendNickname: string) {
 
 		const friend = await this.prisma.user.findUnique({
 			where: { nickname: friendNickname }
 		});
 
+		const me = await this.prisma.user.findUnique({
+			where: { login: login }
+		});
+
 		if (!friend)
 			throw new HttpException("User not found", 404);
 
-		const act = this.prisma.user.update({
-			where: { login: login},
-			data: {
-				friends: {
-					disconnect: {
-						id: friend.id
-					}
-				}
+		const del = await  this.prisma.friendship.deleteMany({
+			where: {
+				friendId: me.id,
+				friendWithId: friend.id
 			}
+		})
 
-	})
-}
+		return del;
+	}
 
 
 	/////////////////////// MANAGE USER'S AVATAR ////////////////////////
 
-	async createImage(imageData: Express.Multer.File): Promise < Image > {
-	return this.prisma.image.create({
-		data: {
-			filename: imageData.filename,
-			filepath: imageData.path,
-			mimetype: imageData.mimetype,
-			size: imageData.size,
-		},
-	});
-}
+	async createImage(imageData: Express.Multer.File): Promise<Image> {
+		return this.prisma.image.create({
+			data: {
+				filename: imageData.filename,
+				filepath: imageData.path,
+				mimetype: imageData.mimetype,
+				size: imageData.size,
+			},
+		});
+	}
 
-	async linkAvatar(image: Image, login: string): Promise < User > {
-	return this.prisma.user.update({
-		where: {
-			login: login
-		},
-		data: {
-			avatar: {
-				connect: {
-					id: image.id
+	async linkAvatar(image: Image, login: string): Promise<User> {
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				avatar: {
+					connect: {
+						id: image.id
+					}
 				}
 			}
-		}
-	})
-}
+		})
+	}
 
 	async image(
-	imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
-): Promise < Image | null > {
+		imageWhereUniqueInput: Prisma.ImageWhereUniqueInput,
+	): Promise<Image | null> {
 
-	if(imageWhereUniqueInput.id === null)
-	throw new HttpException("Requested image not found", 404);
-
-	const img = await this.prisma.image.findUnique({
-		where: imageWhereUniqueInput,
-	});
-
-	if(!img)
+		if (imageWhereUniqueInput.id === null)
 			throw new HttpException("Requested image not found", 404);
-	return img;
-}
+
+		const img = await this.prisma.image.findUnique({
+			where: imageWhereUniqueInput,
+		});
+
+		if (!img)
+			throw new HttpException("Requested image not found", 404);
+		return img;
+	}
 
 	/////////////////////// MANAGE USER'S 2FA ////////////////////////
 
 	async turnOnTwoFactorAuthentication(login: string) {
-	return this.prisma.user.update({
-		where: {
-			login: login
-		},
-		data: {
-			isTwoFAEnabled: true
-		}
-	});
-}
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				isTwoFAEnabled: true
+			}
+		});
+	}
 
 	async setTwoFactorAuthenticationSecret(secret: string, login: string)
-		: Promise < User > {
-	return this.prisma.user.update({
-		where: {
-			login: login
-		},
-		data: {
-			TwoFA_secret: secret
-		}
-	});
-}
+		: Promise<User> {
+		return this.prisma.user.update({
+			where: {
+				login: login
+			},
+			data: {
+				TwoFA_secret: secret
+			}
+		});
+	}
 
 
 

@@ -77,7 +77,7 @@ export class AuthController {
 	@Post('log-in')
 	async logIn_2fa(@Req() request: RequestWithUser) {
 		const { user } = request;
-		const accessTokenCookie = this.authService.getCookieWith_2FAJwtAccessToken(user.id);
+		const accessTokenCookie = await this.authService.getCookieWith_2FAJwtAccessToken(user.login);
 
 		request.res.setHeader('Set-Cookie', [accessTokenCookie]);
 

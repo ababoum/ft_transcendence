@@ -26,12 +26,6 @@
 
 <Header />
 
-<input type="text" id="typeTextX" class="form-control form-control-lg"
-	   required bind:value={log}/>
-<Modal>
-	<InvitationButton login="{log}"/>
-</Modal>
-
 {#if full_profile === undefined}
 	<div class="profile-container">
 		<img src={loading_imageSrc} alt="avatar" class="avatar-img" />
@@ -42,13 +36,14 @@
 	</div>
 {:else}
 	<div class="profile-container">
-		<h1 class="profile-title">Your profile</h1>
+		<h1 class="profile-title">My profile</h1>
 		<ProfileImage profile_data={full_profile} />
 		<ProfileAbout profile_data={full_profile} />
 		<h1 class="profile-title">Add new friends</h1>
 		<AddFriend profile_data={full_profile} />
-		<h1 class="profile-title">Your friends</h1>
+		<h1 class="profile-title">My friends</h1>
 		<Friends profile_data={full_profile} />
+		<h1 class="profile-title">My games</h1>
 	</div>
 {/if}
 

@@ -56,7 +56,11 @@ export class AuthService {
 
 	/////////////////// FOR 2FA AUTHENTICATION ///////////////////
 
-	public getCookieWith_2FAJwtAccessToken(userId: number, isSecondFactorAuthenticated = false) {
+	public async getCookieWith_2FAJwtAccessToken(login: string, isSecondFactorAuthenticated = false) {
+
+		const user = await this.userService.user({login: login});
+		const userId = user.id;
+
 		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
 
 		const jwt_secret = jwtConstants.secret;
@@ -68,19 +72,5 @@ export class AuthService {
 		});
 		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${exp_time}`;
 	}
-
-	public getCookieWithJwtRefreshToken(userId: number, isSecondFactorAuthenticated = false) {
-		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
-
-		const jwt_secret = jwtConstants.secret;
-		const exp_time = jwtConstants.exp_time;
-
-		const token = this.jwtService.sign(payload, {
-			secret: jwt_secret,
-			expiresIn: `${exp_time}s`
-		});
-		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${exp_time}`;
-	}
-
 
 }

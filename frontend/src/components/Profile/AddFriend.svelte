@@ -13,10 +13,13 @@
 		const formData = new FormData(e.target);
 		const nickname = formData.get("nickname").toString();
 
+		if (nickname == profile.nickname) {
+			msg = `<p class="text-danger">You cannot add yourself as friend</p>`;
+			return ;
+		}
+
 		// Send data to the API
 		const resp = await add_friend(nickname);
-
-		console.log(resp);
 
 		if (resp.ok) {
 			msg = `<p class="text-success">User successfully added as friend</p>`;
