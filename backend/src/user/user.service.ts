@@ -171,7 +171,7 @@ export class UserService {
 		return list;
 	}
 
-	async deleteFriend(login: string, friendNickname: string): Promise<User> {
+	async deleteFriend(login: string, friendNickname: string) {
 
 		const friend = await this.prisma.user.findUnique({
 			where: { nickname: friendNickname }

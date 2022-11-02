@@ -63,13 +63,22 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
 
+	async addPassword(user, chatRoomId: number, res) {
+		console.log("addPassword from " + user.nickname + " for room " + chatRoomId)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		console.log(this.chatRoomsList[chatRoomIndex])
+		console.log(this.chatRoomsList[chatRoomIndex].mode)
+		this.chatRoomsList[chatRoomIndex].mode = await res.mode
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
 	async joinChatroom(user, chatRoomId: number, res) {
 		//Update this.chatRoomsList to add this user as participant
 		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
 		this.chatRoomsList[chatRoomIndex].participants = res.participants
 				
-		console.log([chatRoomIndex])
-
 		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
@@ -79,7 +88,14 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
 		this.chatRoomsList[chatRoomIndex].participants = res
 
-		console.log([chatRoomIndex])
+		// Emit update to everyone
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async inviteUser(user, chatRoomId: number, res) {
+		//Update this.chatRoomsList with the new list of participants
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].participants = res.participants
 
 		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
@@ -90,6 +106,8 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 
 		// Join client to the room
 		await client.join(chatRoomId);
+
+		this.logger.log(user.login + " entered the chatroom " + chatRoomId)
 	}
 
 	async exitChatroom(user, chatRoomId: string) {
@@ -97,6 +115,8 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 
 		// Join client to the room
 		await client.leave(chatRoomId);
+
+		this.logger.log(user.login + " exited the chatroom " + chatRoomId)
 	}
 
 	async adminUser(chatRoomId: number, nickname, res) {

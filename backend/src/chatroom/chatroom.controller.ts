@@ -51,10 +51,30 @@ export class ChatroomController {
  	@Post()
 	async createChatRoom(@Request() req, @Body() CreateChatRoomDto: CreateChatRoomDto) {
 		console.log(req.user)
-		//ENCRYPTION OF PASSWORD HERE
 		const res = await this.ChatroomService.createChatRoom(req.user.login, CreateChatRoomDto)
 		await this.ChatroomGateway.createChatroom(res)
 		return res;
+	}
+
+	@Patch(':id/addPassword')
+	async addPassword(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		const res = await this.ChatroomService.addPassword(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.addPassword(req.user, Number(id), res)
+		return res;
+	}
+
+	@Patch(':id/changePassword')
+	async changePassword(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		// const res = await this.ChatroomService.changePassword(req.user.login, +id, UpdateChatRoomDto);
+		// await this.ChatroomGateway.changePassword(req.user, Number(id), res)
+		// return res;
+	}
+
+	@Patch(':id/removePassword')
+	async removePassword(@Request() req, @Param('id') id: string) {
+		// const res = await this.ChatroomService.removePassword(req.user.login, +id);
+		// await this.ChatroomGateway.removePassword(req.user, Number(id), res)
+		// return res;
 	}
 
 // PARTICIPANTS //
@@ -70,11 +90,26 @@ export class ChatroomController {
 		return res;
 	}
 
+	@Patch(':id/joinProtected')
+	async joinProtected(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		const res = await this.ChatroomService.joinProtectedChatRoom(req.user.login, +id, UpdateChatRoomDto.password);
+		await this.ChatroomGateway.joinChatroom(req.user, Number(id), res)
+		return res;
+	}
+
 	@Patch(':id/leave')
 	async leave(@Request() req, @Param('id') id: string) {
+		console.log(req.user.login + " tries to leave")
 		const res = await this.ChatroomService.leaveChatRoom(req.user.login, +id);
 		await this.ChatroomGateway.leaveChatroom(req.user, Number(id), res)
 		return res;	}
+
+	@Patch(':id/invite')
+	async inviteUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		const res = await this.ChatroomService.inviteUser(req.user.login, +id, UpdateChatRoomDto.nickname);
+		await this.ChatroomGateway.inviteUser(req.user, Number(id), res)
+		return res;
+	}
 
 // ADMIN //
 	@Get(':id/adminList')

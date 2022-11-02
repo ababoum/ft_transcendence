@@ -4,6 +4,7 @@ import { ChatRoom, User, UsersMutedinChatRooms, Prisma } from '@prisma/client';
 import { CreateChatRoomDto } from './dto/create-chatroom.dto';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 import { MessageDto } from './dto/message.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChatroomService {
@@ -22,23 +23,35 @@ export class ChatroomService {
 		take?: number;
 		cursor?: Prisma.UserWhereUniqueInput;
 		where?: Prisma.UserWhereInput;
-		orderBy?: Prisma.UserOrderByWithRelationInput;
-	  }): Promise<ChatRoom[]> {
-		const { skip, take, cursor, where, orderBy } = params;
+	  }){
+		const { skip, take, cursor, where } = params;
 		return await this.prisma.chatRoom.findMany({
 		  skip,
 		  take,
 		  cursor,
 		  where,
-		  orderBy,
-		  include :{admin: {select: {id: true, nickname: true}},
-		  			participants: {select: {id: true, nickname: true}},
-					banList: {select: {id: true, nickname: true}},
-					muteList: {select: {user: {select: {id: true, nickname: true}}, mutedUntil: true}}}
+		  orderBy: {id: "asc"},
+		  select: {
+			id: true,
+			name: true,
+			creationDate: true,
+			mode: true,
+			ownerNickname: true,
+			password: false,
+			admin: {select: {id: true, nickname: true}},
+			participants: {select: {id: true, nickname: true}},
+			banList: {select: {id: true, nickname: true}},
+			muteList: {select: {user: {select: {id: true, nickname: true}}, mutedUntil: true}},
+		}
 		});
 	  }
 
 	async createChatRoom(userlogin: string, CreateChatRoomDto: CreateChatRoomDto): Promise<ChatRoom> {
+		let hash = null
+		if (CreateChatRoomDto.mode == "PROTECTED") {
+			const salt = await bcrypt.genSalt();
+			hash = await bcrypt.hash(CreateChatRoomDto.password, salt);
+		}
 		const res = await this.prisma.chatRoom.create({
 			data: {
 				name: CreateChatRoomDto.name,
@@ -46,7 +59,7 @@ export class ChatroomService {
 				mode: CreateChatRoomDto.mode,
 				admin: {connect: {login: userlogin}},
 				participants: {connect: {login: userlogin}},
-				password: CreateChatRoomDto.password
+				password: hash
 			},
 			include :{
 				admin: {select: {id: true, nickname: true}},
@@ -56,6 +69,28 @@ export class ChatroomService {
 			}
 		});
 		return res;
+	}
+
+	async addPassword(userlogin: string, chatroomid: number, UpdateChatRoomDto: UpdateChatRoomDto) {
+		const salt = await bcrypt.genSalt();
+		const hash = await bcrypt.hash(UpdateChatRoomDto.password, salt);
+		const res = await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { owner: true }
+		})
+		if (res.owner.login == userlogin) {
+			return await this.prisma.chatRoom.update({
+			where: { id: chatroomid },
+			data: {
+				mode: "PROTECTED",
+				password: hash
+			},
+			select: {
+				mode: true
+			}
+			});
+		}
+		throw new HttpException("You are not the owner of this chatroom", 401)
 	}
 
 // PARTICIPANTS //
@@ -72,7 +107,28 @@ export class ChatroomService {
 			select: { banList: {where: {login: userlogin}} }
 		})
 		if (res.banList[0])
-			throw new HttpException("You are banned from this chatroom", 403)
+			throw new HttpException("You are banned from this chatroom", 401)
+		return await this.prisma.chatRoom.update({
+			where: { id: chatroomid },
+			data: {
+				participants: { connect: { login: userlogin } },
+			},
+			select: { participants: { select: { id: true, nickname: true } } },
+		});
+	}
+
+	async joinProtectedChatRoom(userlogin: string, chatroomid: number, password: string) {
+		const res = await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { 
+				banList: {where: {login: userlogin}},
+				password: true
+			}
+		})
+		if (res.banList[0])
+			throw new HttpException("You are banned from this chatroom", 401)
+		if(await bcrypt.compare(password, res.password) == false)
+			throw new HttpException("Wrong password", 401)
 		return await this.prisma.chatRoom.update({
 			where: { id: chatroomid },
 			data: {
@@ -106,6 +162,28 @@ export class ChatroomService {
 		catch {
 			throw new HttpException("This room doesn't exist", 404)
 		}
+	}
+
+	async inviteUser(userlogin: string, chatroomid: number, nickname: string) {
+		const res = await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { 
+				participants: {where: {login: userlogin}},
+				banList: {where: {nickname: nickname}}
+		}
+		})
+		if (res.participants[0]) {
+			if (res.banList[0])
+				throw new HttpException("This user is banned from this chatroom", 401)
+			return await this.prisma.chatRoom.update({
+				where: { id: chatroomid },
+				data: {
+					participants: { connect: { nickname: nickname } },
+				},
+				select: { participants: { select: { id: true, nickname: true } } },
+			});
+		}
+		throw new HttpException("You are not participant of this chatroom", 401)
 	}
 
 // ADMIN //

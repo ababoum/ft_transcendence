@@ -1,3 +1,4 @@
+
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
@@ -10,11 +11,12 @@
     import Modal, { getModal } from "../components/Profile/Modal.svelte";
     import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
 
+
 	let tmp: boolean;
 	let chatRoomsList = [];
 	let messagesList = [];
 	let activeChatRoomId;
-	let message, adminNickname, banNickname, muteNickname: string;
+	let message, adminNickname, banNickname, muteNickname, password: string;
 	let muteDuration: number = 1
 	let mutedUntil;
 	let currentTime;
@@ -79,18 +81,30 @@
 		const password = formData.get("password"); 
 		console.log("In joinProtectedChatRoom: " + chatRoomId + " password: " + password)
 		
-		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/join', {
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/joinProtected', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({password: password})
+		})
+		const res = await rawresponse.json()
+		console.log(res)
+		e.target.reset()
+	}
+
+	async function leaveChatRoom(chatRoomId: number){
+		console.log("In leaveChatRoom " + chatRoomId)
+
+		const test = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/exit', {
 			method: 'PATCH',
 			headers: {	
 				"Authorization": "Bearer " + getCookie("jwt"),
 			},
 		})
-		const res = await rawresponse.json()
-		console.log(res)
-	}
 
-	async function leaveChatRoom(chatRoomId: number){
-		console.log("In leaveChatRoom " + chatRoomId)
+		activeChatRoomId = undefined;
 
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/leave', {
 			method: 'PATCH',
@@ -237,9 +251,74 @@
 			body: JSON.stringify({content: message})
 		})
 		const res = await rawresponse.json()
-		console.log("Successfully posted message: " + res.content)
+		console.log(res)
 
 		e.target.reset()
+	}
+
+	async function inviteUser(e){
+		const formData = new FormData(e.target);
+		const nickname = formData.get("nickname");
+		console.log("In inviteUser " + activeChatRoomId + " - nickname: " + nickname)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/invite', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: nickname})
+		})
+		const res = await rawresponse.json()
+		console.log(res)
+		e.target.reset()
+	}
+
+	
+	async function addPassword(chatRoomId: number, password: string){
+		console.log("In addPassword " + password + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/addPassword', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({password: password})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
+	async function changePassword(chatRoomId: number, password: string){
+		console.log("In changePassword " + password + " room " + chatRoomId)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/changePassword', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({password: password})
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
+	}
+
+	async function removePassword(chatRoomId: number){
+		console.log("In removePassword " + chatRoomId + " chatRoomId")
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/removePassword', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+			},
+		})
+		const res = await rawresponse.json()
+
+		console.log(res)
 	}
 
 </script>
@@ -261,12 +340,11 @@
 
                 <div class="p-3">
 					
-                  <div data-mdb-perfect-scrollbar="true" style="position: relative; height: 400px">
+					<div class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
 					{#key chatRoomsList}
 					{#if chatRoomsList[0] }
 					<ul class="list-unstyled mb-0">
 						{#each chatRoomsList as chatroom (chatroom)}
-						  <li class="p-2 border-bottom">
 							{#if chatroom.mode === "PUBLIC"}
 							<div class="pt-1">
 							  {#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
@@ -291,33 +369,37 @@
 								<p>{chatroom.name} <button>Banned</button> </p>
 								{:else}
 								<form on:submit|preventDefault={joinProtectedChatRoom}>
-									<label>{chatroom.name} <input type="text" name="password" placeholder="password"/>
+									<label>{chatroom.name} <input type="text" name="password" minlength="3" placeholder="password" style=" position: relative; width:100px" required/>
 										<input type="hidden" name="chatroomId" value={chatroom.id}/>
 									</label>
 								</form>
 								{/if}
 							</div>
 							{:else if chatroom.mode === "PRIVATE"}
+							{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
 							<div class="pt-1">
-								{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
 								<p>{chatroom.name} 
 								  <button on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 								  <button on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
 								</p>
-								{/if}
 							</div>
 							{/if}
-						  </li>
+							{/if}
 						{/each}
 						</ul>
 					{/if}
 					{/key}
-					<button
-					type="button"
-					class="btn btn-primary btn-sm update-btn"
-					on:click={getModal().open}>Create Room Form</button>
                   </div>
-				  <div class="p-3">
+				  <button type="button" class="btn btn-primary btn-sm update-btn" on:click={getModal().open}>Create Room Form</button>
+				  <div class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
+					<p>Private Messages List</p>
+					<p>Private Messages List</p>
+					<p>Private Messages List</p>
+					<p>Private Messages List</p>
+					<p>Private Messages List</p>
+					<p>Private Messages List</p>
+					<p>Private Messages List</p>
+					<p>Private Messages List</p>
 					<p>Private Messages List</p>
 				  </div>
 
@@ -328,8 +410,7 @@
 
 		          <div class="col-md-6 col-lg-7 col-xl-8">
 
-		            <div class="pt-3 pe-3" data-mdb-perfect-scrollbar="true"
-		              style="position: relative; height: 400px">
+		            <div class="overflow-auto t-3 pe-3" style="position: relative; height: 400px; width:auto; overflow-y: scroll">
 					  {#each messagesList as message}
 
 		              <div class="d-flex flex-row justify-content-start">
@@ -347,6 +428,7 @@
 
 					  {/each}
 		            </div>
+
 					{#if activeChatRoomId != undefined}
 					<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 						<img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" style="width: 40px; height: 100%;">
@@ -368,11 +450,33 @@
 					</div>
 					<div>
 						<ul>
+							{#if chatRoomsList[activeChatRoomId - 1].admin.find(x => x.nickname === $user.nickname) !== undefined}
+							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+								<form on:submit|preventDefault|stopPropagation={inviteUser}>
+									<div class="input-group">
+									<input type="text" name="nickname" minlength="1" maxlength="150" class="form-control width100" placeholder="nickname" style="width:150px" required>
+									<span class="input-group-btn">
+										<button type="submit" class="btn btn-info">Invite</button>
+									</span>
+									</div>
+								</form>
+							</div>
+							{/if}
 							{#if chatRoomsList[activeChatRoomId - 1].ownerNickname === $user.nickname}
 							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 								<input type="text" class="form-control" placeholder="nickname" bind:value={adminNickname}>
 								<button on:click={() => adminUser(activeChatRoomId, adminNickname)}>Admin</button>
 								<button on:click={() => unadminUser(activeChatRoomId, adminNickname)}>Unadmin</button>
+							</div>
+							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+								{#if chatRoomsList[activeChatRoomId - 1].mode === "PUBLIC"}
+								<input type="text" class="form-control" placeholder="password" bind:value={password}>
+								<button on:click={() => addPassword(activeChatRoomId, password)}>Add</button>
+								{:else if chatRoomsList[activeChatRoomId - 1].mode === "PROTECTED"}
+								<input type="text" class="form-control" placeholder="password" bind:value={password}>
+								<button on:click={() => changePassword(activeChatRoomId, password)}>Change</button>
+								<button on:click={() => removePassword(activeChatRoomId)}>Remove</button>
+								{/if}
 							</div>
 							{/if}
 							{#if chatRoomsList[activeChatRoomId - 1].admin.find(x => x.nickname === $user.nickname) !== undefined}
