@@ -16,8 +16,6 @@ ISSUES:
 - Pour socket et Gateway, il faut verifier le token dans handleConnection et disconnect en cas d'erreur, car UseGuards() ne permet pas d'empecher la connection
 
 TO-DO:
-- Invite function pour les PRIVATE Chatroom
-- Password functionality pour les chatroom
 
 BONUS:
 - Generer une <datalist> de nickname pour les suggestions dans les <input type="text">
