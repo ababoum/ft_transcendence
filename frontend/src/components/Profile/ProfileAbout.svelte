@@ -188,6 +188,13 @@
 			</div>
 		{/if}
 
+		<!-- RATING (CANNOT BE DIRECTLY MODIFIED) -->
+
+		<div class="d-flex flex-column justify-content-center align-items-center">
+			<div><strong>⭐ Rating ⭐</strong></div>
+			<div class="rating-text">{profile.rating}</div>
+		</div>
+
 		<!-- PASSWORD MANAGEMENT -->
 
 		<div>
@@ -356,5 +363,12 @@
 
 	.popup-msg {
 		font-size: min(max(16px, 4vw), 22px);
+	}
+
+	.rating-text {
+		color: rgb(255, 183, 0);
+		font-size: 200%;
+		font-weight: bold;
+		text-shadow: 1px 1px #392308;
 	}
 </style>

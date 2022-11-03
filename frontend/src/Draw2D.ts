@@ -6,7 +6,7 @@ export default class Draw2D {
 
 	constructor(context) {
 		this._context = context;
-		this._font = "fantasy";
+		this._font = "monospace";
 		this._text_size = 45;
 	}
 

@@ -127,6 +127,52 @@ export class UserService {
 		return result;
 	}
 
+	///////////////////////    UPDATE USER STATUS    ////////////////////////
+
+	async updateStatus(userLogin: string, status: string) {
+
+		let res: User;
+
+		switch (status) {
+			case 'online':
+				res = await this.prisma.user.update({
+					where: {
+						login: userLogin
+					},
+					data: {
+						status: 'ONLINE'
+					}
+				});
+				break;
+
+			case 'offline':
+				res = await this.prisma.user.update({
+					where: {
+						login: userLogin
+					},
+					data: {
+						status: 'OFFLINE'
+					}
+				});
+				break;
+			case 'in-game':
+
+				res = await this.prisma.user.update({
+					where: {
+						login: userLogin
+					},
+					data: {
+						status: 'IN_GAME'
+					}
+				});
+				break;
+
+			default:
+				throw new HttpException("Invalid status", 400);
+		}
+
+		return res;
+	}
 
 	/////////////////////// MANAGE USER'S FRIENDSHIP ////////////////////////
 
@@ -193,7 +239,7 @@ export class UserService {
 		if (!friend)
 			throw new HttpException("User not found", 404);
 
-		const del = await  this.prisma.friendship.deleteMany({
+		const del = await this.prisma.friendship.deleteMany({
 			where: {
 				friendId: me.id,
 				friendWithId: friend.id

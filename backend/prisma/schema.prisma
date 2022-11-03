@@ -121,5 +121,5 @@ enum chatRoomType {
 enum UserStatus {
     ONLINE
     OFFLINE
-    IN_GAME
+    INGAME
 }

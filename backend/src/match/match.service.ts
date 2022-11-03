@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma, Match } from '@prisma/client';
 import { createMatchDTO } from './dto';
@@ -10,28 +10,62 @@ export class MatchService {
 
 	/////////////////////// ACCESS MATCH INFO ///////////////////////
 
-	async getMatches(params: {
-		skip?: number;
-		take?: number;
-		cursor?: Prisma.MatchWhereUniqueInput;
-		where?: Prisma.MatchWhereInput;
-		orderBy?: Prisma.MatchOrderByWithRelationInput;
-	}): Promise<Match[]> {
+	async getMatches(userLogin?: string)
+		: Promise<Match[]> {
 
-		const { skip, take, cursor, where, orderBy } = params;
-		return this.prisma.match.findMany({
-			skip,
-			take,
-			cursor,
-			where,
-			orderBy,
+		let res: Match[];
+
+		// get all matches
+		if (!userLogin) {
+			res = await this.prisma.match.findMany();
+			return res;
+		}
+
+		res = await this.prisma.match.findMany({
+			where: {
+				OR: [{
+					winnerLogin: userLogin
+				}, {
+					loserLogin: userLogin
+				}]
+			},
+			include: {
+				loser: true,
+				winner: true
+			},
+			orderBy: {
+				createdAt: 'desc' // most recent to less recent
+			}
 		});
+
+		return res;
 	}
 
 	async createMatch(matchData: createMatchDTO): Promise<Match> {
 
-		return this.prisma.match.create({
-			data : {
+		// check if both winner and loser logins are valid
+		const winner = await this.prisma.user.findUnique({
+			where: {
+				login: matchData.winnerLogin
+			}
+		});
+
+		if (!winner) {
+			throw new HttpException("Winner login is invalid: user not found", 400);
+		}
+
+		const loser = await this.prisma.user.findUnique({
+			where: {
+				login: matchData.loserLogin
+			}
+		});
+
+		if (!loser) {
+			throw new HttpException("Loser login is invalid: user not found", 400);
+		}
+
+		return await this.prisma.match.create({
+			data: {
 				winnerScore: matchData.winnerScore,
 				loserScore: matchData.loserScore,
 				winner: {
@@ -39,13 +73,13 @@ export class MatchService {
 						login: matchData.winnerLogin
 					}
 				},
-				loser : {
-					connect : {
+				loser: {
+					connect: {
 						login: matchData.loserLogin
 					}
 				}
 			},
-			
+
 		});
 	}
 }

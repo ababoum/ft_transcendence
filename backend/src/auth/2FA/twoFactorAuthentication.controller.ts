@@ -33,6 +33,8 @@ export class TwoFactorAuthenticationController {
 	@UseGuards(JwtAuthGuard)
 	async register(@Res() response: Response, @Req() request: RequestWithUser) {
 
+		console.log(`Secret requested for ${request.user.login}`);
+
 		const { otpauthUrl } = await this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(request.user.login);
 
 		return this.twoFactorAuthenticationService.pipeQrCodeStream(response, otpauthUrl);
@@ -49,8 +51,7 @@ export class TwoFactorAuthenticationController {
 		@Req() request: RequestWithUser,
 		@Body() { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto
 	) {
-
-		const isCodeValid = this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
+		const isCodeValid = await this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
 			twoFactorAuthenticationCode, request.user.login
 		);
 		if (!isCodeValid) {

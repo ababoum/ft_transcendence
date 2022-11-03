@@ -19,3 +19,10 @@ TO-DO:
 
 BONUS:
 - Generer une <datalist> de nickname pour les suggestions dans les <input type="text">
+
+
+TO-DO M'hamed:
+
+- Créer la liste des matchs passés pour un joueur
+- Modifier le endpoint/strategy login simple pour vérifier si le 2FA est activé et renvoyer une réponse correspondante (http code 202)
+- Ajouter page de profil pour les autres users

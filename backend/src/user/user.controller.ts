@@ -82,7 +82,7 @@ export class UserController {
 		return this.userService.deleteUser({ login: login });
 	}
 
-	///////////////////////   UPDATE USER    ///////////////////////
+	///////////////////////   UPDATE USER INFO    ///////////////////////
 
 	@UseGuards(JwtAuthGuard)
 	@Patch('update/email')
@@ -136,6 +136,15 @@ export class UserController {
 		);
 	}
 
+	/////////////////////// UPDATE USER STATUS ////////////////////////
+
+	@Patch('status/:value')
+	@UseGuards(JwtAuthGuard)
+	async updateUserStatus(
+		@Req() req: RequestWithUser,
+		@Param('value') status: string) {
+		return await this.userService.updateStatus(req.user.login,status);
+	}
 
 	/////////////////////// MANAGE USER'S FRIENDSHIPS ////////////////////////
 
@@ -145,7 +154,7 @@ export class UserController {
 	async addFriendbyNickname(
 		@Req() req: RequestWithUser,
 		@Body() body: NicknameDTO) {
-			return await this.userService.addFriend(req.user.login, body.nickname);
+		return await this.userService.addFriend(req.user.login, body.nickname);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -160,8 +169,8 @@ export class UserController {
 	async deleteFriend(
 		@Req() req: RequestWithUser,
 		@Body() body: NicknameDTO) {
-		
-			return this.userService.deleteFriend(req.user.login, body.nickname);
+
+		return this.userService.deleteFriend(req.user.login, body.nickname);
 	}
 
 	/////////////////////// MANAGE USER'S AVATAR ////////////////////////

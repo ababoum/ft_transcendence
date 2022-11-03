@@ -9,6 +9,7 @@
 	import InvitationButton from "../components/Game/Invitations/InvitationButton.svelte";
     import Friends from "../components/Profile/Friends.svelte";
     import AddFriend from "../components/Profile/AddFriend.svelte";
+    import MatchHistory from "../components/Profile/MatchHistory.svelte";
 
 	// retrieve current user info
 
@@ -44,6 +45,7 @@
 		<h1 class="profile-title">My friends</h1>
 		<Friends profile_data={full_profile} />
 		<h1 class="profile-title">My games</h1>
+		<MatchHistory profile_data={full_profile} />
 	</div>
 {/if}
 

@@ -42,18 +42,20 @@ export class TwoFactorAuthenticationService {
 		return toFileStream(stream, otpauthUrl);
 	}
 
-	public async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, login: string) {
+	public async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, login: string): Promise<boolean> {
 
-		const user = await this.usersService.user({login: login});
+		const user = await this.usersService.user({ login: login });
 
-		return authenticator.verify({
+		const verif = authenticator.verify({
 			token: twoFactorAuthenticationCode,
 			secret: user.TwoFA_secret
 		});
+
+		return verif;
 	}
 
-	public async disable_TwoFA(login: string) {
-		await this.usersService.updateUser({
+	public async disable_TwoFA(login: string): Promise<User> {
+		return await this.usersService.updateUser({
 			where: { login: login },
 			data: { isTwoFAEnabled: false }
 		})

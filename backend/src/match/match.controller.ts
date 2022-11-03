@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { MatchService } from "./match.service";
 import { Match as MatchModel, User as UserModel } from '@prisma/client';
 import { UserService } from "../user/user.service";
 import { createMatchDTO } from './dto'
 import { ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/auth.guards";
 
 @Controller('match_history')
 @ApiTags('match_history')
@@ -14,14 +15,14 @@ export class MatchController {
 
 	@Get()
 	async getAllMatches(): Promise<MatchModel[]> {
-		return this.matchService.getMatches({});
+		return this.matchService.getMatches();
 	}
 
 	@Get('top10')
 	async getTop10Players(): Promise<UserModel[]> {
 		return this.userService.users({
 			take: 10,
-			orderBy: {rating: 'desc'}
+			orderBy: { rating: 'desc' }
 		});
 	}
 
@@ -30,7 +31,7 @@ export class MatchController {
 		@Body() matchData: createMatchDTO)
 		: Promise<MatchModel> {
 		// record the match
-		const ret = this.matchService.createMatch(matchData);
+		const ret = await this.matchService.createMatch(matchData);
 
 		// update the winner's rating
 		this.userService.updateUser({
@@ -46,14 +47,10 @@ export class MatchController {
 	}
 
 	@Get('/:login')
+	@UseGuards(JwtAuthGuard)
 	async getUserMatches(@Param('login') userLogin: string): Promise<MatchModel[]> {
-		return this.matchService.getMatches({
-			where: {
-				OR: {
-					winnerLogin: userLogin,
-					loserLogin: userLogin
-				}
-			}
-		});
+		
+		const matches = await this.matchService.getMatches(userLogin);
+		return matches;
 	}
 }

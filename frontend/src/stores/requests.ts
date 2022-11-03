@@ -188,3 +188,17 @@ export async function delete_friend(nickname: string) {
 
 	return resp;
 }
+
+///////////////////////////////// MATCHES /////////////////////////////////
+
+export async function get_matches(login: string) {
+	const resp = await fetch(get(BACKEND_URL) + "/match_history/" + login, {
+		method: 'GET',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt"),
+			'Content-Type': 'application/json'
+		}
+	});
+
+	return await resp.json();
+}

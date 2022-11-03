@@ -15,7 +15,7 @@
 	let loading_imageSrc = "static/loading_icon.gif";
 	let actual_img = loading_imageSrc;
 
-	const fetchImage = (async () => {
+	const fetchQR = (async () => {
 		const resp = await fetch(get(BACKEND_URL) + "/2fa/generate", {
 			method: "POST",
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
@@ -36,7 +36,7 @@
 </script>
 
 <div class={classes}>
-	{#await fetchImage}
+	{#await fetchQR}
 		<img
 			src={loading_imageSrc}
 			alt="profile"
