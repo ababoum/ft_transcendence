@@ -152,7 +152,7 @@ export class UserController {
 	async updateUserStatus(
 		@Req() req: RequestWithUser,
 		@Param('value') status: string) {
-		return await this.userService.updateStatus(req.user.login,status);
+		return await this.userService.updateStatus(req.user.login, status);
 	}
 
 	/////////////////////// MANAGE USER'S FRIENDSHIPS ////////////////////////

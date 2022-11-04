@@ -4,7 +4,10 @@
 	import { user } from "../../stores/store";
 	import { push } from "svelte-spa-router";
 	import Modal, { getModal } from "../Profile/Modal.svelte";
-	import { authenticate_2fa_code } from "../../stores/requests";
+	import {
+		authenticate_2fa_code,
+		update_status,
+	} from "../../stores/requests";
 
 	let login: string;
 	let password: string;
@@ -22,9 +25,10 @@
 		// No TwoFA and successful login
 		else if (!resp.TwoFA) {
 			$user = await $user.upd();
+			await update_status("ONLINE");
 			await push("/");
 		} else {
-			getModal().open();
+			getModal("sign-in-2fa").open();
 		}
 	}
 
@@ -45,8 +49,9 @@
 		const authentication = await authenticate_2fa_code(login, code);
 		twoFA_msg = authentication.message;
 		if (authentication.success) {
-			getModal().close();
+			getModal("sign-in-2fa").close();
 			$user = await $user.upd();
+			await update_status("ONLINE");
 			await push("/");
 		}
 	}
@@ -91,7 +96,7 @@
 	</form>
 
 	<!-- the pop-up for 2FA -->
-	<Modal>
+	<Modal id="sign-in-2fa">
 		<p class="p-2">
 			Hey! You have actived the <strong
 				>two-factor authentication on your account</strong
