@@ -65,16 +65,16 @@ export class ChatroomController {
 
 	@Patch(':id/changePassword')
 	async changePassword(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
-		// const res = await this.ChatroomService.changePassword(req.user.login, +id, UpdateChatRoomDto);
-		// await this.ChatroomGateway.changePassword(req.user, Number(id), res)
-		// return res;
+		const res = await this.ChatroomService.changePassword(req.user.login, +id, UpdateChatRoomDto);
+		await this.ChatroomGateway.changePassword(req.user, Number(id), res)
+		return res;
 	}
 
 	@Patch(':id/removePassword')
 	async removePassword(@Request() req, @Param('id') id: string) {
-		// const res = await this.ChatroomService.removePassword(req.user.login, +id);
-		// await this.ChatroomGateway.removePassword(req.user, Number(id), res)
-		// return res;
+		const res = await this.ChatroomService.removePassword(req.user.login, +id);
+		await this.ChatroomGateway.removePassword(req.user, Number(id), res)
+		return res;
 	}
 
 // PARTICIPANTS //
