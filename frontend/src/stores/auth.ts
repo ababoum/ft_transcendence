@@ -1,4 +1,4 @@
-import {CREATE_ACC_URL, LOGIN_PAGE, LOGIN_URL} from "./store";
+import { CREATE_ACC_URL, LOGIN_PAGE, LOGIN_URL } from "./store";
 import { get } from 'svelte/store'
 import { push } from "svelte-spa-router";
 
@@ -25,29 +25,41 @@ export async function logout() {
 	await push(get(LOGIN_PAGE));
 }
 
-export async function signIn(login: string, password: string) {
+export async function signIn(login: string, password: string)
+	: Promise<{ TwoFA: boolean, message: string }> {
+
 	let token;
-	await fetch(get(LOGIN_URL), {
+	const resp = await fetch(get(LOGIN_URL), {
 		method: 'POST',
-		headers: {'Content-Type': 'application/json'},
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ login, password })
-	}).then(response=>response.json())
-		.then(data=>{ token = data['access_token']; })
-	if (token != undefined) {
-		setCookie("jwt", token);
-	} else
-		throw "Wrong login or password";
+	});
+
+	if (resp.ok) {
+		await resp.json()
+			.then(data => { token = data['access_token']; })
+
+		// 2FA is not enabled
+		if (token) {
+			setCookie("jwt", token);
+			return { TwoFA: false, message: "" };
+		} else {
+			return { TwoFA: true, message: "" };
+		}
+	}
+	else
+		return { TwoFA: false, message: "Wrong login or password" };
 }
 
 export async function signUp(login: string, password: string, email: string, nickname: string) {
 	let msg: string = "";
 	const resp = await fetch(get(CREATE_ACC_URL), {
 		method: 'POST',
-		headers: {'Content-Type': 'application/json'},
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ login, password, email, nickname })
 	});
 	if (resp.ok)
 		return msg;
-	await resp.json().then((data)=> msg  = data.message);
+	await resp.json().then((data) => msg = data.message);
 	return msg;
 }

@@ -56,12 +56,12 @@ export class AuthService {
 
 	/////////////////// FOR 2FA AUTHENTICATION ///////////////////
 
-	public async getCookieWith_2FAJwtAccessToken(login: string, isSecondFactorAuthenticated = false) {
+	public async getCookieWith_2FAJwtAccessToken(login: string) {
 
 		const user = await this.userService.user({login: login});
-		const userId = user.id;
 
-		const payload: TokenPayload = { userId, isSecondFactorAuthenticated };
+		const payload = { username: user.login, sub: user.id };
+
 
 		const jwt_secret = jwtConstants.secret;
 		const exp_time = jwtConstants.exp_time
@@ -70,7 +70,8 @@ export class AuthService {
 			secret: jwt_secret,
 			expiresIn: `${exp_time}s`
 		});
-		return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${exp_time}`;
+		// return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${exp_time}`;
+		return `${token}`;
 	}
 
 }

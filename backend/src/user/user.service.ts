@@ -74,6 +74,24 @@ export class UserService {
 		});
 	}
 
+	async getUserPublicDatabyNickname(nickname: string) {
+
+		const user = await this.prisma.user.findUnique({
+			where: {
+				nickname: nickname
+			},
+			select: {
+				login: true,
+				rating: true,
+				email: true,
+				nickname: true,
+				status: true
+			}
+		});
+
+		return user;
+	}
+
 
 	/////////////////////// CREATE/DELETE USERS ////////////////////////
 
@@ -162,7 +180,7 @@ export class UserService {
 						login: userLogin
 					},
 					data: {
-						status: 'IN_GAME'
+						status: 'INGAME'
 					}
 				});
 				break;
@@ -189,6 +207,8 @@ export class UserService {
 
 		if (!friend)
 			throw new HttpException("User not found", 404);
+		else if (friend.login === me.login)
+			throw new HttpException("You cannot add yourself as friend", 409);
 
 		const new_friendship = await this.prisma.friendship.create({
 			data: {

@@ -1,4 +1,4 @@
-import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping, Body, Res, Param, Query, HttpStatus } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping, Body, Res, Param, Query, HttpStatus, HttpException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import {
 	JwtAuthGuard,
@@ -6,7 +6,7 @@ import {
 	FT_OAuthGuard
 } from './auth.guards';
 import { RequestWithUser } from './auth.interfaces';
-import { ApiBody, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './auth.dto';
 
@@ -24,10 +24,24 @@ export class AuthController {
 	@Post('login')
 	async login(@Body() body: LoginDto, @Request() req: RequestWithUser) {
 
+		const user = await this.userService.user({ login: req.user.login });
+
+		// check if login exists
+		if (!user) {
+			throw new HttpException("Wrong login or password", 401);
+		}
+
+		// check if 2FA is enabled
+		if (user.isTwoFAEnabled) {
+			return { TwoFA: true, access_token: null };
+		}
+
+		
+		// if 2FA is not enabled, immediately send access token
 		const { access_token } = await this.authService.login(req.user);
 		req.res.setHeader('Set-Cookie', [access_token]);
-		return { access_token: access_token };
-
+		
+		return { TwoFA: false, access_token: access_token };
 	}
 
 	@UseGuards(JwtAuthGuard)

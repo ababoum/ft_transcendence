@@ -12,6 +12,7 @@ services:
       - network
     volumes:
       - /goinfre/${USER}/data:/var/lib/postgresql/data
+      # - ~/ft_transcendence/${USER}/data:/var/lib/postgresql/data
       # - /Users/amyroshn/Documents/data:/var/lib/postgresql/data #ANTON PC
     restart: always
     ports:

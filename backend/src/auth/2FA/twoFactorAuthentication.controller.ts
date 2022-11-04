@@ -33,8 +33,6 @@ export class TwoFactorAuthenticationController {
 	@UseGuards(JwtAuthGuard)
 	async register(@Res() response: Response, @Req() request: RequestWithUser) {
 
-		console.log(`Secret requested for ${request.user.login}`);
-
 		const { otpauthUrl } = await this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(request.user.login);
 
 		return this.twoFactorAuthenticationService.pipeQrCodeStream(response, otpauthUrl);
@@ -75,11 +73,8 @@ export class TwoFactorAuthenticationController {
 			throw new UnauthorizedException('Wrong authentication code');
 		}
 
-		const accessTokenCookie = await this.authenticationService.getCookieWith_2FAJwtAccessToken(body.login, true);
-
-		request.res.setHeader('Set-Cookie', [accessTokenCookie]);
-
-		return request.user;
+		const accessTokenCookie = await this.authenticationService.getCookieWith_2FAJwtAccessToken(body.login);
+		return {access_token: accessTokenCookie};
 	}
 
 	@Patch('disable')

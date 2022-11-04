@@ -49,18 +49,26 @@ export class UserController {
 
 	@Get('id/:id')
 	async getUserById(@Param('id') id: string): Promise<UserModel> {
-		return this.userService.user({ id: Number(id) });
+		return await this.userService.user({ id: Number(id) });
 	}
 
 	@Get('profile/:login')
 	async getUserByLogin(@Param('login') login: string): Promise<UserModel> {
-		return this.userService.user({ login: login });
+		return await this.userService.user({ login: login });
 	}
 
 	@Get()
 	async findUsersById(): Promise<UserModel[]> {
-		return this.userService.users({});
+		return await this.userService.users({});
 	}
+
+	// public data of a user
+	@Get('public/:nickname')
+	@UseGuards(JwtAuthGuard)
+	async getUserPublicDataByNickname(@Param('nickname') nickname: string) {
+		return await this.userService.getUserPublicDatabyNickname(nickname);
+	}
+
 
 	/////////////////////// CREATE/DELETE USERS ////////////////////////
 
