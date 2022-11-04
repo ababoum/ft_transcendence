@@ -36,11 +36,11 @@ export class AuthController {
 			return { TwoFA: true, access_token: null };
 		}
 
-		
+
 		// if 2FA is not enabled, immediately send access token
 		const { access_token } = await this.authService.login(req.user);
 		req.res.setHeader('Set-Cookie', [access_token]);
-		
+
 		return { TwoFA: false, access_token: access_token };
 	}
 
@@ -74,13 +74,23 @@ export class AuthController {
 			req.user.id,
 			req.user.avatar);
 
-		// emit a token after successful login
-		const { access_token } = await this.authService.login({
-			login: usr.login,
-			sub: usr.id
-		});
-		res.cookie('jwt', access_token);
-		res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
+		if (!usr.isTwoFAEnabled) {
+			// emit a token after successful login (no 2FA)
+			const { access_token } = await this.authService.login({
+				login: usr.login,
+				sub: usr.id
+			});
+			res.cookie('jwt', access_token);
+			res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
+		}
+		else {
+			const url = new URL(process.env.FRONTEND_URL + "/#/2FA");
+			url.port = process.env.FRONT_PORT;
+			// url.pathname = '#/2FA';
+			url.searchParams.append('login', usr.login);
+			console.log(url.hash);
+			res.status(HttpStatus.FOUND).redirect(url.href);
+		}
 	}
 
 

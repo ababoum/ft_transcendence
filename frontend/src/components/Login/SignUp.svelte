@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Nav from "../Nav.svelte";
 	import {signUp} from "../../stores/auth";
 	import {push, location} from "svelte-spa-router";
 

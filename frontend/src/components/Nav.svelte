@@ -8,7 +8,7 @@
 </script>
 
 <main>
-	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="{$LOBBY_PAGE}" use:link>
 				<img src="static/logo.png" alt="" width="40" height="30">
