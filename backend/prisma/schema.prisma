@@ -31,9 +31,8 @@ model User {
     friend          Friendship[]            @relation("friendWith")
     friendWith      Friendship[]            @relation("friend")
     // block from receiving messages
-    blockerId       Int?
-    blocker         User?                   @relation("blocking", fields: [blockerId], references: [id])
     blockedList     User[]                  @relation("blocking")
+	blockedListRe   User[]                  @relation("blocking")
     // chats
     chatRoomOwned   ChatRoom[]              @relation(name: "OwnerTable")
     chatRoomAdmined ChatRoom[]              @relation(name: "AdminTable")

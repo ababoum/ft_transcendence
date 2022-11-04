@@ -93,6 +93,47 @@ export class ChatroomService {
 		throw new HttpException("You are not the owner of this chatroom", 401)
 	}
 
+	async changePassword(userlogin: string, chatroomid: number, UpdateChatRoomDto: UpdateChatRoomDto) {
+		const salt = await bcrypt.genSalt();
+		const hash = await bcrypt.hash(UpdateChatRoomDto.password, salt);
+		const res = await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { owner: true }
+		})
+		if (res.owner.login == userlogin) {
+			return await this.prisma.chatRoom.update({
+			where: { id: chatroomid },
+			data: {
+				password: hash
+			},
+			select: {
+				mode: true
+			}
+			});
+		}
+		throw new HttpException("You are not the owner of this chatroom", 401)
+	}
+
+	async removePassword(userlogin: string, chatroomid: number) {
+		const res = await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { owner: true }
+		})
+		if (res.owner.login == userlogin) {
+			return await this.prisma.chatRoom.update({
+			where: { id: chatroomid },
+			data: {
+				mode: "PUBLIC",
+				password: null
+			},
+			select: {
+				mode: true
+			}
+			});
+		}
+		throw new HttpException("You are not the owner of this chatroom", 401)
+	}
+
 // PARTICIPANTS //
 	async participantsByChatRoom(chatroomid: number) {
 		return this.prisma.chatRoom.findUniqueOrThrow({
@@ -148,15 +189,15 @@ export class ChatroomService {
 				},
 				select: {owner: true, participants: {select: {id: true, nickname: true}}}
 			});
-			// if (res.owner.login == userlogin) {
-			// 	res = await this.prisma.chatRoom.update({
-			// 		where: {id:chatroomid},
-			// 		data: {
-			// 			owner: {connect: {login: "ellacroi"}},
-			// 		},
-			// 		select: {ownerlogin: true, participants: {select: {id: true, nickname: true}}}
-			// 	})
-			// }
+			if (res.owner.login == userlogin) {
+				res = await this.prisma.chatRoom.update({
+					where: {id:chatroomid},
+					data: {
+						owner: {connect: {id: 1}},
+					},
+					select: {owner: true, participants: {select: {id: true, nickname: true}}}
+				})
+			}
 			return res.participants;
 		}
 		catch {
@@ -326,7 +367,7 @@ export class ChatroomService {
 	async getMessages(chatroomid: number) {
 		const res =  await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { messages: { select: { author: {select: {login: true, nickname: true}}, creationDate: true, content: true } } },
+			select: { messages: { select: { author: {select: {id: true, nickname: true}}, creationDate: true, content: true } } },
 		})
 		return res.messages
 	}
@@ -348,7 +389,7 @@ export class ChatroomService {
 					content: MessageDto.content,
 					chatRoomId: chatroomid
 				},
-				select: { author: {select: {login: true, nickname: true}}, creationDate: true, content: true },
+				select: { author: {select: {id: true, nickname: true}}, creationDate: true, content: true },
 			})
 		}
 		throw new HttpException("You are not participant of this chatroom", 401)

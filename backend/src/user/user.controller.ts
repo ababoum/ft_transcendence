@@ -36,6 +36,7 @@ import { createReadStream } from 'fs';
 import type { Response } from 'express';
 import { AuthService } from '../auth/auth.service';
 
+
 @Controller('users')
 @ApiTags('users')
 export class UserController {
@@ -264,5 +265,31 @@ export class UserController {
 
 		return await this.userService.user({ login: login })
 			.then(user => user.profile_picture);
+	}
+
+	/////////////////////// MANAGE USER'S BLOCKLIST ////////////////////////
+
+	@Post('blockUser')
+	@UseGuards(JwtAuthGuard)
+	async blockUserbyNickname(
+		@Req() req: RequestWithUser,
+		@Body() body: NicknameDTO) {
+		return await this.userService.blockUser(req.user.login, body.nickname);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('blockList')
+	async getMyBlockList(@Req() req) {
+		console.log("in getMyBlockList")
+		return await this.userService.getMyBlockList(req.user.login);
+	}
+
+	@Delete('unblockUser')
+	@UseGuards(JwtAuthGuard)
+	async deleteBlocked(
+		@Req() req: RequestWithUser,
+		@Body() body: NicknameDTO) {
+
+		return await this.userService.unblockUser(req.user.login, body.nickname);
 	}
 }
