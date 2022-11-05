@@ -2,6 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma, Image } from '@prisma/client';
 import { capitalizeFirstLetter } from '../utils';
+import { connect } from 'http2';
 
 @Injectable()
 export class UserService {
@@ -72,6 +73,24 @@ export class UserService {
 			where,
 			orderBy,
 		});
+	}
+
+	async getUserPublicDatabyNickname(nickname: string) {
+
+		const user = await this.prisma.user.findUnique({
+			where: {
+				nickname: nickname
+			},
+			select: {
+				login: true,
+				rating: true,
+				email: true,
+				nickname: true,
+				status: true
+			}
+		});
+
+		return user;
 	}
 
 
@@ -162,7 +181,7 @@ export class UserService {
 						login: userLogin
 					},
 					data: {
-						status: 'IN_GAME'
+						status: 'INGAME'
 					}
 				});
 				break;
@@ -189,6 +208,8 @@ export class UserService {
 
 		if (!friend)
 			throw new HttpException("User not found", 404);
+		else if (friend.login === me.login)
+			throw new HttpException("You cannot add yourself as friend", 409);
 
 		const new_friendship = await this.prisma.friendship.create({
 			data: {
@@ -317,6 +338,50 @@ export class UserService {
 				TwoFA_secret: secret
 			}
 		});
+	}
+
+	/////////////////////// MANAGE USER'S BLOCKLIST ////////////////////////
+
+
+	async blockUser(userLogin: string, friendNickname: string) {
+		const user = await this.prisma.user.findUnique({
+			where: {login : userLogin},
+			select: {nickname: true}
+		})
+		console.log(user.nickname)
+		console.log(friendNickname)
+		if (user.nickname !== friendNickname) {
+			const res = await this.prisma.user.update({
+				where: {login : userLogin},
+				data: {
+					blockedList: { connect: {nickname: friendNickname}}
+				},
+				select: {blockedList: {select: {nickname: true}}}
+			})
+			return res.blockedList;
+		}
+		throw new HttpException("You can't block yourself", 409)
+	}
+
+	async getMyBlockList(userLogin: string) {
+		const res = await this.prisma.user.findUnique({
+			where: {login: userLogin},
+			select: {blockedList: {select: {nickname: true}}}
+		})
+
+		return res.blockedList;
+	}
+
+	async unblockUser(userLogin: string, friendNickname: string) {
+		const res = await this.prisma.user.update({
+			where: {login : userLogin},
+			data: {
+				blockedList: { disconnect: {nickname: friendNickname}}
+			},
+			select: {blockedList: {select: {nickname: true}}}
+		})
+
+		return res.blockedList;
 	}
 
 

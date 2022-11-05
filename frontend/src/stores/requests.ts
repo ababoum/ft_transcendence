@@ -1,5 +1,5 @@
 import { BACKEND_URL, CHECK_AUTH_URL, GET_PROFILE_URL, TOP_10 } from "./store";
-import { eraseCookie, getCookie } from "./auth";
+import { eraseCookie, getCookie, setCookie } from "./auth";
 import { get } from "svelte/store";
 
 export async function get_current_user_data() {
@@ -31,11 +31,17 @@ export async function get_full_profile(login: string) {
 	}
 }
 
-export async function get_top_10() {
-	return fetch(get(TOP_10), {
+export async function get_user_public_data(nickname: string) {
+	const resp = await fetch(get(BACKEND_URL) + "/users/public/" + nickname, {
 		method: 'GET',
-	}).then(response => response.json());
+		headers: { "Authorization": "Bearer " + getCookie("jwt") }
+	});
+
+	const data = await resp.json();
+
+	return data;
 }
+
 
 export async function is_authenticated() {
 	try {
@@ -51,6 +57,11 @@ export async function is_authenticated() {
 	eraseCookie("jwt");
 	return false;
 }
+
+
+////////////////////////////// MANAGE USER INFO //////////////////////////////
+
+
 
 export async function update_email(new_email: string) {
 
@@ -112,6 +123,24 @@ export async function update_password(
 	return msg;
 }
 
+export async function update_status(status: string) {
+	let msg: string = null;
+	const resp = await fetch(get(BACKEND_URL) + "/users/status/" + status, {
+		method: 'PATCH',
+		headers: {
+			"Authorization": "Bearer " + getCookie("jwt")
+		}
+	});
+
+	if (resp.ok)
+		return msg;
+	await resp.json().then((data) => msg = data.message);
+	return msg;
+}
+
+///////////////////////////////// 2FA AUTH /////////////////////////////////
+
+
 export async function validate_2fa_code(twoFactorAuthenticationCode: string) {
 	const resp = await fetch(get(BACKEND_URL) + "/2fa/turn-on", {
 		method: 'POST',
@@ -131,6 +160,33 @@ export async function validate_2fa_code(twoFactorAuthenticationCode: string) {
 	else {
 		const msg = await resp.json().then(data => data.message);
 		return `<p class="text-danger">${msg}</p>`;
+	}
+}
+
+export async function authenticate_2fa_code(login: string, twoFactorAuthenticationCode: string)
+	: Promise<{ success: boolean, message: string, access_token: string }> {
+
+	const resp = await fetch(get(BACKEND_URL) + "/2fa/authenticate", {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(
+			{
+				login: login,
+				twoFactorAuthenticationCode: twoFactorAuthenticationCode
+			})
+	});
+
+	if (resp.ok) {
+		const token = await resp.json().then(data => data.access_token);
+
+		setCookie("jwt", token);
+		return { success: true, message: `<p class="text-success">Code valid!</p>`, access_token: token };
+	}
+	else {
+		const msg = await resp.json().then(data => data.message);
+		return { success: false, message: `<p class="text-danger">${msg}</p>`, access_token: null };
 	}
 }
 
@@ -189,7 +245,7 @@ export async function delete_friend(nickname: string) {
 	return resp;
 }
 
-///////////////////////////////// MATCHES /////////////////////////////////
+//////////////////////////// MATCHES and RATINGS /////////////////////////////
 
 export async function get_matches(login: string) {
 	const resp = await fetch(get(BACKEND_URL) + "/match_history/" + login, {
@@ -201,4 +257,10 @@ export async function get_matches(login: string) {
 	});
 
 	return await resp.json();
+}
+
+export async function get_top_10() {
+	return fetch(get(TOP_10), {
+		method: 'GET',
+	}).then(response => response.json());
 }

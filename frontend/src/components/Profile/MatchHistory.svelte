@@ -50,7 +50,6 @@
 
 	onMount(async () => {
 		matches = await get_matches(profile.login);
-		console.log(matches);
 	});
 </script>
 
@@ -66,18 +65,21 @@
 		</thead>
 		<tbody>
 			{#each matches as match}
-				<tr>
-					<th scope="row">{convert_date(match.createdAt)}</th>
-					{#if profile.login == match.winnerLogin}
+				{#if profile.login == match.winnerLogin}
+					<tr class="win">
+						<th scope="row">🏆 {convert_date(match.createdAt)}</th>
 						<td>{match.loser.nickname}</td>
 						<td>{match.winnerScore}</td>
 						<td>{match.loserScore}</td>
-					{:else}
+					</tr>
+				{:else}
+					<tr class="lose">
+						<th scope="row">😥 {convert_date(match.createdAt)}</th>
 						<td>{match.winner.nickname}</td>
 						<td>{match.loserScore}</td>
 						<td>{match.winnerScore}</td>
-					{/if}
-				</tr>
+					</tr>
+				{/if}
 			{/each}
 		</tbody>
 	</table>
@@ -86,5 +88,13 @@
 <style>
 	.table-header {
 		background-color: rgb(163, 168, 173);
+	}
+
+	.win {
+		background-color: rgb(125, 174, 125);
+	}
+
+	.lose {
+		background-color: rgb(169, 103, 103);
 	}
 </style>

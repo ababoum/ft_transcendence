@@ -22,7 +22,8 @@
 		const resp = await add_friend(nickname);
 
 		if (resp.ok) {
-			msg = `<p class="text-success">User successfully added as friend</p>`;
+			// msg = `<p class="text-success">User successfully added as friend</p>`;
+			window.location.reload();
 		} else {
 			msg = `<p class="text-danger">${await resp
 				.json()

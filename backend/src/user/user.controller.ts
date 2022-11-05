@@ -36,6 +36,7 @@ import { createReadStream } from 'fs';
 import type { Response } from 'express';
 import { AuthService } from '../auth/auth.service';
 
+
 @Controller('users')
 @ApiTags('users')
 export class UserController {
@@ -49,18 +50,26 @@ export class UserController {
 
 	@Get('id/:id')
 	async getUserById(@Param('id') id: string): Promise<UserModel> {
-		return this.userService.user({ id: Number(id) });
+		return await this.userService.user({ id: Number(id) });
 	}
 
 	@Get('profile/:login')
 	async getUserByLogin(@Param('login') login: string): Promise<UserModel> {
-		return this.userService.user({ login: login });
+		return await this.userService.user({ login: login });
 	}
 
 	@Get()
 	async findUsersById(): Promise<UserModel[]> {
-		return this.userService.users({});
+		return await this.userService.users({});
 	}
+
+	// public data of a user
+	@Get('public/:nickname')
+	@UseGuards(JwtAuthGuard)
+	async getUserPublicDataByNickname(@Param('nickname') nickname: string) {
+		return await this.userService.getUserPublicDatabyNickname(nickname);
+	}
+
 
 	/////////////////////// CREATE/DELETE USERS ////////////////////////
 
@@ -143,7 +152,7 @@ export class UserController {
 	async updateUserStatus(
 		@Req() req: RequestWithUser,
 		@Param('value') status: string) {
-		return await this.userService.updateStatus(req.user.login,status);
+		return await this.userService.updateStatus(req.user.login, status);
 	}
 
 	/////////////////////// MANAGE USER'S FRIENDSHIPS ////////////////////////
@@ -256,5 +265,31 @@ export class UserController {
 
 		return await this.userService.user({ login: login })
 			.then(user => user.profile_picture);
+	}
+
+	/////////////////////// MANAGE USER'S BLOCKLIST ////////////////////////
+
+	@Post('blockUser')
+	@UseGuards(JwtAuthGuard)
+	async blockUserbyNickname(
+		@Req() req: RequestWithUser,
+		@Body() body: NicknameDTO) {
+		return await this.userService.blockUser(req.user.login, body.nickname);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('blockList')
+	async getMyBlockList(@Req() req) {
+		console.log("in getMyBlockList")
+		return await this.userService.getMyBlockList(req.user.login);
+	}
+
+	@Delete('unblockUser')
+	@UseGuards(JwtAuthGuard)
+	async deleteBlocked(
+		@Req() req: RequestWithUser,
+		@Body() body: NicknameDTO) {
+
+		return await this.userService.unblockUser(req.user.login, body.nickname);
 	}
 }

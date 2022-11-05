@@ -252,13 +252,13 @@
 				<button
 					type="button"
 					class="btn btn-primary btn-sm update-btn"
-					on:click={getModal().open}>Enable</button
+					on:click={getModal("twofa").open}>Enable</button
 				>
 			{/if}
 		</div>
 
 		<!-- the pop-up for 2FA -->
-		<Modal>
+		<Modal id="twofa">
 			<h1 class="popup-msg">
 				Download Google Authenticator: <a
 					href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
@@ -288,7 +288,6 @@
 							<input
 								name="code"
 								type="number"
-								minlength="6"
 								placeholder="Your access code"
 							/>
 						</div>

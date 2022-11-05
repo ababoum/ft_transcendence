@@ -1,4 +1,4 @@
-import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping, Body, Res, Param, Query, HttpStatus } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Get, Redirect, HttpCode, Req, RequestMapping, Body, Res, Param, Query, HttpStatus, HttpException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import {
 	JwtAuthGuard,
@@ -6,7 +6,7 @@ import {
 	FT_OAuthGuard
 } from './auth.guards';
 import { RequestWithUser } from './auth.interfaces';
-import { ApiBody, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './auth.dto';
 
@@ -24,10 +24,24 @@ export class AuthController {
 	@Post('login')
 	async login(@Body() body: LoginDto, @Request() req: RequestWithUser) {
 
+		const user = await this.userService.user({ login: req.user.login });
+
+		// check if login exists
+		if (!user) {
+			throw new HttpException("Wrong login or password", 401);
+		}
+
+		// check if 2FA is enabled
+		if (user.isTwoFAEnabled) {
+			return { TwoFA: true, access_token: null };
+		}
+
+
+		// if 2FA is not enabled, immediately send access token
 		const { access_token } = await this.authService.login(req.user);
 		req.res.setHeader('Set-Cookie', [access_token]);
-		return { access_token: access_token };
 
+		return { TwoFA: false, access_token: access_token };
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -60,13 +74,26 @@ export class AuthController {
 			req.user.id,
 			req.user.avatar);
 
-		// emit a token after successful login
-		const { access_token } = await this.authService.login({
-			login: usr.login,
-			sub: usr.id
-		});
-		res.cookie('jwt', access_token);
-		res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
+		if (!usr.isTwoFAEnabled) {
+			// emit a token after successful login (no 2FA)
+			const { access_token } = await this.authService.login({
+				login: usr.login,
+				sub: usr.id
+			});
+
+			// we update the user's status here because the frontend can't do it in this situation
+			this.userService.updateStatus(usr.login, "ONLINE");
+			res.cookie('jwt', access_token);
+			res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
+		}
+		else {
+			const url = new URL(process.env.FRONTEND_URL + "/#/2FA");
+			url.port = process.env.FRONT_PORT;
+			// url.pathname = '#/2FA';
+			url.searchParams.append('login', usr.login);
+			console.log(url.hash);
+			res.status(HttpStatus.FOUND).redirect(url.href);
+		}
 	}
 
 

@@ -10,7 +10,6 @@ import { JwtAuthGuard } from '../auth/auth.guards';
 import { JwtService } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 
-
 @Module({
 	imports: [
 		MulterModule.registerAsync({
@@ -24,7 +23,7 @@ import { HttpModule } from '@nestjs/axios';
 		PrismaService, 
 		TwoFactorAuthenticationService, 
 		AuthService,
-		JwtService
+		JwtService,
 	],
 	controllers: [UserController, TwoFactorAuthenticationController],
 	exports: [UserService, TwoFactorAuthenticationService],

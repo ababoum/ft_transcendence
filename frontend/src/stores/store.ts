@@ -25,6 +25,7 @@ export const game_socket = writable(io(get(GAME_URL), {
 	}
 }));
 
+export const friends = writable([])
 
 export const chatroom_socket = writable(io('http://localhost:5678/chatroom'));
 export const GET_CHATROOMS_URL = readable('http://localhost:3000/chatrooms');

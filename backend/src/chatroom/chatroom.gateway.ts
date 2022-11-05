@@ -67,8 +67,24 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		console.log("addPassword from " + user.nickname + " for room " + chatRoomId)
 
 		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
-		console.log(this.chatRoomsList[chatRoomIndex])
-		console.log(this.chatRoomsList[chatRoomIndex].mode)
+		this.chatRoomsList[chatRoomIndex].mode = await res.mode
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async changePassword(user, chatRoomId: number, res) {
+		console.log("changePassword from " + user.nickname + " for room " + chatRoomId)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].mode = await res.mode
+
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async removePassword(user, chatRoomId: number, res) {
+		console.log("removePassword from " + user.nickname + " for room " + chatRoomId)
+
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
 		this.chatRoomsList[chatRoomIndex].mode = await res.mode
 
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
