@@ -47,7 +47,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		Logger.write("Deleted connection of " + user.nickname + ", current connections = " + user.connections_count());
 		if (user.connections_count() == 0) {
 			this._users.delete(user);
-			this.userService.updateStatus(user.login, "offline");
+			if (user.is_logged)
+				this.userService.updateStatus(user.login, "offline");
 			Logger.write("disconnect --- " + (user.is_logged ? user.nickname : client.id));
 		}
 		this.updateServerInfo();
@@ -68,6 +69,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					Logger.write(client.id + " now is logged like " + newUser.nickname);
 				else
 					Logger.write(oldUser.nickname + " now is delogged like " + client.id);
+				if (oldUser.is_logged)
+					this.userService.updateStatus(oldUser.login, "offline");
 				this._users.delete(oldUser);
 				this.add_user(client, newUser);
 			}
@@ -204,7 +207,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 		if (!added) {
 			this._users.add(user);
-			this.userService.updateStatus(user.login, "online");
+			if (user.is_logged)
+				this.userService.updateStatus(user.login, "online");
 			console.log("connect --- " + (user.is_logged ? user.nickname : client.id));
 		}
 		this.updateServerInfo();

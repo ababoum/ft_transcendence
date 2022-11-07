@@ -47,7 +47,6 @@
 			getModal("sign-in-2fa").close();
 			$user = await $user.upd();
 			await $game_socket.emit('update-user-data', getCookie('jwt'));
-			await update_status("ONLINE");
 			await push("/");
 		}
 	}
