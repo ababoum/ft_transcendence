@@ -36,23 +36,6 @@ export class GameServer {
 						this.gameGateway.updateServerInfo();
 					}
 				});
-				/*
-				for (let i = 0; i < this._games.length; i++) {
-					if (this._games[i].leftPlayer.gameData.is_ready && this._games[i].rightPlayer.gameData.is_ready)
-						this._games[i].update();
-					this.sendData(this._games[i]);
-					if (this._games[i].isFinished(this._show_logs)) {
-						GameServer.write_result_in_db(this._games[i]);
-						this._games[i].endGame();
-						this._games.length = 0; //FIXME BUG WHEN 2+ game
-						if (this._games.length == 0) {
-							clearInterval(this._interval);
-							this._interval = undefined;
-							Logger.write("Interval is off, this game is over, games online " + this._games.length);
-						}
-					}
-				}
-				 */
 			}, 1000 / GameServer.fps, this._rooms);
 	}
 
@@ -152,8 +135,8 @@ export class GameServer {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
-				winnerNickname: game.winner().nickname,
-				loserNickname: game.loser().nickname,
+				winnerLogin: game.winner().login,
+				loserLogin: game.loser().login,
 				winnerScore: game.winner().score,
 				loserScore: game.loser().score
 			})
