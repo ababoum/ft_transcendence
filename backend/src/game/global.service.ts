@@ -1,4 +1,5 @@
 export class Logger {
+	/* TO DEACTIVATE DEBUG MESSAGES*/
 	private static write_log = true;
 
 	public static write(msg) {

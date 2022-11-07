@@ -3,9 +3,9 @@ import {PlayerData} from "./PlayerData";
 import {Game} from "./Game";
 
 export class SiteUser {
-	private readonly	_login: string;
-	private readonly	_nickname: string;
-	private readonly	_is_logged: boolean;
+	private readonly _login: string;
+	private readonly _nickname: string;
+	private readonly _is_logged: boolean;
 	private _game_socket: Socket;
 	private _all_sockets: Set<Socket>;
 	private _is_playing: boolean;
@@ -105,7 +105,7 @@ export class SiteUser {
 		this._all_sockets.forEach((v) => {
 			if (client == v) {
 				result = true;
-				return ;
+				return;
 			}
 		});
 		return result;
@@ -114,7 +114,8 @@ export class SiteUser {
 	public delete_socket(client: Socket): void {
 		try {
 			this._all_sockets.delete(client);
-		} catch (e) {}
+		} catch (e) {
+		}
 	}
 
 	public connections_count(): number {
@@ -124,7 +125,6 @@ export class SiteUser {
 	set is_leaved(value: boolean) {
 		this._is_leaved = value;
 	}
-
 
 	get is_waiting(): boolean {
 		return this._is_waiting;
@@ -154,6 +154,8 @@ export class SiteUser {
 	set is_ready(value: boolean) {
 		this._is_ready = value;
 	}
+
+	/* Game data get/set wrappers */
 
 	get score(): number {
 		return this._gameData.score;

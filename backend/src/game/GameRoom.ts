@@ -20,11 +20,13 @@ export class GameRoom {
 		Logger.write("Game has been started. " + player1.nickname + " vs " + player2.nickname);
 	}
 
+	/* Send same message to players */
 	public sendMessage(args: string, param): void {
 		this._player1.sendMessage(args, param);
 		this._player2.sendMessage(args, param);
 	}
 
+	/* Will update element positions if players are ready to play and send elements positions to them */
 	public update(): void {
 		if (this._player1.is_ready && this._player2.is_ready) {
 			this._game.update();
@@ -32,6 +34,7 @@ export class GameRoom {
 		this.sendData();
 	}
 
+	/*	Send element's positions to players and spectators and will delete disconnected */
 	public sendData(): void {
 		this.sendMessage('get-data', this._game);
 
@@ -46,28 +49,34 @@ export class GameRoom {
 		});
 	}
 
+	/*	Add spectator to spectator list */
 	public addSpectator(user: SiteUser, client: Socket) {
 		this._spectators.set(client, (user.is_logged ? user.nickname : user.id));
 		Logger.write((user.is_logged ? user.nickname : user.id) + " is spectating " + this._player1.nickname +
-			+ " vs " + this._player2.nickname);
+			+" vs " + this._player2.nickname);
 	}
 
+	/* Check players nickname inside room */
 	public check_nickname(nickname: string): boolean {
 		return this._player1.nickname == nickname || this._player2.nickname == nickname;
 	}
 
+	/*	Check user inside room */
 	public has(user: SiteUser): boolean {
 		return this._player1 == user || this._player2 == user;
 	}
 
+	/* Move paddle */
 	public movePaddle(siteUser: SiteUser, direction: string): void {
 		this._game.movePaddle(siteUser, direction);
 	}
 
+	/*	Game status */
 	public isFinished(): boolean {
 		return this._game.isFinished();
 	}
 
+	/* Ends game, send messages to clients with result and reset data to default values for next game */
 	public endGame(): void {
 		this.sendMessage('exit-game', this._game);
 		this.sendMessage('game-invite-status', {status: "annulled"});
@@ -83,14 +92,17 @@ export class GameRoom {
 		this._player2.resetData();
 	}
 
+	/* returns who are currently winning */
 	public winner(): SiteUser {
 		return this._player1.score > this._player2.score ? this._player1 : this._player2;
 	}
 
+	/* returns who are currently losing */
 	public loser(): SiteUser {
 		return this._player1.score < this._player2.score ? this._player1 : this._player2;
 	}
 
+	/* GETTERS */
 	get game(): Game {
 		return this._game;
 	}

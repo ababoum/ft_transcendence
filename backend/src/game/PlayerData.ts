@@ -39,12 +39,12 @@ export class PlayerData {
         return this._x;
     }
 
+	get y(): number {
+		return this._y;
+	}
+
     set x(value: number) {
         this._x = value;
-    }
-
-    get y(): number {
-        return this._y;
     }
 
     set y(value: number) {

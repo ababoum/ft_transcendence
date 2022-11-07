@@ -34,11 +34,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	handleDisconnect(client: Socket) {
-		let user = this.get_user_by_socket(client);
+		let user = this.getUserBySocket(client);
 		try {
 			if (user.game_socket == client) {
 				this.gameServer.deletePlayerFromQueue(user);
-				this.get_user_by_socket(client).is_leaved = true;
+				this.getUserBySocket(client).is_leaved = true;
 			}
 		} catch (e) {
 		}
@@ -58,7 +58,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/* SiteUser update after login, logout, personal data modifications */
 	@SubscribeMessage('update-user-data')
 	async updateUserData(@ConnectedSocket() client: Socket, @MessageBody() token: string) {
-		let oldUser: SiteUser = this.get_user_by_socket(client);
+		let oldUser: SiteUser = this.getUserBySocket(client);
 		let newUser: SiteUser = new SiteUser(client, await this.getUserData(client, token));
 		try {
 			if (oldUser.is_logged != newUser.is_logged) {
@@ -81,8 +81,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this._users.forEach((element) => {
 			if (element.nickname == nickname) {
 				client.emit('game-invite-status', {status: "sent"});
-				element.sendAllTabsMessage('game-invite', {inviter: this.get_user_by_socket(client).nickname});
-				this.gameServer.putUserInWaitingRoom(nickname, client, this.get_user_by_socket(client));
+				element.sendAllTabsMessage('game-invite', {inviter: this.getUserBySocket(client).nickname});
+				this.gameServer.putUserInWaitingRoom(nickname, client, this.getUserBySocket(client));
 				return;
 			}
 		});
@@ -90,26 +90,26 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('game-invite-delete')
 	deleteInv(@ConnectedSocket() client: Socket): void {
-		this.gameServer.deleteUserFromWaitingRoom(this.get_user_by_socket(client));
+		this.gameServer.deleteUserFromWaitingRoom(this.getUserBySocket(client));
 		client.emit('game-invite-status', {status: "annulled"});
 	}
 
 	/*	Accept invitation */
 	@SubscribeMessage('game-invite-accept')
 	acceptInv(@ConnectedSocket() client: Socket): void {
-		this.gameServer.acceptWaitingGame(client, this.get_user_by_socket(client));
+		this.gameServer.acceptWaitingGame(client, this.getUserBySocket(client));
 	}
 
 	/*	Decline invitation */
 	@SubscribeMessage('game-invite-decline')
 	declineInt(@ConnectedSocket() client: Socket): void {
-		this.gameServer.declineWaitingGame(client, this.get_user_by_socket(client));
+		this.gameServer.declineWaitingGame(client, this.getUserBySocket(client));
 	}
 
 	/*	Press ready button */
 	@SubscribeMessage('ready')
 	ready(@ConnectedSocket() client: Socket): void {
-		let user: SiteUser = this.get_user_by_socket(client);
+		let user: SiteUser = this.getUserBySocket(client);
 		if (user.is_logged) {
 			user.is_ready = true;
 			Logger.write(user.nickname + " is ready");
@@ -119,20 +119,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/*	Leave from the game */
 	@SubscribeMessage('exit-game')
 	exitGame(@ConnectedSocket() client: Socket): void {
-		this.get_user_by_socket(client).is_leaved = true;
+		this.getUserBySocket(client).is_leaved = true;
 		this.updateServerInfo();
 	}
 
 	/*	Move game paddle */
 	@SubscribeMessage('move-paddle')
 	movePaddle(@MessageBody() direction: string, @ConnectedSocket() client: Socket): void {
-		this.gameServer.movePaddle(this.get_user_by_socket(client), direction);
+		this.gameServer.movePaddle(this.getUserBySocket(client), direction);
 	}
 
 	/* Start or find a game */
 	@SubscribeMessage('find-game')
 	findGame(@ConnectedSocket() client: Socket): void {
-		let user: SiteUser = this.get_user_by_socket(client);
+		let user: SiteUser = this.getUserBySocket(client);
 		if (!user.is_logged)
 			client.emit('find-game-error', "You are not login");
 		else if (user.is_playing)
@@ -151,14 +151,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/*	Stop searching */
 	@SubscribeMessage('find-game-stop')
 	findGameStop(@MessageBody() profile: any, @ConnectedSocket() client: Socket): void {
-		this.gameServer.deletePlayerFromQueue(this.get_user_by_socket(client));
+		this.gameServer.deletePlayerFromQueue(this.getUserBySocket(client));
 		this.updateServerInfo();
 	}
 
 	/*	Start spectating a match */
 	@SubscribeMessage('spectate')
 	spectateHandler(@MessageBody() nickname: any, @ConnectedSocket() client: Socket): void {
-		this.gameServer.addSpectator(this.get_user_by_socket(client), client, nickname);
+		this.gameServer.addSpectator(this.getUserBySocket(client), client, nickname);
 	}
 
 	/*	Get server statistics */
@@ -167,10 +167,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		client.emit('get-games-list', this.gameServer, {players_online: this._users.size});
 	}
 
+	/* Methods */
+
+	/* Send server info */
 	public updateServerInfo(): void {
 		this.server.emit('get-games-list', this.gameServer, {players_online: this._users.size});
 	}
 
+	/*	Get user data from db using jwt token */
 	async getUserData(client: Socket, token: string) {
 		let result;
 		try {
@@ -187,6 +191,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		return result;
 	}
 
+	/*	Identifying client like user. Supporting multiple connections in differents tabs */
 	private add_user(client: Socket, user: SiteUser): void {
 		let added: boolean = false;
 		this._users.forEach((e) => {
@@ -205,7 +210,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.updateServerInfo();
 	}
 
-	get_user_by_socket(client: Socket): SiteUser {
+
+	getUserBySocket(client: Socket): SiteUser {
 		let result: SiteUser;
 		this._users.forEach((v) => {
 			if (v.have(client)) {

@@ -22,6 +22,7 @@ export class GameServer {
 		this._queue = new Set();
 	}
 
+	/* Creates a game room with 2 players, updates their status and starts update interval*/
 	private createRoom(player1: SiteUser, player2: SiteUser) {
 		let room: GameRoom = new GameRoom(player1, player2);
 		this._rooms.add(room);
@@ -45,6 +46,7 @@ export class GameServer {
 			}, 1000 / GameServer.fps, this._rooms);
 	}
 
+	/* Adds player in queue and starts game if they are 2+ players */
 	public addPlayerToQueue(client: Socket, siteUser: SiteUser): void {
 		siteUser.game_socket = client;
 		siteUser.is_searching = true;
@@ -62,15 +64,17 @@ export class GameServer {
 		this.gameGateway.updateServerInfo();
 	}
 
+	/*	Finds a match by nickname and adds spectator */
 	addSpectator(siteUser: SiteUser, client: Socket, nickname: any) {
 		this._rooms.forEach((element) => {
 			if (element.check_nickname(nickname)) {
 				element.addSpectator(siteUser, client);
-				return ;
+				return;
 			}
 		});
 	}
 
+	/*	Delete user from queue */
 	public deletePlayerFromQueue(siteUser: SiteUser) {
 		if (this._queue.delete(siteUser)) {
 			siteUser.resetData();
@@ -79,6 +83,7 @@ export class GameServer {
 		}
 	}
 
+	/* Finds match by site user object and call move puddle method */
 	public movePaddle(siteUser: SiteUser, direction: string): void {
 		this._rooms.forEach(element => {
 			if (element.has(siteUser)) {
@@ -88,6 +93,7 @@ export class GameServer {
 		});
 	}
 
+	/*	Puts user in waiting room for waiting his friend */
 	public putUserInWaitingRoom(invited: string, client: Socket, siteUser: SiteUser): void {
 		if (!this.isInWaitingRoom(invited) && !this.isInWaitingRoom(siteUser.nickname)) {
 			this._waiting_room.set(invited, siteUser);
@@ -97,6 +103,7 @@ export class GameServer {
 		}
 	}
 
+	/*	Deletes player for waiting room */
 	public deleteUserFromWaitingRoom(siteUser: SiteUser): void {
 		if (siteUser.is_waiting) {
 			this._waiting_room.forEach((v, k, array) => {
@@ -104,7 +111,8 @@ export class GameServer {
 					Logger.write(siteUser.nickname + " has been deleted from waiting friend room");
 					try {
 						this.gameGateway.getUserByNickname(k).sendAllTabsMessage('close-invitation', {});
-					} catch (e) {}
+					} catch (e) {
+					}
 					array.delete(k);
 					siteUser.is_waiting = false;
 					return;
@@ -113,6 +121,7 @@ export class GameServer {
 		}
 	}
 
+	/* Starts friends game */
 	public acceptWaitingGame(client: Socket, siteUser: SiteUser): void {
 		this._waiting_room.forEach((value, key, map) => {
 			if (siteUser.nickname == key) {
@@ -128,6 +137,7 @@ export class GameServer {
 		});
 	}
 
+	/* Declines waiting game */
 	public declineWaitingGame(client: Socket, siteUser: SiteUser): void {
 		this._waiting_room.forEach((value, key, map) => {
 			if (siteUser.nickname == key) {
