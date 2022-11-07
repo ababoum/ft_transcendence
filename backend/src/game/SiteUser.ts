@@ -112,7 +112,9 @@ export class SiteUser {
 	}
 
 	public delete_socket(client: Socket): void {
-		this._all_sockets.delete(client);
+		try {
+			this._all_sockets.delete(client);
+		} catch (e) {}
 	}
 
 	public connections_count(): number {

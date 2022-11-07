@@ -93,4 +93,12 @@ export class GameRoom {
 	get game(): Game {
 		return this._game;
 	}
+
+	get player1(): SiteUser {
+		return this._player1;
+	}
+
+	get player2(): SiteUser {
+		return this._player2;
+	}
 }

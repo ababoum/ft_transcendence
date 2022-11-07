@@ -5,6 +5,7 @@ import {Logger} from "./global.service";
 import {Game} from "./Game";
 import {forwardRef, Inject, Injectable} from "@nestjs/common";
 import {GameGateway} from "./game.gateway";
+import {UserService} from "../user/user.service";
 
 @Injectable()
 export class GameServer {
@@ -14,7 +15,8 @@ export class GameServer {
 	private static readonly fps = 100;
 	private _interval;
 
-	constructor(@Inject(forwardRef(() => GameGateway)) private readonly gameGateway: GameGateway) {
+	constructor(@Inject(forwardRef(() => GameGateway)) private readonly gameGateway: GameGateway,
+				private readonly userService: UserService) {
 		this._rooms = new Set();
 		this._waiting_room = new Map();
 		this._queue = new Set();
@@ -24,6 +26,8 @@ export class GameServer {
 		let room: GameRoom = new GameRoom(player1, player2);
 		this._rooms.add(room);
 		this.gameGateway.updateServerInfo();
+		this.userService.updateStatus(player1.login, 'in-game');
+		this.userService.updateStatus(player2.login, 'in-game');
 
 		if (this._interval == undefined)
 			this._interval = setInterval((rooms) => {
@@ -32,6 +36,8 @@ export class GameServer {
 					if (val.isFinished()) {
 						GameServer.write_result_in_db(val);
 						val.endGame();
+						this.userService.updateStatus(val.player1.login, 'online');
+						this.userService.updateStatus(val.player2.login, 'online');
 						set.delete(key);
 						this.gameGateway.updateServerInfo();
 					}

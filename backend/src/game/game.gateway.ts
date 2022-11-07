@@ -57,6 +57,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 		if (!added) {
 			this._users.add(user);
+			this.userService.updateStatus(user.login, "online");
 			console.log("connect --- " + (user.is_logged ? user.nickname : client.id));
 		}
 		this.updateServerInfo();
@@ -86,6 +87,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		Logger.write("Deleted connection of " + user.nickname + ", current connections = " + user.connections_count());
 		if (user.connections_count() == 0) {
 			this._users.delete(user);
+			this.userService.updateStatus(user.login, "offline");
 			Logger.write("disconnect --- " + (user.is_logged ? user.nickname : client.id));
 		}
 		this.updateServerInfo();
