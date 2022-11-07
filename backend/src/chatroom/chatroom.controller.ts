@@ -102,13 +102,20 @@ export class ChatroomController {
 		console.log(req.user.login + " tries to leave")
 		const res = await this.ChatroomService.leaveChatRoom(req.user.login, +id);
 		await this.ChatroomGateway.leaveChatroom(req.user, Number(id), res)
-		return res;	}
+		return res.participants;
+	}
 
 	@Patch(':id/invite')
 	async inviteUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
 		const res = await this.ChatroomService.inviteUser(req.user.login, +id, UpdateChatRoomDto.nickname);
 		await this.ChatroomGateway.inviteUser(req.user, Number(id), res)
 		return res;
+	}
+
+	@Patch(':id/exit')
+	async exitRoom(@Request() req, @Param('id') id: string) {
+		const res = await this.ChatroomGateway.exitChatroom(req.user, id)
+		return res
 	}
 
 // ADMIN //
@@ -187,10 +194,4 @@ export class ChatroomController {
 		return res;
 	}
 
-// ROOMS //
-	@Patch(':id/exit')
-	async exitRoom(@Request() req, @Param('id') id: string) {
-		const res = await this.ChatroomGateway.exitChatroom(req.user, id)
-		return res
-	}
 }

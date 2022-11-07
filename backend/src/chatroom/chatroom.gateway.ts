@@ -100,9 +100,12 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 	}
 
 	async leaveChatroom(user, chatRoomId: number, res) {
+		console.log(res)
 		//Update this.chatRoomsList to remove this user as participant
 		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
-		this.chatRoomsList[chatRoomIndex].participants = res
+		this.chatRoomsList[chatRoomIndex].participants = res.participants
+		this.chatRoomsList[chatRoomIndex].ownerNickname = res.owner.nickname
+		this.chatRoomsList[chatRoomIndex].admins = res.admins
 
 		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)

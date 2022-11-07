@@ -19,7 +19,6 @@ TO-DO Eliot:
 - Pouvoir aller sur le profil de quelqu'un en cliquant dessus
 - Pouvoir inviter quelqu'un via le chat
 - Private messages
-- Bouger la case password vers la droite
 
 TO-DO M'hamed:
 

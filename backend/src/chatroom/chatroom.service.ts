@@ -187,18 +187,27 @@ export class ChatroomService {
 					admin: { disconnect : { login: userlogin } },
 					participants: { disconnect : { login: userlogin } },
 				},
-				select: {owner: true, participants: {select: {id: true, nickname: true}}}
+				select: {
+					owner: true, 
+					participants: {select: {id: true, nickname: true}},
+					admin: {select: {id: true, nickname: true}},
+				}
 			});
 			if (res.owner.login == userlogin) {
 				res = await this.prisma.chatRoom.update({
 					where: {id:chatroomid},
 					data: {
 						owner: {connect: {id: 1}},
+						admin: {connect: {id: 1}},
 					},
-					select: {owner: true, participants: {select: {id: true, nickname: true}}}
+					select: {
+						owner: true, 
+						participants: {select: {id: true, nickname: true}},
+						admin: {select: {id: true, nickname: true}},
+					}
 				})
 			}
-			return res.participants;
+			return res;
 		}
 		catch {
 			throw new HttpException("This room doesn't exist", 404)

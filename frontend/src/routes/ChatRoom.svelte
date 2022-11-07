@@ -262,8 +262,10 @@
 		muteNickname = undefined
 
 		console.log(res)
-		if (res.statusCode)
+		if (res.statusCode == 409)
 			alert("This user doesn't exist")
+		if (res.statusCode == 401)
+			alert("You are not admin in this chatroom")
 	}
 
 	async function unmuteUser(chatRoomId: number, usernickname: string){
@@ -459,40 +461,40 @@
 					<ul class="list-unstyled mb-0">
 						{#each chatRoomsList as chatroom (chatroom)}
 							{#if chatroom.mode === "PUBLIC"}
-							<div class="pt-1">
+							<div class="pt-1 d-flex align-items-center">
 							  {#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
-							  <p style="width: 50%; display:inline-block">{chatroom.name}</p>
+							  <p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
 							  <button class="btn btn-primary" on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 							  <button class="btn btn-secondary" on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
 							  {:else if chatroom.banList.find(x => x.nickname === $user.nickname) !== undefined}
-							  <p style="width: 50%; display:inline-block">{chatroom.name}</p>
+							  <p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
 							  <button class="btn btn-primary">Banned</button>
 							  {:else}
-							  <p style="width: 50%; display:inline-block">{chatroom.name}</p>
+							  <p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
 							  <button class="btn btn-primary" on:click={() => joinChatRoom(chatroom.id)}>Join</button>
 							  {/if}
 							</div>
 							{:else if chatroom.mode === "PROTECTED"}
-							<div class="pt-1">
+							<div class="pt-1 d-flex align-items-center">
 								{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
-								<p style="width: 50%; display:inline-block">{chatroom.name}</p>
+								<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
 								<button class="btn btn-primary" on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 								<button class="btn btn-secondary" on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
 								{:else if chatroom.banList.find(x => x.nickname === $user.nickname) !== undefined}
-								<p style="width: 50%; display:inline-block">{chatroom.name}</p>
+								<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
 								<button class="btn btn-primary">Banned</button>
 								{:else}
-								<form on:submit|preventDefault={joinProtectedChatRoom}>
-									<label>{chatroom.name} <input type="text" name="password" minlength="3" placeholder="password" style=" position: relative; width:100px" required/>
-										<input type="hidden" name="chatroomId" value={chatroom.id}/>
-									</label>
+								<form on:submit|preventDefault={joinProtectedChatRoom} style="width: 100%;">
+									<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
+									<input type="text" name="password" minlength="3" placeholder="password" style="float: right; margin-right: 5%; width:45%" required/>
+									<input type="hidden" name="chatroomId" value={chatroom.id}/>
 								</form>
 								{/if}
 							</div>
 							{:else if chatroom.mode === "PRIVATE"}
 							{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
-							<div class="pt-1">
-								<p style="width: 50%; display:inline-block">{chatroom.name}</p>
+							<div class="pt-1 d-flex align-items-center">
+								<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
 								<button class="btn btn-primary" on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 								<button class="btn btn-secondary" on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
 							</div>
