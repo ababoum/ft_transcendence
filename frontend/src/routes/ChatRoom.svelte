@@ -2,7 +2,7 @@
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
-	import {chatroom_socket, user, game_socket, nickname} from "../stores/store";
+	import {chatroom_socket, user, game_socket, nickname, show_nav} from "../stores/store";
 	import {getCookie} from "../stores/auth";
     import Modal, { getModal } from "../components/Profile/Modal.svelte";
     import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
