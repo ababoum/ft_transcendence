@@ -70,6 +70,7 @@ export class GameRoom {
 
 	public endGame(): void {
 		this.sendMessage('exit-game', this._game);
+		this.sendMessage('game-invite-status', {status: "annulled"});
 		this._spectators.forEach((value, key) => {
 			if (key.connected)
 				key.emit('exit-game', this._game);

@@ -92,7 +92,24 @@ export class GameServer {
 		if (!this.isInWaitingRoom(invited) && !this.isInWaitingRoom(siteUser.nickname)) {
 			this._waiting_room.set(invited, siteUser);
 			siteUser.game_socket = client;
+			siteUser.is_waiting = true;
 			Logger.write(siteUser.nickname + " has invited " + invited + " to play");
+		}
+	}
+
+	public deleteUserFromWaitingRoom(siteUser: SiteUser): void {
+		if (siteUser.is_waiting) {
+			this._waiting_room.forEach((v, k, array) => {
+				if (v.nickname == siteUser.nickname) {
+					Logger.write(siteUser.nickname + " has been deleted from waiting friend room");
+					try {
+						this.gameGateway.getUserByNickname(k).sendAllTabsMessage('close-invitation', {});
+					} catch (e) {}
+					array.delete(k);
+					siteUser.is_waiting = false;
+					return;
+				}
+			})
 		}
 	}
 

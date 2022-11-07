@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authenticate_2fa_code, update_status } from "../../stores/requests";
+	import { authenticate_2fa_code } from "../../stores/requests";
 	import { user } from "../../stores/store";
 	import { push } from "svelte-spa-router";
 
@@ -13,7 +13,6 @@
 
 		if (resp.success) {
 			$user = await $user.upd();
-			await update_status("ONLINE");
 			await push("/");
 		}
 		else {

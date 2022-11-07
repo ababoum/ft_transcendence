@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import {onDestroy, onMount} from "svelte";
 	import {
 		delete_friend,
 		get_friends,

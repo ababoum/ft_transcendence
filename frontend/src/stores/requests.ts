@@ -127,21 +127,6 @@ export async function update_password(
 	return msg;
 }
 
-export async function update_status(status: string) {
-	let msg: string = null;
-	const resp = await fetch(get(BACKEND_URL) + "/users/status/" + status, {
-		method: 'PATCH',
-		headers: {
-			"Authorization": "Bearer " + getCookie("jwt")
-		}
-	});
-
-	if (resp.ok)
-		return msg;
-	await resp.json().then((data) => msg = data.message);
-	return msg;
-}
-
 ///////////////////////////////// 2FA AUTH /////////////////////////////////
 
 
