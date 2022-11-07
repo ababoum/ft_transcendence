@@ -16,13 +16,10 @@ ISSUES:
 - Pour socket et Gateway, il faut verifier le token dans handleConnection et disconnect en cas d'erreur, car UseGuards() ne permet pas d'empecher la connection
 
 TO-DO Eliot:
-- Blocklist
-- Ne pas afficher les messages des User bloques 
-- Ouvrir un menu deroulant quand on clique sur le profil d'un User
-- Recuperer l'avatar de User
 - Pouvoir aller sur le profil de quelqu'un en cliquant dessus
 - Pouvoir inviter quelqu'un via le chat
 - Private messages
+- Bouger la case password vers la droite
 
 TO-DO M'hamed:
 

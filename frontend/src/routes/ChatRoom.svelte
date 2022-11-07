@@ -157,6 +157,9 @@
 
 		messagesList = res
 		blockList = [...blockList]
+
+		var box = document.getElementById('messages')
+		box.scrollTop = await box.scrollHeight
 	}
 
 	async function banUser(chatRoomId: number, usernickname: string){
@@ -517,7 +520,7 @@
               </div>
 
 		          <div class="col-md-6 col-lg-7 col-xl-8">
-		            <div class="overflow-auto t-3 pe-3" style="position: relative; height: 400px; overflow-y: scroll">
+		            <div id="messages" class="t-3 pe-3" style="position: relative; height: 400px; overflow-y: scroll">
 					  {#each messagesList as message}
 
 		              <div class="d-flex flex-row justify-content-start" style="width: 60%">
@@ -590,16 +593,18 @@
 								<button class="btn btn-success" on:click={() => adminUser(activeChatRoomId, adminNickname)}>Admin</button>
 								<button class="btn btn-danger" on:click={() => unadminUser(activeChatRoomId, adminNickname)}>Unadmin</button>
 							</div>
-							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 								{#if chatRoomsList[activeChatRoomId - 1].mode === "PUBLIC"}
+								<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 								<input type="text" class="form-control" placeholder="password" bind:value={password} style="width: 50%">
 								<button class="btn btn-success" on:click={() => addPassword(activeChatRoomId, password)}>Add</button>
+								</div>
 								{:else if chatRoomsList[activeChatRoomId - 1].mode === "PROTECTED"}
+								<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 								<input type="text" class="form-control" placeholder="password" bind:value={password} style="width: 50%">
 								<button class="btn btn-info" on:click={() => changePassword(activeChatRoomId, password)}>Change</button>
 								<button class="btn btn-danger" on:click={() => removePassword(activeChatRoomId)}>Remove</button>
+								</div>
 								{/if}
-							</div>
 							{/if}
 							{#if chatRoomsList[activeChatRoomId - 1].admin.find(x => x.nickname === $user.nickname) !== undefined}
 							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
