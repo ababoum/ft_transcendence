@@ -174,7 +174,6 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 			await client.connectionId.leave(String(chatRoomId))
 			client.connectionId.emit('you-have-been-banned', chatRoomId)
 		}
-
 	}
 
 	async unbanUser(chatRoomId: number, nickname, res) {

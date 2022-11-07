@@ -1,17 +1,12 @@
-
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
-	import {get_current_user_data, is_authenticated} from "../stores/requests";
 	import {chatroom_socket, user, game_socket, nickname} from "../stores/store";
 	import {getCookie} from "../stores/auth";
-    import { get } from "svelte/store";
-    import { io } from "socket.io-client";
     import Modal, { getModal } from "../components/Profile/Modal.svelte";
     import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
     import Avatar from "../components/Avatar.svelte";
-    import InvitationButton from "../components/Game/Invitations/InvitationButton.svelte";
 
 
 	let tmp: boolean;
@@ -55,6 +50,7 @@
 			if (data = activeChatRoomId){
 				activeChatRoomId = undefined
 				messagesList = []
+				alert("You have been banned from this chatroom")
 			}
 		});
 	})
@@ -441,65 +437,61 @@
 
 <main>
 	<Header/>
-<section style="background-color: black;">
+<section style="background-color: black; margin-top:50px">
   <div class="container py-5">
 
     <div class="row">
       <div class="col-md-12">
 
-        <div class="card" id="chat3" style="border-radius: 15px;">
+        <div class="card" id="chat3" style="border-radius: 15px; background-color:aliceblue ">
           <div class="card-body">
 
-            <div class="row">
+            <div id="module" class="row">
 
-              <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
+              <div id="leftcolumn" class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
 
-                <div class="p-3">
+                <div id="leftcolumn" class="p-3">
 					
-					<div class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
+					<div id="chatroomlist" class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
 					{#key chatRoomsList}
 					<ul class="list-unstyled mb-0">
-						{#each chatRoomsList as chatroom (chatroom)}
+						{#each chatRoomsList as chatroom (chatRoomsList)}
+						<div class="pt-1 d-flex align-items-center">
 							{#if chatroom.mode === "PUBLIC"}
-							<div class="pt-1 d-flex align-items-center">
 							  {#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
-							  <p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
+							  <p class="chatroomname">{chatroom.name}</p>
 							  <button class="btn btn-primary" on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 							  <button class="btn btn-secondary" on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
 							  {:else if chatroom.banList.find(x => x.nickname === $user.nickname) !== undefined}
-							  <p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
-							  <button class="btn btn-primary">Banned</button>
+							  <p class="chatroomname">{chatroom.name}</p>
+							  <button class="btn btn-danger">Banned</button>
 							  {:else}
-							  <p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
+							  <p class="chatroomname">{chatroom.name}</p>
 							  <button class="btn btn-primary" on:click={() => joinChatRoom(chatroom.id)}>Join</button>
 							  {/if}
-							</div>
 							{:else if chatroom.mode === "PROTECTED"}
-							<div class="pt-1 d-flex align-items-center">
 								{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
-								<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
+								<p class="chatroomname">{chatroom.name}</p>
 								<button class="btn btn-primary" on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 								<button class="btn btn-secondary" on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
 								{:else if chatroom.banList.find(x => x.nickname === $user.nickname) !== undefined}
-								<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
-								<button class="btn btn-primary">Banned</button>
+								<p class="chatroomname">{chatroom.name}</p>
+								<button class="btn btn-danger">Banned</button>
 								{:else}
 								<form on:submit|preventDefault={joinProtectedChatRoom} style="width: 100%;">
-									<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
+									<p class="chatroomname">{chatroom.name}</p>
 									<input type="text" name="password" minlength="3" placeholder="password" style="float: right; margin-right: 5%; width:45%" required/>
 									<input type="hidden" name="chatroomId" value={chatroom.id}/>
 								</form>
 								{/if}
-							</div>
 							{:else if chatroom.mode === "PRIVATE"}
 							{#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
-							<div class="pt-1 d-flex align-items-center">
-								<p style="width: 50%; display:inline-block; overflow:hidden; white-space: nowrap; text-overflow: ellipsis;">{chatroom.name}</p>
+								<p class="chatroomname">{chatroom.name}</p>
 								<button class="btn btn-primary" on:click={() => enterChatRoom(chatroom.id)}>Enter</button>
 								<button class="btn btn-secondary" on:click={() => leaveChatRoom(chatroom.id)}>Leave</button> 
-							</div>
 							{/if}
 							{/if}
+						</div>
 						{/each}
 						</ul>
 					{/key}
@@ -521,7 +513,12 @@
 
               </div>
 
-		          <div class="col-md-6 col-lg-7 col-xl-8">
+		          <div id="messageszone" class="col-md-6 col-lg-7 col-xl-8">
+					{#if activeChatRoomId}
+					<div class="d-flex justify-content-center" style="position: top">
+						<p class="p-2 rounded-3 chatroomtitle">{chatRoomsList[activeChatRoomId - 1].name}</p>
+					</div>
+					{/if}
 		            <div id="messages" class="t-3 pe-3" style="position: relative; height: 400px; overflow-y: scroll">
 					  {#each messagesList as message}
 
@@ -544,11 +541,11 @@
 							</div>
 		                <div>
 						  {#if message.author.nickname === $user.nickname}
-		                  <p class="small p-2 ms-3 mb-1 rounded-3 text-break" style="background-color: blue; height: auto">{message.content}</p>
+		                  <p class="small p-2 ms-3 mb-1 rounded-3 text-break ownmessage">{message.content}</p>
 						  {:else if blockList.find(x => x.nickname === message.author.nickname) !== undefined} 
-						  <p class="small p-2 ms-3 mb-1 rounded-3 text-break" style="background-color: grey; height: auto">Hidden message</p>
+						  <p class="small p-2 ms-3 mb-1 rounded-3 text-break blockedmessage">Hidden message</p>
 						  {:else}
-						  <p class="small p-2 ms-3 mb-1 rounded-3 text-break" style="background-color: green; height: auto">{message.content}</p>
+						  <p class="small p-2 ms-3 mb-1 rounded-3 text-break message">{message.content}</p>
 						  {/if}
 		                </div>
 						</div>
@@ -557,7 +554,7 @@
 		            </div>
 
 					{#if activeChatRoomId != undefined}
-					<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+					<div id="typezone" class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 						<Avatar classes="rounded-circle" size="45" login="{"string"}"/>
 						{#key activeChatRoomId}
 						{#if mutedUntil = chatRoomsList[activeChatRoomId - 1].muteList.find(x => x.user.nickname === $user.nickname)}
@@ -575,7 +572,7 @@
 						{/if}
 						{/key}
 					</div>
-					<div>
+					<div id="adminzone">
 						<ul>
 							{#if chatRoomsList[activeChatRoomId - 1].admin.find(x => x.nickname === $user.nickname) !== undefined}
 							<div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
@@ -638,6 +635,39 @@
   </div>
 </section>
 </main>
+
+<style>
+	.chatroomname {
+		width: 50%;
+		display:inline-block;
+        font-family: 'PT Sans', sans-serif;
+		overflow:hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.chatroomtitle {
+		height: auto;
+		width: 50%;
+		text-align: center;
+        font-family: 'PT Sans', sans-serif;
+		background-color:rgba(105, 105, 105, 0.295);
+		overflow:hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.message{
+		background-color: rgba(0, 128, 0, 0.315);
+		height: auto
+	}
+	.ownmessage {
+		background-color: rgba(0, 162, 255, 0.26);
+		height: auto
+	}
+	.blockedmessage {
+		background-color: grey;
+		height: auto
+	}
+</style>
 
 <Modal>
 	<CreateChatRoomForm/>

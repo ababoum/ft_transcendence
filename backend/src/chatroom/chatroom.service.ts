@@ -372,7 +372,6 @@ export class ChatroomService {
 		throw new HttpException("You are not admin of this chatroom", 401)
 	}
 
-
 	async getMessages(chatroomid: number) {
 		const res =  await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },

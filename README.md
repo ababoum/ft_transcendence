@@ -19,6 +19,10 @@ TO-DO Eliot:
 - Pouvoir aller sur le profil de quelqu'un en cliquant dessus
 - Pouvoir inviter quelqu'un via le chat
 - Private messages
+	- Chatroom a 2 participants
+	- Impossible a Join ou Leave
+	- Pas d'owner et admin
+	- Pas de mode
 
 TO-DO M'hamed:
 
