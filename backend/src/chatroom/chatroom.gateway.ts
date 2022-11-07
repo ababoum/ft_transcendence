@@ -1,4 +1,4 @@
-import { Body, Logger, UsePipes, ValidationPipe } from "@nestjs/common";
+import {Logger} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import {ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
 import { ChatRoom } from "@prisma/client";
@@ -46,7 +46,7 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		}
 		catch {
 			this.logger.log("Disconnection because of bad token --- " + client.id);
-			client.disconnect(true)
+			//client.disconnect(true)
 		}
 	}
 

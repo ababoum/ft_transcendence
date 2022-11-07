@@ -3,10 +3,14 @@ import { eraseCookie, getCookie, setCookie } from "./auth";
 import { get } from "svelte/store";
 
 export async function get_current_user_data() {
-	return fetch(get(GET_PROFILE_URL), {
-		method: 'GET',
-		headers: { "Authorization": "Bearer " + getCookie("jwt") }
-	});
+	try {
+		return fetch(get(GET_PROFILE_URL), {
+			method: 'GET',
+			headers: {"Authorization": "Bearer " + getCookie("jwt")}
+		});
+	} catch (e) {
+		return undefined;
+	}
 }
 
 export async function get_current_user_json() {
@@ -17,8 +21,8 @@ export async function get_current_user_json() {
 		.then(response => response.json());
 }
 
-export async function get_full_profile(login: string) {
-	const resp = await fetch(get(BACKEND_URL) + "/users/profile/" + login, {
+export async function get_full_profile(nickname: string) {
+	const resp = await fetch(get(BACKEND_URL) + "/users/profile/" + nickname, {
 		method: 'GET',
 		headers: { "Authorization": "Bearer " + getCookie("jwt") }
 	});

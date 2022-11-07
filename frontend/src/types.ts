@@ -1,6 +1,7 @@
 import {get_current_user_data} from "./stores/requests";
-import {game_socket, login, user} from "./stores/store";
+import {game_socket} from "./stores/store";
 import {get} from "svelte/store";
+import {getCookie} from "./stores/auth";
 
 export class loginBase {
 
@@ -19,30 +20,26 @@ export class User {
 		this.isLogged = false;
 	}
 
-	id: number;
-	login: string;
 	nickname: string;
 	isLogged: boolean;
 
 	public async upd() {
 		const resp: any = await get_current_user_data();
 		let nu: User = new User();
-		if (resp.ok) {
+		if (resp != undefined && resp.ok) {
 			nu.isLogged = true;
 			let data = await resp.json();
-			nu.id = data.id;
-			nu.login = data.login;
 			nu.nickname = data.nickname;
 		} else
 			nu.isLogged = false;
+		if (nu.isLogged != this.isLogged || this.nickname != nu.nickname)
+			await get(game_socket).emit('update-user-data', getCookie('jwt'));
 		return nu;
 	}
 
 	toJSON() {
 		return {
 			is_logged: this.isLogged,
-			id: this.id,
-			login: this.login,
 			nickname: this.nickname,
 		}
 	}

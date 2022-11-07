@@ -53,9 +53,9 @@ export class UserController {
 		return await this.userService.user({ id: Number(id) });
 	}
 
-	@Get('profile/:login')
-	async getUserByLogin(@Param('login') login: string): Promise<UserModel> {
-		return await this.userService.user({ login: login });
+	@Get('profile/:nickname')
+	async getUserByLogin(@Param('nickname') nickname: string): Promise<UserModel> {
+		return await this.userService.user({ nickname: nickname });
 	}
 
 	@Get()
@@ -239,14 +239,14 @@ export class UserController {
 	}
 
 	// Get avatar by userLogin
-	@Get('avatar/:login')
-	async getAvatarByLogin(
-		@Param('login') login: string,
+	@Get('avatar/:nickname')
+	async getAvatarBynickname(
+		@Param('nickname') nickname: string,
 		@Res({ passthrough: true }) res: Response)
 		: Promise<StreamableFile> {
 
 		const img_object: ImageModel = await this.userService.image({
-			id: await this.userService.user({ login: login }).then(usr => usr.imageId)
+			id: await this.userService.user({ nickname: nickname }).then(usr => usr.imageId)
 		});
 
 		const file = createReadStream(img_object.filepath);

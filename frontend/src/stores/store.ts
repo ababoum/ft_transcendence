@@ -16,7 +16,7 @@ export const GET_PROFILE_URL = readable('http://localhost:3000/auth/profile');
 export const LOGIN_URL = readable('http://localhost:3000/auth/login');
 export const CREATE_ACC_URL = readable('http://localhost:3000/users/create');
 export const TOP_10 = readable('http://localhost:3000/match_history/top10');
-export const GET_LOGIN_AVATAR = readable('http://localhost:3000/users/avatar/')
+export const GET_NICKNAME_AVATAR = readable('http://localhost:3000/users/avatar/')
 
 export const user = writable(new User());
 export const game_socket = writable(io(get(GAME_URL), {
@@ -24,6 +24,7 @@ export const game_socket = writable(io(get(GAME_URL), {
 		token: getCookie("jwt")
 	}
 }));
+export const show_nav = writable(true);
 
 export const friends = writable([])
 

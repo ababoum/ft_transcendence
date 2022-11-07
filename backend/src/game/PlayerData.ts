@@ -4,11 +4,9 @@ export class PlayerData {
     private				_x: number;
     private				_y: number;
 	private 			_score: number;
-	private 			_is_ready: boolean;
 
     constructor() {
         this._score = 0;
-		this._is_ready = false;
     }
 
 	public getPaddleTop(): number {
@@ -60,12 +58,4 @@ export class PlayerData {
     set score(value: number) {
         this._score = value;
     }
-
-	get is_ready(): boolean {
-		return this._is_ready;
-	}
-
-	set is_ready(value: boolean) {
-		this._is_ready = value;
-	}
 }

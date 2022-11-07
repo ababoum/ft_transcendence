@@ -9,5 +9,5 @@
 </script>
 
 <button class="btn btn-primary pull-right" on:click={findGame}
-	>Invite to play</button
+>Invite to play</button
 >

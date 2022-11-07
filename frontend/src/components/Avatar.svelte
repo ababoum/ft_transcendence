@@ -5,10 +5,10 @@
 <script lang="ts">
 	import { get } from "svelte/store";
 
-	import { BACKEND_URL, GET_LOGIN_AVATAR } from "../stores/store";
+	import { BACKEND_URL, GET_NICKNAME_AVATAR } from "../stores/store";
 
 	export let size;
-	export let login = "";
+	export let nickname = "";
 	export let classes = "";
 
 	// default paths
@@ -17,9 +17,9 @@
 	let actual_img = default_imageSrc;
 
 	const fetchImage = (async () => {
-		const resp1 = await fetch($GET_LOGIN_AVATAR + login);
+		const resp1 = await fetch($GET_NICKNAME_AVATAR + nickname);
 		const resp2 = await fetch(
-			get(BACKEND_URL) + "/users/ft_avatar/" + login
+			get(BACKEND_URL) + "/users/ft_avatar/" + nickname
 		);
 		if (resp1.ok) {
 			const imageBlob = await resp1.blob();

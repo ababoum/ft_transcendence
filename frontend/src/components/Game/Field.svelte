@@ -17,7 +17,7 @@
 
 	let innerWidth, innerHeight: number;
 
-	onMount(() => context = canvas.getContext('2d'))
+	onMount(() => context = canvas.getContext('2d'));
 
 	function getScalingNumber() {
 		if (innerWidth < 0 || innerHeight < 0)

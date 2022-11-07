@@ -1,11 +1,14 @@
 <script lang="ts">
-	import {onDestroy} from "svelte";
+	import {onDestroy, onMount} from "svelte";
 	import {game_socket} from "../../stores/store";
 	import Avatar from "../Avatar.svelte";
 	import {Modal} from "svelte-simple-modal";
 	import SpectatorPopup from "../Game/SpectatorPopup.svelte";
 
 	export let game_list;
+
+	onMount(() => {
+	});
 
 	onDestroy(() => {
 		$game_socket.removeListener('get-games-list');
@@ -34,13 +37,13 @@
                         <div class="align-middle text-danger">
                             <p> No games online </p>
                         </div>
-                    {/if}
+                    {:else }
                     {#each game_list.games as game}
                         <tr>
                             <td class="align-middle">
                                 <div class="d-flex align-items-center">
                                     <div>
-                                        <Avatar login="{game.leftPlayer.login}" size="50"/>
+                                        <Avatar nickname="{game.leftPlayer.nickname}" size="50"/>
                                     </div>
                                     <div class="ms-3 lh-1">
                                         <h5 class="fw-bold mb-1">{game.leftPlayer.nickname}</h5>
@@ -49,7 +52,7 @@
                             <td class="align-middle">{game.leftPlayer.score}</td>
                             <td class="align-middle">
                                 <Modal>
-                                    <SpectatorPopup login="{game.leftPlayer.login}"/>
+                                    <SpectatorPopup nickname="{game.leftPlayer.nickname}"/>
                                 </Modal>
                             </td>
                             <td class="align-middle">{game.rightPlayer.score}</td>
@@ -57,7 +60,7 @@
                                 <div class="d-flex
                             align-items-center">
                                     <div>
-                                        <Avatar login="{game.rightPlayer.login}" size="50"/>
+                                        <Avatar nickname="{game.rightPlayer.nickname}" size="50"/>
                                     </div>
                                     <div class="ms-3 lh-1">
                                         <h5 class="fw-bold mb-1">{game.rightPlayer.nickname}</h5>
@@ -66,6 +69,7 @@
                             </td>
                         </tr>
                     {/each}
+                    {/if}
                 {:else}
                     <div class="align-middle text-danger">
                         <p> No games online </p>

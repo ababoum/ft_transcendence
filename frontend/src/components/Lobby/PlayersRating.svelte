@@ -26,7 +26,7 @@
                     {#each stats as stat}
                         <tr class="bg-blue">
                             <td class="pt-2">
-                                <Avatar classes="rounded-circle" size="40" login="{stat.login}"/>
+                                <Avatar classes="rounded-circle" size="40" nickname="{stat.nickname}"/>
                                 <div class="pl-lg-5 pl-md-3 pl-1 name">{stat.nickname}</div>
                             </td>
                             <td class="pt-3 mt-1">{stat.rating}</td>

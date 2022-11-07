@@ -6,10 +6,10 @@
 		get_user_public_data,
 	} from "../../stores/requests";
 	import Avatar from "../Avatar.svelte";
-	import InvitationButton from "../../components/Game/Invitations/InvitationButton.svelte";
 	import { Modal as InviteModal } from "svelte-simple-modal";
 	import Modal, { getModal } from "./Modal.svelte";
 	import { user, friends } from "../../stores/store";
+	import InvitationButton from "../Game/Invitations/InvitationButton.svelte";
 
 	export let profile_data;
 	let profile = undefined;

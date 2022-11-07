@@ -6,6 +6,7 @@
 	const { open } = getContext("simple-modal");
 
 	let is_searching: boolean = false;
+	let search_error: string = "";
 	$: is_searching_resp = is_searching;
 
 	async function findGame() {
@@ -14,6 +15,7 @@
 			is_searching = false;
 			return;
 		}
+
 		$game_socket.on("find-game", (data) => {
 			if (data["status"] == "searching") is_searching = true;
 			if (data["status"] == "found") {
@@ -30,6 +32,11 @@
 				);
 			}
 		});
+
+		$game_socket.on("find-game-error", (msg) => {
+			search_error = msg;
+		});
+
 		$game_socket.emit("find-game", $user);
 	}
 
@@ -39,6 +46,9 @@
 	});
 </script>
 
+<div>
 <button on:click={findGame}>
-	{is_searching_resp ? "Searching..." : "Find Game"}</button
->
+	{is_searching_resp ? "Searching..." : "Find Game"}
+</button>
+<p>{search_error}</p>
+</div>

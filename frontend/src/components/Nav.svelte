@@ -4,18 +4,18 @@
 		LOBBY_PAGE,
 		LOGIN_PAGE,
 		CHATROOM_PAGE,
-		user,
+		user, game_socket,
 	} from "../stores/store";
 	import { onMount } from "svelte";
 	import { link } from "svelte-spa-router";
-	import { logout } from "../stores/auth";
+	import {getCookie, logout} from "../stores/auth";
 	import { update_status } from "../stores/requests";
 
 	onMount(async () => ($user = await $user.upd()));
 
 	async function call_logout() {
-		await update_status("OFFLINE");
 		await logout();
+		$user = await $user.upd();
 	}
 </script>
 

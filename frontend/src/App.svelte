@@ -7,7 +7,7 @@
 
 <main>
 	<Modal>
-        <Invitation/>
+		<Invitation/>
 	</Modal>
 	<Router {routes}/>
 </main>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { push, location } from "svelte-spa-router";
-	import { user } from "../stores/store";
+	import {show_nav, user} from "../stores/store";
 	import { onMount } from "svelte";
 	import SignIn from "../components/Login/SignIn.svelte";
 	import SignUp from "../components/Login/SignUp.svelte";
@@ -15,7 +15,9 @@
 </script>
 
 <main>
-	<Nav />
+	{#if $show_nav}
+		<Nav />
+	{/if}
 	<section class="vh-100 gradient-custom page-body">
 		<div class="container py-5 h-100">
 			<div

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from "../components/Nav.svelte";
-	import {game_socket, user} from "../stores/store";
-	import {onMount} from "svelte";
+	import {game_socket, show_nav, user} from "../stores/store";
+	import {onDestroy, onMount} from "svelte";
 	import MatchList from "../components/Lobby/MatchList.svelte";
 	import PlayersRating from "../components/Lobby/PlayersRating.svelte";
 	import Statistics from "../components/Lobby/Statistics.svelte";
@@ -14,18 +14,23 @@
 	let players_count;
 
 	onMount(async () => {
-		$user = await $user.upd()
+        $user = await $user.upd()
 		$game_socket.on('get-games-list', (data, pc) => {
 			game_list = data;
 			players_count = pc;
 		});
+		$game_socket.emit('get-games-list');
 	});
 
-	let log;
+	onDestroy(() => $game_socket.removeListener('get-games-list'));
 </script>
 
 <main>
-    <Header/>
+    {#if $show_nav}
+        <Header />
+    {/if}
+
+
 
     <Statistics game_list="{game_list}" players_count="{players_count}"/>
 
@@ -41,9 +46,4 @@
 
     <MatchList game_list="{game_list}"/>
     <PlayersRating/>
-    <!--
-    {#if $user.isLogged}
-            <p class="mb-3"> Hello, [login: {$user.login}], [id: {$user.id}], [nickname: {$user.nickname}]</p>
-    {/if}
-    -->
 </main>

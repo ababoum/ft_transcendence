@@ -3,10 +3,9 @@
 	import { onMount } from "svelte";
 	import ProfileImage from "../components/Profile/ProfileImage.svelte";
 	import { get_full_profile } from "../stores/requests";
-	import { user } from "../stores/store";
+	import {show_nav, user} from "../stores/store";
 	import ProfileAbout from "../components/Profile/ProfileAbout.svelte";
 	import { Modal } from "svelte-simple-modal";
-	import InvitationButton from "../components/Game/Invitations/InvitationButton.svelte";
 	import Friends from "../components/Profile/Friends.svelte";
 	import AddFriend from "../components/Profile/AddFriend.svelte";
 	import MatchHistory from "../components/Profile/MatchHistory.svelte";
@@ -23,14 +22,18 @@
 			full_profile = null;
 			return;
 		}
-		await get_full_profile($user.login).then((data) => {
+		await get_full_profile($user.nickname).then((data) => {
 			full_profile = data;
 		});
 	});
 	let log;
 </script>
 
-<Header />
+
+{#if $show_nav}
+	<Header />
+{/if}
+
 
 <div class="page-body">
 	{#if full_profile === undefined}

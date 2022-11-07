@@ -4,14 +4,13 @@
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
 	import {get_current_user_data, is_authenticated} from "../stores/requests";
-	import {chatroom_socket, user, game_socket, nickname} from "../stores/store";
+	import {chatroom_socket, user, game_socket, nickname, show_nav} from "../stores/store";
 	import {getCookie} from "../stores/auth";
     import { get } from "svelte/store";
     import { io } from "socket.io-client";
     import Modal, { getModal } from "../components/Profile/Modal.svelte";
     import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
     import Avatar from "../components/Avatar.svelte";
-    import InvitationButton from "../components/Game/Invitations/InvitationButton.svelte";
 
 
 	let tmp: boolean;
@@ -435,7 +434,10 @@
 </script>
 
 <main>
-	<Header/>
+	{#if $show_nav}
+		<Header/>
+	{/if}
+
 <section style="background-color: black;">
   <div class="container py-5">
 

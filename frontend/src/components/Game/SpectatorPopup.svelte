@@ -5,7 +5,7 @@
 
 	const { open } = getContext("simple-modal");
 
-	export let login: string;
+	export let nickname: string;
 	const run = () => {
 		open(
 			Spectator,
@@ -16,11 +16,11 @@
 				},
 			}
 		);
-		spectate(login);
+		spectate(nickname);
 	};
 
-	async function spectate(login: string) {
-		$game_socket.emit("spectate", login);
+	async function spectate(nickname: string) {
+		$game_socket.emit("spectate", nickname);
 	}
 </script>
 

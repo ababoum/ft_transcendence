@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Nav from "../Nav.svelte";
-	import { setCookie, signIn } from "../../stores/auth";
-	import { user } from "../../stores/store";
+	import {getCookie, setCookie, signIn} from "../../stores/auth";
+	import {game_socket, user} from "../../stores/store";
 	import { push } from "svelte-spa-router";
 	import Modal, { getModal } from "../Profile/Modal.svelte";
 	import {
@@ -51,6 +51,7 @@
 		if (authentication.success) {
 			getModal("sign-in-2fa").close();
 			$user = await $user.upd();
+			await $game_socket.emit('update-user-data',getCookie('jwt'));
 			await update_status("ONLINE");
 			await push("/");
 		}

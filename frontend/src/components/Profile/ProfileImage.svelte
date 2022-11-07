@@ -57,7 +57,7 @@
 </script>
 
 <div class="avatar">
-	<Avatar login={$user.login} size="125" />
+	<Avatar nickname={$user.nickname} size="125" />
 	<div class="avatar-content">
 		<span
 			class="avatar-text"
