@@ -40,6 +40,9 @@ model User {
     chatRoomBanned  ChatRoom[]              @relation(name: "BanTable")
     chatRoomMuted   UsersMutedinChatRooms[]
     messages        Messages[]
+	// direct messages
+	directRoomJoined	DirectMessagesRooms[]
+	directMessages		DirectMessages[]
     // games
     matchWinner     Match[]                 @relation(name: "match_winner")
     matchLoser      Match[]                 @relation(name: "match_loser")
@@ -89,6 +92,24 @@ model Messages {
     content      String
     location     ChatRoom @relation(fields: [chatRoomId], references: [id])
     chatRoomId   Int
+}
+
+model DirectMessagesRooms {
+    id            	Int                     @id @default(autoincrement())
+    name         	String
+    creationDate  	DateTime                @default(now())
+    participants  	User[]                  
+    privateMessages	DirectMessages[]
+}
+
+model DirectMessages {
+    id           Int      @id @default(autoincrement())
+    creationDate DateTime @default(now())
+    author       User     @relation(fields: [authorLogin], references: [login])
+    authorLogin  String
+    content      String
+    location     DirectMessagesRooms @relation(fields: [DMRoomId], references: [id])
+    DMRoomId  	 Int
 }
 
 model Image {
