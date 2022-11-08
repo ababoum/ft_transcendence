@@ -1,0 +1,1 @@
+web: docker-compuse up -d
