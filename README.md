@@ -26,7 +26,7 @@ TO-DO Eliot:
 
 TO-DO M'hamed:
 
-- ?
+- Se débarrasser des window.location.reload() dans le frontend
 
 BONUS:
 - Generer une <datalist> de nickname pour les suggestions dans les <input type="text">
