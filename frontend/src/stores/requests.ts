@@ -143,10 +143,7 @@ export async function validate_2fa_code(twoFactorAuthenticationCode: string) {
 			})
 	});
 
-	if (resp.ok) {
-		return `<p class="text-success">Two factor authentication successfully enabled</p>`;
-	}
-	else {
+	if (!resp.ok) {
 		const msg = await resp.json().then(data => data.message);
 		return `<p class="text-danger">${msg}</p>`;
 	}

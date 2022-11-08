@@ -10,6 +10,7 @@ import {
 	Body,
 	UnauthorizedException,
 	Patch,
+	HttpException,
 } from '@nestjs/common';
 import { TwoFactorAuthenticationService } from './twoFactorAuthentication.service';
 import { TwoFactorAuthenticationCodeDto, TwoFactorAuthenticationDto } from './twoFactorAuthentication.dto'
@@ -49,6 +50,9 @@ export class TwoFactorAuthenticationController {
 		@Req() request: RequestWithUser,
 		@Body() { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto
 	) {
+		if (parseInt(twoFactorAuthenticationCode) < 0) {
+			throw new HttpException("twoFactorAuthenticationCode must be a positive integer", 400);
+		}
 		const isCodeValid = await this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
 			twoFactorAuthenticationCode, request.user.login
 		);
