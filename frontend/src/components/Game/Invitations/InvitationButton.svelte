@@ -16,7 +16,7 @@
 
 	onDestroy(() => {
 		$game_socket.emit("game-invite-delete");
-		$game_socket.removeListener("game-invite");
+		$game_socket.removeListener("game-invite-status");
     });
 
 	async function findGame() {

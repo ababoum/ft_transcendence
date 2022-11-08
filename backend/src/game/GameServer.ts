@@ -144,6 +144,7 @@ export class GameServer {
 				client.emit('game-invite-decline', {});
 				siteUser.sendAllExcept(siteUser.game_socket, 'close-invitation', {});
 				value.sendMessage('game-invite-decline', {});
+				value.sendMessage('game-invite-status', {status: "annulled"});
 				Logger.write(siteUser.nickname + " has declined " + value.nickname + "'s invite")
 				map.delete(key);
 				return;

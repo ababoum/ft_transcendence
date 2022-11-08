@@ -35,14 +35,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	handleDisconnect(client: Socket) {
 		let user = this.getUserBySocket(client);
-		try {
-			if (user.game_socket == client) {
-				this.gameServer.deletePlayerFromQueue(user);
-				this.getUserBySocket(client).is_leaved = true;
-			}
-		} catch (e) {
+		if (user == null)
+			return ;
+		if (user.is_logged && user.game_socket != undefined && user.game_socket == client) {
+			this.gameServer.deletePlayerFromQueue(user);
+			this.getUserBySocket(client).is_leaved = true;
 		}
-		this.updateServerInfo();
 		user.delete_socket(client)
 		Logger.write("Deleted connection of " + user.nickname + ", current connections = " + user.connections_count());
 		if (user.connections_count() == 0) {
@@ -197,14 +195,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/*	Identifying client like user. Supporting multiple connections in differents tabs */
 	private add_user(client: Socket, user: SiteUser): void {
 		let added: boolean = false;
-		this._users.forEach((e) => {
-			if (e.nickname == user.nickname) {
-				added = true;
-				e.add_socket(client)
-				Logger.write(user.nickname + " has entered with another tab");
-				return;
-			}
-		});
+		if (user.is_logged) {
+			this._users.forEach((e) => {
+				if (e.nickname == user.nickname) {
+					added = true;
+					e.add_socket(client)
+					Logger.write(user.nickname + " has entered with another tab");
+					return;
+				}
+			});
+		}
 		if (!added) {
 			this._users.add(user);
 			if (user.is_logged)
@@ -216,7 +216,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 
 	getUserBySocket(client: Socket): SiteUser {
-		let result: SiteUser;
+		let result: SiteUser = null;
 		this._users.forEach((v) => {
 			if (v.have(client)) {
 				result = v;
