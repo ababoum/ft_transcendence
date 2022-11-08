@@ -429,8 +429,8 @@
 		console.log(blockList)
 	}
 
-	async function findGame(login: string) {
-		$game_socket.emit('game-invite', login);
+	async function findGame(nickname: string) {
+		$game_socket.emit('game-invite', nickname);
 	}
 
 </script>
@@ -538,7 +538,7 @@
 								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 								  <p class="dropdown-item">Profile</p>
 								  {#if message.author.nickname != $user.nickname}
-								  <p class="dropdown-item" on:click={() => findGame("string1")}>Game</p>
+								  <p class="dropdown-item" on:click={() => findGame(message.author.nickname)}>Game</p>
 								  <p class="dropdown-item" on:click={() => blockUser(message.author.nickname)}>Block</p>
 								  <p class="dropdown-item" on:click={() => unblockUser(message.author.nickname)}>Unblock</p>
 								  {/if}
