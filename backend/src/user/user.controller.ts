@@ -104,6 +104,8 @@ export class UserController {
 				data: { email: body.new_email }
 			}
 		)
+
+		return update;
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -116,7 +118,9 @@ export class UserController {
 				where: { login: req.user.login },
 				data: { nickname: body.new_nickname }
 			}
-		)
+		);
+
+		return update;
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -143,6 +147,8 @@ export class UserController {
 				}
 			}
 		);
+
+		return update;
 	}
 
 	/////////////////////// UPDATE USER STATUS ////////////////////////
@@ -151,7 +157,7 @@ export class UserController {
 	@UseGuards(JwtAuthGuard)
 	async updateUserStatus(
 		@Req() req: RequestWithUser,
-		@Param('value') status: string) {
+		@Param('value') status: 'online' | 'offline' | 'in-game') {
 		return await this.userService.updateStatus(req.user.login, status);
 	}
 

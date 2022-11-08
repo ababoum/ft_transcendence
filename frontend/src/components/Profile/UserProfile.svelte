@@ -1,26 +1,26 @@
-<script context="module" lang="ts">
-    import { onMount } from "svelte";
-    import { get_user_public_data } from "../../stores/requests";
+<script lang="ts">
+	import { onMount } from "svelte";
+	import { get_user_public_data } from "../../stores/requests";
 	import Avatar from "../Avatar.svelte";
 	import Modal, { getModal } from "./Modal.svelte";
 
-	export let user_to_display;
+	export let user_to_display_nickname;
 
-	export function getUserProfile() {
-		return getModal();
-	}
+	let user_to_display;
 
-
+	$: get_user_public_data(user_to_display_nickname).then((resp) => {
+		user_to_display = resp;
+	});
 </script>
 
-<Modal>
+<Modal id="user_profile">
 	<div class="d-flex flex-column justify-content-center align-items-center">
 		{#if !user_to_display}
 			<p>Profile loading...</p>
 		{:else}
 			<h1>{user_to_display.nickname}</h1>
 			<Avatar
-				login={user_to_display.login}
+				nickname={user_to_display.nickname}
 				size="100"
 				classes="rounded-circle"
 			/>

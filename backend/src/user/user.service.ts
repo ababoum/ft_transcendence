@@ -2,7 +2,6 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma, Image } from '@prisma/client';
 import { capitalizeFirstLetter } from '../utils';
-import { connect } from 'http2';
 
 @Injectable()
 export class UserService {
@@ -121,8 +120,7 @@ export class UserService {
 		const { where, data } = params;
 
 		try {
-
-			return this.prisma.user.update({
+			return await this.prisma.user.update({
 				data,
 				where,
 			});
@@ -131,7 +129,7 @@ export class UserService {
 			if (e instanceof Prisma.PrismaClientKnownRequestError) {
 				if (e.code === 'P2002') {
 					throw new HttpException(
-						`${capitalizeFirstLetter(e.meta.target as string)} already exists`,
+						`This ${(e.meta.target as string)} already exists`,
 						400);
 				}
 			}
@@ -148,7 +146,8 @@ export class UserService {
 
 	///////////////////////    UPDATE USER STATUS    ////////////////////////
 
-	async updateStatus(userLogin: string, status: string) {
+	async updateStatus
+		(userLogin: string, status: 'online' | 'offline' | 'in-game') {
 
 		let res: User;
 
@@ -274,7 +273,7 @@ export class UserService {
 	/////////////////////// MANAGE USER'S AVATAR ////////////////////////
 
 	async createImage(imageData: Express.Multer.File): Promise<Image> {
-		return this.prisma.image.create({
+		return await this.prisma.image.create({
 			data: {
 				filename: imageData.filename,
 				filepath: imageData.path,
@@ -285,7 +284,7 @@ export class UserService {
 	}
 
 	async linkAvatar(image: Image, login: string): Promise<User> {
-		return this.prisma.user.update({
+		return await this.prisma.user.update({
 			where: {
 				login: login
 			},
@@ -318,7 +317,7 @@ export class UserService {
 	/////////////////////// MANAGE USER'S 2FA ////////////////////////
 
 	async turnOnTwoFactorAuthentication(login: string) {
-		return this.prisma.user.update({
+		return await this.prisma.user.update({
 			where: {
 				login: login
 			},
@@ -330,7 +329,7 @@ export class UserService {
 
 	async setTwoFactorAuthenticationSecret(secret: string, login: string)
 		: Promise<User> {
-		return this.prisma.user.update({
+		return await this.prisma.user.update({
 			where: {
 				login: login
 			},
@@ -345,28 +344,28 @@ export class UserService {
 
 	async blockUser(userLogin: string, friendNickname: string) {
 		const user = await this.prisma.user.findUnique({
-			where: {login : userLogin},
-			select: {nickname: true}
+			where: { login: userLogin },
+			select: { nickname: true }
 		})
-		console.log(user.nickname)
-		console.log(friendNickname)
+		console.log(user.nickname);
+		console.log(friendNickname);
 		if (user.nickname !== friendNickname) {
 			const res = await this.prisma.user.update({
-				where: {login : userLogin},
+				where: { login: userLogin },
 				data: {
-					blockedList: { connect: {nickname: friendNickname}}
+					blockedList: { connect: { nickname: friendNickname } }
 				},
-				select: {blockedList: {select: {nickname: true}}}
+				select: { blockedList: { select: { nickname: true } } }
 			})
 			return res.blockedList;
 		}
-		throw new HttpException("You can't block yourself", 409)
+		throw new HttpException("You can't block yourself", 409);
 	}
 
 	async getMyBlockList(userLogin: string) {
 		const res = await this.prisma.user.findUnique({
-			where: {login: userLogin},
-			select: {blockedList: {select: {nickname: true}}}
+			where: { login: userLogin },
+			select: { blockedList: { select: { nickname: true } } }
 		})
 
 		return res.blockedList;
@@ -374,11 +373,11 @@ export class UserService {
 
 	async unblockUser(userLogin: string, friendNickname: string) {
 		const res = await this.prisma.user.update({
-			where: {login : userLogin},
+			where: { login: userLogin },
 			data: {
-				blockedList: { disconnect: {nickname: friendNickname}}
+				blockedList: { disconnect: { nickname: friendNickname } }
 			},
-			select: {blockedList: {select: {nickname: true}}}
+			select: { blockedList: { select: { nickname: true } } }
 		})
 
 		return res.blockedList;

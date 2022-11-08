@@ -82,7 +82,7 @@ export class AuthController {
 			});
 
 			// we update the user's status here because the frontend can't do it in this situation
-			this.userService.updateStatus(usr.login, "ONLINE");
+			await this.userService.updateStatus(usr.login, "online");
 			res.cookie('jwt', access_token);
 			res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
 		}

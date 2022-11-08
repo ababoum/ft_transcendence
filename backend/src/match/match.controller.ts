@@ -33,16 +33,6 @@ export class MatchController {
 		// record the match
 		const ret = await this.matchService.createMatch(matchData);
 
-		// update the winner's rating
-		this.userService.updateUser({
-			where: { login: matchData.winnerLogin },
-			data: {
-				rating: {
-					increment: matchData.winnerScore - matchData.loserScore
-				}
-			}
-		});
-
 		return ret;
 	}
 

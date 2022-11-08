@@ -1,11 +1,12 @@
-import {Socket} from "socket.io";
-import {SiteUser} from "./SiteUser";
-import {GameRoom} from "./GameRoom";
-import {Logger} from "./global.service";
-import {Game} from "./Game";
-import {forwardRef, Inject, Injectable} from "@nestjs/common";
-import {GameGateway} from "./game.gateway";
-import {UserService} from "../user/user.service";
+import { Socket } from "socket.io";
+import { SiteUser } from "./SiteUser";
+import { GameRoom } from "./GameRoom";
+import { Logger } from "./global.service";
+import { Game } from "./Game";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { GameGateway } from "./game.gateway";
+import { UserService } from "../user/user.service";
+import { MatchService } from "../match/match.service";
 
 @Injectable()
 export class GameServer {
@@ -15,8 +16,10 @@ export class GameServer {
 	private static readonly fps = 100;
 	private _interval;
 
-	constructor(@Inject(forwardRef(() => GameGateway)) private readonly gameGateway: GameGateway,
-				private readonly userService: UserService) {
+	constructor(
+		@Inject(forwardRef(() => GameGateway)) private readonly gameGateway: GameGateway,
+		private readonly userService: UserService,
+		private matchService: MatchService) {
 		this._rooms = new Set();
 		this._waiting_room = new Map();
 		this._queue = new Set();
@@ -35,7 +38,7 @@ export class GameServer {
 				rooms.forEach((val, key, set) => {
 					val.update();
 					if (val.isFinished()) {
-						GameServer.write_result_in_db(val);
+						this.write_result_in_db(val);
 						val.endGame();
 						this.userService.updateStatus(val.player1.login, 'online');
 						this.userService.updateStatus(val.player2.login, 'online');
@@ -53,7 +56,7 @@ export class GameServer {
 		if (this.isInWaitingRoom(siteUser.login))
 			return;
 		this._queue.add(siteUser);
-		siteUser.sendMessage('find-game', {status: 'searching'});
+		siteUser.sendMessage('find-game', { status: 'searching' });
 		Logger.write("Client " + siteUser.nickname + " is searching a game\nQueue size is " + this._queue.size);
 		if (this._queue.size == 2) {
 			let iter = this._queue.keys();
@@ -162,17 +165,12 @@ export class GameServer {
 		return res;
 	}
 
-	private static async write_result_in_db(game: GameRoom) {
-		let url = "http://localhost:3000/match_history/create";
-		await fetch(url, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json'},
-			body: JSON.stringify({
-				winnerLogin: game.winner().login,
-				loserLogin: game.loser().login,
-				winnerScore: game.winner().score,
-				loserScore: game.loser().score
-			})
+	private async write_result_in_db(game: GameRoom) {
+		this.matchService.createMatch({
+			winnerLogin: game.winner().login,
+			loserLogin: game.loser().login,
+			winnerScore: game.winner().score,
+			loserScore: game.loser().score
 		});
 	}
 

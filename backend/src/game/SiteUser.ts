@@ -1,6 +1,6 @@
-import {Socket} from "socket.io";
-import {PlayerData} from "./PlayerData";
-import {Game} from "./Game";
+import { Socket } from "socket.io";
+import { PlayerData } from "./PlayerData";
+import { Game } from "./Game";
 
 export class SiteUser {
 	private readonly _login: string;
@@ -113,8 +113,10 @@ export class SiteUser {
 
 	public delete_socket(client: Socket): void {
 		try {
-			this._all_sockets.delete(client);
-		} catch (e) {
+			if (client)
+				this._all_sockets.delete(client);
+		}
+		catch (e) {
 		}
 	}
 

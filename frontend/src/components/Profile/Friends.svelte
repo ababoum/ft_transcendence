@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {onDestroy, onMount} from "svelte";
+	import { onDestroy, onMount } from "svelte";
 	import {
 		delete_friend,
 		get_friends,
@@ -10,6 +10,7 @@
 	import Modal, { getModal } from "./Modal.svelte";
 	import { user, friends } from "../../stores/store";
 	import InvitationButton from "../Game/Invitations/InvitationButton.svelte";
+	import UserProfile from "./UserProfile.svelte";
 
 	export let profile_data;
 	let profile = undefined;
@@ -17,7 +18,6 @@
 
 	let user_to_display_nickname: string;
 
-	$: user_to_display = get_user_public_data(user_to_display_nickname);
 
 	onMount(async () => {
 		$friends = await get_friends(profile.login);
@@ -55,7 +55,7 @@
 					<div class="nearby-user">
 						<div class="row d-flex align-items-center">
 							<div class="col-md-2 col-sm-2">
-								<Avatar size="100" {login} />
+								<Avatar size="100" {nickname} />
 							</div>
 							<div class="col-md-7 col-sm-7">
 								<h5>
@@ -87,27 +87,7 @@
 
 <!-- DISPLAY ANOTHER USER'S PROFILE -->
 
-<Modal id="user_profile">
-	<div class="d-flex flex-column justify-content-center align-items-center">
-		<h1>{user_to_display_nickname}</h1>
-		{#await user_to_display}
-			<p>Profile loading...</p>
-		{:then user_profile}
-			<Avatar
-				login={user_profile.login}
-				size="100"
-				classes="rounded-circle"
-			/>
-			<div>
-				<strong>Email</strong>: {user_profile.email}
-			</div>
-			<div class="d-flex flex-column justify-content-center align-items-center">
-				<div><strong>⭐ Rating ⭐</strong></div>
-				<div class="rating-text">{user_profile.rating}</div>
-			</div>
-		{/await}
-	</div>
-</Modal>
+<UserProfile user_to_display_nickname={user_to_display_nickname} />
 
 <style>
 	.people-nearby .nearby-user {
@@ -119,12 +99,5 @@
 
 	.profile-link {
 		cursor: pointer;
-	}
-
-	.rating-text {
-		color: rgb(255, 183, 0);
-		font-size: 200%;
-		font-weight: bold;
-		text-shadow: 1px 1px #392308;
 	}
 </style>

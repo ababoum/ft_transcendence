@@ -2,10 +2,13 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma, Match } from '@prisma/client';
 import { createMatchDTO } from './dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class MatchService {
-	constructor(private prisma: PrismaService) { }
+	constructor(
+		private prisma: PrismaService,
+		private userService: UserService) { }
 
 
 	/////////////////////// ACCESS MATCH INFO ///////////////////////
@@ -64,7 +67,7 @@ export class MatchService {
 			throw new HttpException("Loser login is invalid: user not found", 400);
 		}
 
-		return await this.prisma.match.create({
+		const result = await this.prisma.match.create({
 			data: {
 				winnerScore: matchData.winnerScore,
 				loserScore: matchData.loserScore,
@@ -81,5 +84,18 @@ export class MatchService {
 			},
 
 		});
+
+		// update the winner's rating
+		this.userService.updateUser({
+			where: { login: matchData.winnerLogin },
+			data: {
+				rating: {
+					increment: matchData.winnerScore - matchData.loserScore
+				}
+			}
+		});
+
+		return result;
+
 	}
 }

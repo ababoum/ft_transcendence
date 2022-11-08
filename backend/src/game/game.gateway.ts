@@ -43,7 +43,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		} catch (e) {
 		}
 		this.updateServerInfo();
-		user.delete_socket(client)
+		user.delete_socket(client);
 		Logger.write("Deleted connection of " + user.nickname + ", current connections = " + user.connections_count());
 		if (user.connections_count() == 0) {
 			this._users.delete(user);
