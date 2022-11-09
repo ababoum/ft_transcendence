@@ -263,13 +263,13 @@ export class UserController {
 		return new StreamableFile(file);
 	}
 
-	// Get avatar from 42 by userLogin
-	@Get('ft_avatar/:login')
-	async getFTAvatarByLogin(
-		@Param('login') login: string)
+	// Get avatar from 42 by userNickname
+	@Get('ft_avatar/:nickname')
+	async getFTAvatarByNickname(
+		@Param('nickname') nickname: string)
 		: Promise<string> {
 
-		return await this.userService.user({ login: login })
+		return await this.userService.user({ nickname: nickname })
 			.then(user => user.profile_picture);
 	}
 

@@ -5,10 +5,10 @@
 	import { get_full_profile } from "../stores/requests";
 	import {show_nav, user} from "../stores/store";
 	import ProfileAbout from "../components/Profile/ProfileAbout.svelte";
-	import { Modal } from "svelte-simple-modal";
 	import Friends from "../components/Profile/Friends.svelte";
 	import AddFriend from "../components/Profile/AddFriend.svelte";
 	import MatchHistory from "../components/Profile/MatchHistory.svelte";
+    import Stats from "../components/Profile/Stats.svelte";
 
 	// retrieve current user info
 
@@ -49,6 +49,8 @@
 			<h1 class="profile-title">My profile</h1>
 			<ProfileImage profile_data={full_profile} />
 			<ProfileAbout profile_data={full_profile} />
+			<h1 class="profile-title">My stats</h1>
+			<Stats profile_data={full_profile} />
 			<h1 class="profile-title">Add new friends</h1>
 			<AddFriend profile_data={full_profile} />
 			<h1 class="profile-title">My friends</h1>

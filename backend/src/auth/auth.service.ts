@@ -47,6 +47,8 @@ export class AuthService {
 				nickname: true,
 				login: true,
 				imageId: true,
+				isTwoFAEnabled: true,
+				rating: true
 			}
 		});
 	}

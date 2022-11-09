@@ -9,13 +9,13 @@
 	} from "../../stores/requests";
 	import Modal, { getModal } from "./Modal.svelte";
 	import QrCode from "./QR_Code.svelte";
+	import { user } from "../../stores/store";
 
 	export let profile_data;
 	let profile = undefined;
 	let updating_email = false;
 	let updating_nickname = false;
 	let updating_password = false;
-	let TwoFA_QRCode: string;
 	$: profile = profile_data;
 
 	onMount(async () => {});
@@ -40,7 +40,7 @@
 		// close the 'prompt'
 		updating_email = false;
 
-		window.location.reload();
+		$user.email = new_email;
 	}
 
 	async function updateNickname(e) {
@@ -60,7 +60,7 @@
 		// close the 'prompt'
 		updating_nickname = false;
 
-		window.location.reload();
+		$user.nickname = new_nickname;
 	}
 
 	async function updatePassword(e) {
@@ -99,25 +99,23 @@
 		// send request to backend to disable 2FA for current user
 		await disable_2fa();
 
-		window.location.reload();
+		$user.isTwoFAEnabled = false;
 	}
 
-	let twoFA_msg = ""; // to signal errors to the user
+	let twoFA_err_msg; // to signal errors to the user
 	async function enable2FA(e) {
 		// send access code to backend to validate 2FA activation
 
+		twoFA_err_msg = "";
+
 		const formData = new FormData(e.target);
 		const code = formData.get("code").toString();
-		if (code.length != 6) {
-			twoFA_msg = `<p class="text-danger">The access code should be 6-digit long</p>`;
-			return;
-		}
 
-		if (parseInt(code) < 0) {
-			twoFA_msg = `<p class="text-danger">The access code should be a positive integer</p>`;
-			return;
+		twoFA_err_msg = await validate_2fa_code(code);
+		if (!twoFA_err_msg) {
+			$user.isTwoFAEnabled = true;
+			getModal("twofa").close();
 		}
-		twoFA_msg = await validate_2fa_code(code);
 	}
 
 	function toggleEmail() {
@@ -140,7 +138,7 @@
 		<!-- NICKNAME -->
 		<div>
 			<strong>Nickname:</strong>
-			{profile.nickname}
+			{$user.nickname}
 			<span class="update-btn" on:click={toggleNickname}>⚙️</span>
 		</div>
 		{#if updating_nickname}
@@ -166,7 +164,7 @@
 
 		<div>
 			<strong>Email:</strong>
-			{profile.email}
+			{$user.email}
 			<span class="update-btn" on:click={toggleEmail}>⚙️</span>
 		</div>
 		{#if updating_email}
@@ -187,13 +185,6 @@
 				</form>
 			</div>
 		{/if}
-
-		<!-- RATING (CANNOT BE DIRECTLY MODIFIED) -->
-
-		<div class="d-flex flex-column justify-content-center align-items-center">
-			<div><strong>⭐ Rating ⭐</strong></div>
-			<div class="rating-text">{profile.rating}</div>
-		</div>
 
 		<!-- PASSWORD MANAGEMENT -->
 
@@ -241,8 +232,8 @@
 
 		<div class="d-flex align-items-center">
 			<strong>2FA Authentication:&nbsp;</strong>
-			{profile.isTwoFAEnabled ? "Enabled ✅" : "Disabled ❌"}
-			{#if profile.isTwoFAEnabled}
+			{$user.isTwoFAEnabled ? "Enabled ✅" : "Disabled ❌"}
+			{#if $user.isTwoFAEnabled}
 				<button
 					type="button"
 					class="btn btn-warning btn-sm update-btn"
@@ -298,8 +289,8 @@
 						</div>
 					</form>
 				</div>
-				{#if twoFA_msg}
-					{@html twoFA_msg}
+				{#if twoFA_err_msg}
+					{@html twoFA_err_msg}
 				{/if}
 			</div>
 		</Modal>
@@ -362,12 +353,5 @@
 
 	.popup-msg {
 		font-size: min(max(16px, 4vw), 22px);
-	}
-
-	.rating-text {
-		color: rgb(255, 183, 0);
-		font-size: 200%;
-		font-weight: bold;
-		text-shadow: 1px 1px #392308;
 	}
 </style>

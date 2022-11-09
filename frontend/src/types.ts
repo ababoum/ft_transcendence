@@ -22,6 +22,9 @@ export class User {
 
 	nickname: string;
 	isLogged: boolean;
+	rating: number;
+	email: string;
+	isTwoFAEnabled: boolean;
 
 	public async upd() {
 		const resp: any = await get_current_user_data();
@@ -30,6 +33,8 @@ export class User {
 			nu.isLogged = true;
 			let data = await resp.json();
 			nu.nickname = data.nickname;
+			nu.email = data.email;
+			nu.isTwoFAEnabled = data.isTwoFAEnabled;
 		} else
 			nu.isLogged = false;
 		if (nu.isLogged != this.isLogged || this.nickname != nu.nickname)

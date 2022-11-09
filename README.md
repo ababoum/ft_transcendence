@@ -26,8 +26,16 @@ TO-DO Eliot:
 
 TO-DO M'hamed:
 
-- ?
+- Se débarrasser des window.location.reload() dans le frontend
+- Implement data validation for all user inputs and forms
+- Add a stat component in the profile (rating, wins, and losses)
 
 BONUS:
 - Generer une <datalist> de nickname pour les suggestions dans les <input type="text">
+
+
+TESTS TO DO:
+
+- Run tests on each browser (Chrome, Firefox)
+- Monitor warnings and unhandled errors in the console
 
