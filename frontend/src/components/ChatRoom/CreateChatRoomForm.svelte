@@ -28,7 +28,7 @@
 
 <form on:submit|preventDefault={createChatRoomForm}>
 	<label>
-		Name: <input type="text" placeholder="name" minlength="5" bind:value={name} required>
+		Name: <input type="text" placeholder="name" minlength="1" maxlength="100" bind:value={name} required>
 	</label>
 	<fieldset>
 		<label>Select mode:	

@@ -17,7 +17,6 @@ ISSUES:
 
 TO-DO Eliot:
 - Corrrection
-	- Empecher les admins de ban/mute le owner
 	- Ne pas voir les direct message d'un blocked user
 - Private messages
 	- Chatroom a 2 participants
