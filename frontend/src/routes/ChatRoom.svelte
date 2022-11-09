@@ -549,7 +549,7 @@
 					  {#each messagesList as message}
 
 		              <div class="d-flex flex-row justify-content-start" style="width: 60%">
-						<Avatar classes="rounded-circle" size="45" login="{"string"}"/>
+						<Avatar classes="rounded-circle" size="45" nickname="{$user.nickname}"/>
 						<div>
 							<div class="dropdown">
 								<span class="dropdown-toggle mall ms-3 mb-3 rounded-3 text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: auto;height: 5px">
@@ -585,7 +585,7 @@
 
 					{#if activeChatRoomId != undefined}
 					<div id="typezone" class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-						<Avatar classes="rounded-circle" size="45" login="{"string"}"/>
+						<Avatar classes="rounded-circle" size="45" nickname="{$user.nickname}"/>
 						{#key activeChatRoomId}
 						{#if mutedUntil = chatRoomsList[activeChatRoomId - 1].muteList.find(x => x.user.nickname === $user.nickname)}
 							{#if new Date(mutedUntil.mutedUntil) > currentTime}
@@ -696,6 +696,12 @@
 	.blockedmessage {
 		background-color: grey;
 		height: auto
+	}
+	.rating-text {
+		color: rgb(255, 183, 0);
+		font-size: 200%;
+		font-weight: bold;
+		text-shadow: 1px 1px #392308;
 	}
 </style>
 
