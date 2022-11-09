@@ -10,7 +10,7 @@ import {
 
 export class CreateChatRoomDto {
   @IsNotEmpty()
-  @MinLength(6)
+  @MinLength(5)
   @ApiProperty()
   name: string;
  

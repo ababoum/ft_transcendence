@@ -36,6 +36,8 @@ export async function get_full_profile(nickname: string) {
 }
 
 export async function get_user_public_data(nickname: string) {
+	if(!nickname)
+		return ;
 	const resp = await fetch(get(BACKEND_URL) + "/users/public/" + nickname, {
 		method: 'GET',
 		headers: { "Authorization": "Bearer " + getCookie("jwt") }

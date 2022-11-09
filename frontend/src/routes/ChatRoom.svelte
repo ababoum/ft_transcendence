@@ -2,11 +2,13 @@
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
-	import {chatroom_socket, user, game_socket, nickname, show_nav} from "../stores/store";
+	import {chatroom_socket, user, game_socket, nickname} from "../stores/store";
 	import {getCookie} from "../stores/auth";
     import Modal, { getModal } from "../components/Profile/Modal.svelte";
     import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
     import Avatar from "../components/Avatar.svelte";
+	import UserProfile from "../components/Profile/UserProfile.svelte"
+    import { get_user_public_data } from "../stores/requests";
 
 
 	let tmp: boolean;
@@ -18,7 +20,16 @@
 	let muteDuration: number = 1
 	let mutedUntil;
 	let currentTime;
+	let invite: boolean;
 	let variable;
+
+
+	//Profile popup
+	let user_to_display_nickname;
+	let user_to_display;
+	$: get_user_public_data(user_to_display_nickname).then((resp) => {
+		user_to_display = resp;
+	});
 
 	onMount(async () => { 
 		$user = await $user.upd()
@@ -53,6 +64,13 @@
 				alert("You have been banned from this chatroom")
 			}
 		});
+
+		$game_socket.on("game-invite-status", (resp) => {
+			if (resp["status"] === "sent")
+				invite = false;
+			else if (resp["status"] === "annulled")
+				invite = true;
+        });
 	})
 
 	onDestroy(() => {
@@ -433,14 +451,17 @@
 		$game_socket.emit('game-invite', nickname);
 	}
 
+	async function displayUserProfile(nickname: string) {
+		user_to_display_nickname = nickname;
+
+		getModal("user_profile").open();
+	}
+
 </script>
 
 <main>
 	<Header/>
 <section style="background-color: black; margin-top:50px">
-	{#if $show_nav}
-		<Header/>
-	{/if}
 
 <section style="background-color: black;">
   <div class="container py-5">
@@ -460,7 +481,7 @@
 					<div id="chatroomlist" class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
 					{#key chatRoomsList}
 					<ul class="list-unstyled mb-0">
-						{#each chatRoomsList as chatroom (chatRoomsList)}
+						{#each chatRoomsList as chatroom (chatroom.id)}
 						<div class="pt-1 d-flex align-items-center">
 							{#if chatroom.mode === "PUBLIC"}
 							  {#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
@@ -501,7 +522,7 @@
 						</ul>
 					{/key}
                   </div>
-				  <button type="button" class="btn btn-primary btn-sm update-btn" on:click={getModal().open}>Create Room Form</button>
+				  <button type="button" class="btn btn-primary btn-sm update-btn" on:click={getModal("create_chatroom").open}>Create Room Form</button>
 				  <div class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
 					<p>Private Messages List</p>
 					<p>Private Messages List</p>
@@ -536,9 +557,13 @@
 								</span>
 								<span class="small ms-3 mb-3 rounded-3 text-muted" style="width: auto;height: 5px">{new Date(message.creationDate).toLocaleTimeString("en-US")}</span>
 								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-								  <p class="dropdown-item">Profile</p>
+								  <p class="dropdown-item" on:click={() => displayUserProfile(message.author.nickname)}>Profile</p>
 								  {#if message.author.nickname != $user.nickname}
+								  {#if invite === false}
 								  <p class="dropdown-item" on:click={() => findGame(message.author.nickname)}>Game</p>
+								  {:else}
+								  <p class="dropdown-item">Invite sent</p>
+								  {/if}
 								  <p class="dropdown-item" on:click={() => blockUser(message.author.nickname)}>Block</p>
 								  <p class="dropdown-item" on:click={() => unblockUser(message.author.nickname)}>Unblock</p>
 								  {/if}
@@ -674,6 +699,30 @@
 	}
 </style>
 
-<Modal>
+<Modal id="create_chatroom">
 	<CreateChatRoomForm/>
+</Modal>
+
+<Modal id="user_profile">
+	<div class="d-flex flex-column justify-content-center align-items-center">
+		{#if !user_to_display}
+			<p>Profile loading...</p>
+		{:else}
+			<h1>{user_to_display.nickname}</h1>
+			<Avatar
+				nickname={user_to_display.nickname}
+				size="100"
+				classes="rounded-circle"
+			/>
+			<div>
+				<strong>Email</strong>: {user_to_display.email}
+			</div>
+			<div
+				class="d-flex flex-column justify-content-center align-items-center"
+			>
+				<div><strong>⭐ Rating ⭐</strong></div>
+				<div class="rating-text">{user_to_display.rating}</div>
+			</div>
+		{/if}
+	</div>
 </Modal>
