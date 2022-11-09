@@ -1,7 +1,7 @@
-import {get_current_user_data} from "./stores/requests";
-import {game_socket} from "./stores/store";
-import {get} from "svelte/store";
-import {getCookie} from "./stores/auth";
+import { get_current_user_data } from "./stores/requests";
+import { game_socket, BACKEND_URL, GET_NICKNAME_AVATAR,  } from "./stores/store";
+import { get } from "svelte/store";
+import { getCookie } from "./stores/auth";
 
 export class loginBase {
 

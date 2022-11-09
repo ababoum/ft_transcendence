@@ -47,7 +47,7 @@
 	{:else}
 		<div class="profile-container">
 			<h1 class="profile-title">My profile</h1>
-			<ProfileImage profile_data={full_profile} />
+			<ProfileImage />
 			<ProfileAbout profile_data={full_profile} />
 			<h1 class="profile-title">My stats</h1>
 			<Stats profile_data={full_profile} />

@@ -221,7 +221,9 @@ export class UserController {
 		@Request() req: RequestWithUser) {
 
 		const img = await this.userService.createImage(file);
-		return this.userService.linkAvatar(img, req.user.login);
+		await this.userService.linkAvatar(img, req.user.login);
+
+		return img.id;
 	}
 
 	// Get image by imageId

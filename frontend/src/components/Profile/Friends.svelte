@@ -7,8 +7,8 @@
 	} from "../../stores/requests";
 	import Avatar from "../Avatar.svelte";
 	import { Modal as InviteModal } from "svelte-simple-modal";
-	import Modal, { getModal } from "./Modal.svelte";
-	import { user, friends } from "../../stores/store";
+	import { getModal } from "./Modal.svelte";
+	import { friends } from "../../stores/store";
 	import InvitationButton from "../GlobalModal/InvitationButton.svelte";
 	import UserProfile from "./UserProfile.svelte";
 
@@ -34,7 +34,7 @@
 
 		// Send data to the API
 		const resp = await delete_friend(nickname);
-		window.location.reload();
+		$friends = await get_friends(profile.login);
 	}
 
 	async function displayUserProfile(nickname: string) {
