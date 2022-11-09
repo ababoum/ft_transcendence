@@ -20,7 +20,7 @@
 	let muteDuration: number = 1
 	let mutedUntil;
 	let currentTime;
-	let invite: boolean;
+	let invite: boolean = false;
 	let variable;
 
 
@@ -559,11 +559,7 @@
 								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 								  <p class="dropdown-item" on:click={() => displayUserProfile(message.author.nickname)}>Profile</p>
 								  {#if message.author.nickname != $user.nickname}
-								  {#if invite === false}
 								  <p class="dropdown-item" on:click={() => findGame(message.author.nickname)}>Game</p>
-								  {:else}
-								  <p class="dropdown-item">Invite sent</p>
-								  {/if}
 								  <p class="dropdown-item" on:click={() => blockUser(message.author.nickname)}>Block</p>
 								  <p class="dropdown-item" on:click={() => unblockUser(message.author.nickname)}>Unblock</p>
 								  {/if}
