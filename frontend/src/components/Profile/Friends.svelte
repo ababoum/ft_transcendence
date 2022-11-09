@@ -9,7 +9,7 @@
 	import { Modal as InviteModal } from "svelte-simple-modal";
 	import Modal, { getModal } from "./Modal.svelte";
 	import { user, friends } from "../../stores/store";
-	import InvitationButton from "../Game/Invitations/InvitationButton.svelte";
+	import InvitationButton from "../GlobalModal/InvitationButton.svelte";
 	import UserProfile from "./UserProfile.svelte";
 
 	export let profile_data;
@@ -69,7 +69,7 @@
 							</div>
 							<div class="col-md-3 col-sm-3">
 								<InviteModal>
-									<InvitationButton {login} />
+									<InvitationButton {nickname} />
 								</InviteModal>
 								<button
 									on:click={() => deleteFriend(nickname)}

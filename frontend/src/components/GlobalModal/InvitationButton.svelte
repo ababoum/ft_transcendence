@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { game_socket } from "../../../stores/store";
+	import { game_socket } from "../../stores/store";
 	import {onDestroy, onMount} from "svelte";
 
-	export let login;
+	export let nickname;
 	let invite: boolean = true;
 
 	onMount(() => {
@@ -21,7 +21,7 @@
 
 	async function findGame() {
 		if (invite)
-		    $game_socket.emit("game-invite", login);
+		    $game_socket.emit("game-invite", nickname);
 		else
 			$game_socket.emit("game-invite-delete");
 	}

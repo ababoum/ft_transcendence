@@ -12,7 +12,8 @@ import { MatchService } from "../match/match.service";
 export class GameServer {
 	private _queue: Set<SiteUser>;
 	private _rooms: Set<GameRoom>;
-	private _waiting_room: Map<String, SiteUser>;
+	/*						*Map<Invitee, Host>*/
+	private _waiting_room: Map<SiteUser, SiteUser>;
 	private static readonly fps = 100;
 	private _interval;
 
@@ -53,8 +54,6 @@ export class GameServer {
 	public addPlayerToQueue(client: Socket, siteUser: SiteUser): void {
 		siteUser.game_socket = client;
 		siteUser.is_searching = true;
-		if (this.isInWaitingRoom(siteUser.login))
-			return;
 		this._queue.add(siteUser);
 		siteUser.sendMessage('find-game', { status: 'searching' });
 		Logger.write("Client " + siteUser.nickname + " is searching a game\nQueue size is " + this._queue.size);
@@ -97,73 +96,84 @@ export class GameServer {
 	}
 
 	/*	Puts user in waiting room for waiting his friend */
-	public putUserInWaitingRoom(invited: string, client: Socket, siteUser: SiteUser): void {
-		if (!this.isInWaitingRoom(invited) && !this.isInWaitingRoom(siteUser.nickname)) {
-			this._waiting_room.set(invited, siteUser);
-			siteUser.game_socket = client;
-			siteUser.is_waiting = true;
-			Logger.write(siteUser.nickname + " has invited " + invited + " to play");
+	public putUserInWaitingRoom(invitee: SiteUser, host: SiteUser, hostSocket: Socket): boolean {
+		if (this.areAbleToPlay(invitee, host, hostSocket)) {
+			this._waiting_room.set(invitee, host);
+			host.game_socket = hostSocket;
+			host.is_waiting = true;
+			invitee.is_waiting = true;
+			Logger.write(host.nickname + " has invited " + invitee.nickname + " to play");
+			return true;
 		}
+		return false;
 	}
 
 	/*	Deletes player for waiting room */
-	public deleteUserFromWaitingRoom(siteUser: SiteUser): void {
-		if (siteUser.is_waiting) {
-			this._waiting_room.forEach((v, k, array) => {
-				if (v.nickname == siteUser.nickname) {
-					Logger.write(siteUser.nickname + " has been deleted from waiting friend room");
-					try {
-						this.gameGateway.getUserByNickname(k).sendAllTabsMessage('close-invitation', {});
-					} catch (e) {
-					}
-					array.delete(k);
-					siteUser.is_waiting = false;
+	public deleteUserFromWaitingRoom(host: SiteUser): void {
+		if (host.is_waiting) {
+			host.is_waiting = false;
+			host.sendAllTabsMessage('game-invite-status', {status: "annulled"});
+			this._waiting_room.forEach((v, invitee, array) => {
+				if (v == host) {
+					Logger.write(host.nickname + " has been deleted from waiting friend room");
+					invitee.is_waiting = false;
+					invitee.sendAllTabsMessage('close-invitation', {});
+					host.sendAllTabsMessage('game-invite-status', {status: "annulled"});
+					array.delete(invitee);
 					return;
 				}
-			})
+			});
 		}
 	}
 
 	/* Starts friends game */
-	public acceptWaitingGame(client: Socket, siteUser: SiteUser): void {
-		this._waiting_room.forEach((value, key, map) => {
-			if (siteUser.nickname == key) {
-				siteUser.game_socket = client;
-				siteUser.sendAllExcept(client, 'close-invitation', {});
-				siteUser.sendMessage('game-invite-accept', {});
-				value.sendMessage('game-invite-accept', {});
-				Logger.write(siteUser.nickname + " has accepted " + value.nickname + "'s invite")
-				this.createRoom(siteUser, value);
-				map.delete(key);
-				return;
-			}
-		});
+	public acceptWaitingGame(inviteeSocket: Socket, invitee: SiteUser): void {
+		let host: SiteUser = this._waiting_room.get(invitee);
+		invitee.is_waiting = false;
+		if (host === undefined)
+			inviteeSocket.emit('notification', "Something went wrong. Invitation is not valid");
+		else {
+			invitee.game_socket = inviteeSocket;
+			invitee.sendAllTabsMessage('close-invitation', {});
+			invitee.sendMessage('game-invite-accept', {});
+			host.sendMessage('game-invite-accept', {});
+			host.is_waiting = false;
+			Logger.write(invitee.nickname + " has accepted " + host.nickname + "'s invite")
+			this._waiting_room.delete(invitee);
+			this.createRoom(host, invitee);
+		}
 	}
 
 	/* Declines waiting game */
-	public declineWaitingGame(client: Socket, siteUser: SiteUser): void {
-		this._waiting_room.forEach((value, key, map) => {
-			if (siteUser.nickname == key) {
-				client.emit('game-invite-decline', {});
-				siteUser.sendAllExcept(siteUser.game_socket, 'close-invitation', {});
-				value.sendMessage('game-invite-decline', {});
-				value.sendMessage('game-invite-status', {status: "annulled"});
-				Logger.write(siteUser.nickname + " has declined " + value.nickname + "'s invite")
-				map.delete(key);
-				return;
-			}
-		});
+	public declineWaitingGame(inviteeSocket: Socket, invitee: SiteUser): void {
+		let host: SiteUser = this._waiting_room.get(invitee);
+		invitee.is_waiting = false;
+		if (host === undefined)
+			inviteeSocket.emit('notification', "Something went wrong. Invitation is not valid");
+		else {
+			invitee.sendAllTabsMessage('close-invitation', {});
+			host.sendAllTabsMessage('game-invite-status', {status: "annulled"});
+			host.sendMessage('notification', {message: invitee.nickname + " has declined your invitation"});
+			host.is_waiting = false;
+			Logger.write(invitee.nickname + " has declined " + host.nickname + "'s invite")
+			this._waiting_room.delete(invitee);
+		}
 	}
 
-	private isInWaitingRoom(login: string): boolean {
-		let res: boolean = false;
-		this._waiting_room.forEach((value, key) => {
-			if (key == login || value.login == login) {
-				res = true;
-				return;
-			}
-		});
-		return res;
+	private areAbleToPlay(invitee: SiteUser, host: SiteUser, hostSocket: Socket): boolean {
+		if (invitee.is_playing || invitee.is_waiting || invitee.is_searching || host.is_playing || host.is_waiting || host.is_searching) {
+			if (invitee.is_playing || host.is_playing)
+				hostSocket.emit('notification', {message: ((invitee.is_playing ?
+														invitee.nickname + " is" : "You are") + " already playing")});
+			else if (invitee.is_searching || host.is_searching)
+				hostSocket.emit('notification', {message: (invitee.is_searching ?
+														invitee.nickname + " is" : "You are") + " already searching a game"});
+			else if (invitee.is_waiting || host.is_waiting)
+				hostSocket.emit('notification', {message: (invitee.is_waiting ?
+														invitee.nickname + " is" : "You are") + " already waiting someone to play"});
+			return false;
+		}
+		return true;
 	}
 
 	private async write_result_in_db(game: GameRoom) {

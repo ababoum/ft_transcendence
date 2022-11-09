@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { getContext, onDestroy } from "svelte";
-	import { game_socket, user } from "../../stores/store";
+	import {getContext, onDestroy, onMount} from "svelte";
+	import {game_socket, user} from "../../stores/store";
 	import Game from "./Game.svelte";
 
-	const { open } = getContext("simple-modal");
-
+	const {open} = getContext("simple-modal");
 	let is_searching: boolean = false;
-	let search_error: string = "";
-	$: is_searching_resp = is_searching;
 
 	async function findGame() {
 		if (is_searching) {
@@ -19,10 +16,8 @@
 		$game_socket.on("find-game", (data) => {
 			if (data["status"] == "searching") is_searching = true;
 			if (data["status"] == "found") {
-				$game_socket.off("find-game");
 				is_searching = false;
-				open(
-					Game,
+				open(Game,
 					{},
 					{
 						styleWindow: {
@@ -31,24 +26,21 @@
 					}
 				);
 			}
-		});
-
-		$game_socket.on("find-game-error", (msg) => {
-			search_error = msg;
-		});
-
+        });
 		$game_socket.emit("find-game", $user);
 	}
 
+	onMount(() => {
+
+	});
+
 	onDestroy(() => {
 		$game_socket.removeListener("find-game");
-		$game_socket.removeListener("get-games-list");
 	});
 </script>
 
 <div>
-<button on:click={findGame}>
-	{is_searching_resp ? "Searching..." : "Find Game"}
-</button>
-<p>{search_error}</p>
+    <button on:click={findGame}>
+        {is_searching ? "Searching..." : "Find Game"}
+    </button>
 </div>

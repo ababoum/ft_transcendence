@@ -206,4 +206,8 @@ export class SiteUser {
 	public getPaddleRight(): number {
 		return this._gameData.getPaddleRight();
 	}
+
+	get game_socket(): Socket {
+		return this._game_socket;
+	}
 }

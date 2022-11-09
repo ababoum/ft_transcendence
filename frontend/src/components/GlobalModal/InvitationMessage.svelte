@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {game_socket} from "../../../stores/store";
+	import {game_socket} from "../../stores/store";
 	import {getContext, onDestroy, onMount} from "svelte";
 
 	const {close} = getContext('simple-modal');
