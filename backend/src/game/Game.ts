@@ -12,6 +12,7 @@ export class Game {
 	/*** VARS ***/
 	private readonly _leftPlayer: SiteUser;
 	private readonly _rightPlayer: SiteUser;
+	private _scoreWasChanged: boolean;
 
 	/*** Nested BALL class ***/
 	private ball = new class {
@@ -53,6 +54,7 @@ export class Game {
 		this._rightPlayer = player2;
 		this.leftPlayer.is_playing = true;
 		this.rightPlayer.is_playing = true;
+		this.scoreWasChanged = false;
 
 		this._leftPlayer.x = 0;
 		this._leftPlayer.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
@@ -92,9 +94,11 @@ export class Game {
 		}
 		if (this.ball.x - this.ball.radius < 0) {
 			this.rightPlayer.score++;
+			this.scoreWasChanged = true;
 			this.ball.reset();
 		} else if (this.ball.x + this.ball.radius > Game.FIELD_WIDTH) {
 			this.leftPlayer.score++;
+			this.scoreWasChanged = true;
 			this.ball.reset();
 		}
 	}
@@ -130,6 +134,14 @@ export class Game {
 
 	get rightPlayer(): SiteUser {
 		return this._rightPlayer;
+	}
+
+	get scoreWasChanged(): boolean {
+		return this._scoreWasChanged;
+	}
+
+	set scoreWasChanged(value: boolean) {
+		this._scoreWasChanged = value;
 	}
 
 	/*	to JSON */

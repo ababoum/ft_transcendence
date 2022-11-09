@@ -50,10 +50,14 @@ export class GameRoom {
 	}
 
 	/*	Add spectator to spectator list */
-	public addSpectator(user: SiteUser, client: Socket) {
-		this._spectators.set(client, (user.is_logged ? user.nickname : user.id));
-		Logger.write((user.is_logged ? user.nickname : user.id) + " is spectating " + this._player1.nickname +
+	public addSpectator(spectatorUser: SiteUser, spectatorSocket: Socket): void {
+		this._spectators.set(spectatorSocket, (spectatorUser.is_logged ? spectatorUser.nickname : spectatorUser.id));
+		Logger.write((spectatorUser.is_logged ? spectatorUser.nickname : spectatorUser.id) + " is spectating " + this._player1.nickname +
 			+" vs " + this._player2.nickname);
+	}
+
+	public deleteSpectator(spectatorSocket: Socket): boolean {
+		return this._spectators.delete(spectatorSocket);
 	}
 
 	/* Check players nickname inside room */
@@ -113,5 +117,15 @@ export class GameRoom {
 
 	get player2(): SiteUser {
 		return this._player2;
+	}
+
+	get scoreWasChanged(): boolean {
+		return this._game.scoreWasChanged;
+	}
+
+	/* SETTERS */
+
+	set scoreWasChanged(value: boolean) {
+		this._game.scoreWasChanged = value;
 	}
 }

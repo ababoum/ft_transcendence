@@ -14,7 +14,6 @@ import {SiteUser} from "./SiteUser";
 import {GameServer} from "./GameServer";
 import {Logger} from "./global.service";
 import {UserService} from "../user/user.service";
-import {use} from "passport";
 
 @WebSocketGateway(5678, {cors: '*'})
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -46,8 +45,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (leavedUser == null)
 			return ;
 		if (leavedUser.is_logged) {
-			if (leavedUser.is_playing && client == leavedUser.game_socket)
-				this.getUserBySocket(client).is_leaved = true;
+			if (leavedUser.is_playing && client == leavedUser.game_socket) {
+				console.log("WATAFAK")
+				leavedUser.is_leaved = true;
+			}
 			if (leavedUser.is_searching)
 				this.gameServer.deletePlayerFromQueue(leavedUser);
 			if (leavedUser.is_waiting) {
@@ -139,7 +140,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	/*	Leave from the game */
 	@SubscribeMessage('exit-game')
 	exitGame(@ConnectedSocket() client: Socket): void {
-		this.getUserBySocket(client).is_leaved = true;
+		let leavedUser = this.getUserBySocket(client);
+		if (leavedUser.is_playing && client == leavedUser.game_socket)
+			this.getUserBySocket(client).is_leaved = true;
+		else
+			this.gameServer.deleteSpectator(client);
 		this.updateServerInfo();
 	}
 

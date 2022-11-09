@@ -38,6 +38,10 @@ export class GameServer {
 			this._interval = setInterval((rooms) => {
 				rooms.forEach((val, key, set) => {
 					val.update();
+					if (val.scoreWasChanged) {
+						this.gameGateway.updateServerInfo();
+						val.scoreWasChanged = false;
+					}
 					if (val.isFinished()) {
 						this.write_result_in_db(val);
 						val.endGame();
@@ -67,12 +71,19 @@ export class GameServer {
 	}
 
 	/*	Finds a match by nickname and adds spectator */
-	addSpectator(siteUser: SiteUser, client: Socket, nickname: any) {
+	addSpectator(spectatorUser: SiteUser, spectatorSocket: Socket, playersNickname: any) {
 		this._rooms.forEach((element) => {
-			if (element.check_nickname(nickname)) {
-				element.addSpectator(siteUser, client);
+			if (element.check_nickname(playersNickname)) {
+				element.addSpectator(spectatorUser, spectatorSocket);
 				return;
 			}
+		});
+	}
+
+	deleteSpectator(spectatorSocket: Socket): void {
+		this._rooms.forEach((e) => {
+			if (e.deleteSpectator(spectatorSocket))
+				return;
 		});
 	}
 
