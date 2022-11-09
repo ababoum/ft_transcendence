@@ -41,18 +41,17 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 			client.emit('chatrooms-list', this.chatRoomsList);
 			const user = await this.UserService.user({login: verified.username})
 			this.users.push({connectionId: client, login: verified.username, nickname: user.nickname})
-			client.emit('chatrooms-list', this.chatRoomsList)
-			//console.log(this.users)
+			//console.log(this.users.map(({connectionId, ...rest}) => connectionId.id + " - " + rest.nickname))
 		}
 		catch {
 			this.logger.log("Disconnection because of bad token --- " + client.id);
-			//client.disconnect(true)
+			client.disconnect()
 		}
 	}
 
 	handleDisconnect(client: Socket) {
 		this.logger.log("disconnect --- " + client.id);
-		this.users.splice(this.users.findIndex(x => x.connectionId.id),1)
+		this.users.splice(this.users.findIndex(x => x.connectionId.id === client.id),1)
 	}
 
 	async createChatroom(chatRoom: ChatRoom) {
@@ -120,22 +119,26 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
 
-	async enterChatroom(user, chatRoomId: string) {
-		const client = await this.users.find(x => x.login === user.login).connectionId
-
-		// Join client to the room
-		await client.join(chatRoomId);
-
-		this.logger.log(user.login + " entered the chatroom " + chatRoomId)
+	async enterChatroom(user, chatRoomId: string, socketId: string) {
+		console.log("User " + user.login + " entering " + chatRoomId + " from connection " + socketId)
+		const found = await this.users.find(x => x.connectionId.id === socketId)
+		if (found){
+			await found.connectionId.join(chatRoomId);
+			this.logger.log(user.login + " entered the chatroom " + chatRoomId)
+		}
+		else
+			this.logger.log("The connection provided wasn't found")
 	}
 
-	async exitChatroom(user, chatRoomId: string) {
-		const client = await this.users.find(x => x.login === user.login).connectionId
-
-		// Join client to the room
-		await client.leave(chatRoomId);
-
-		this.logger.log(user.login + " exited the chatroom " + chatRoomId)
+	async exitChatroom(user, chatRoomId: string, socketId: string) {
+		console.log("User " + user.login + " leaving " + chatRoomId + " from connection " + socketId)
+		const found = await this.users.find(x => x.connectionId.id === socketId)
+		if (found){
+			await found.connectionId.leave(chatRoomId);
+			this.logger.log(user.login + " exited the chatroom " + chatRoomId)
+		}
+		else
+			this.logger.log("The connection provided wasn't found")
 	}
 
 	async adminUser(chatRoomId: number, nickname, res) {
@@ -164,7 +167,7 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		console.log(res)
 
 		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
-		this.chatRoomsList[chatRoomIndex].banList = await res.banList
+		this.chatRoomsList[chatRoomIndex].banList = await res.banList.map(({login, ...rest}) => rest);
 		this.chatRoomsList[chatRoomIndex].participants = await res.participants
 
 		this.wss.emit('chatrooms-list', this.chatRoomsList)

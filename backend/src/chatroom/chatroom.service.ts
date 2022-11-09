@@ -303,8 +303,8 @@ export class ChatroomService {
 					participants: {disconnect: {nickname: UpdateChatRoomDto.nickname}}
 				},
 				select: {
-					banList: {select: {id: true, nickname: true}},
-					participants: {select: {id: true, nickname: true}}
+					banList: {select: {id: true, nickname: true, login: true}},
+					participants: {select: {id: true, nickname: true}},
 				}
 			})
 		}

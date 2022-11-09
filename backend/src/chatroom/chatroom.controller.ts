@@ -113,8 +113,8 @@ export class ChatroomController {
 	}
 
 	@Patch(':id/exit')
-	async exitRoom(@Request() req, @Param('id') id: string) {
-		const res = await this.ChatroomGateway.exitChatroom(req.user, id)
+	async exitRoom(@Request() req, @Param('id') id: string, @Body() socketId) {
+		const res = await this.ChatroomGateway.exitChatroom(req.user, id, socketId.id)
 		return res
 	}
 
@@ -148,7 +148,7 @@ export class ChatroomController {
 	async banUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
 		const res = await this.ChatroomService.banUser(req.user.login, +id, UpdateChatRoomDto);
 		await this.ChatroomGateway.banUser(Number(id), UpdateChatRoomDto.nickname, res)
-		return res;
+		return res.participants;
 	}
 
 	@Patch(':id/unbanUser')
@@ -180,10 +180,10 @@ export class ChatroomController {
 	}
 
 // MESSAGES //
-	@Get(':id/messages')
-	async getMessages(@Request() req, @Param('id') id: string) {
+	@Patch(':id/messages')
+	async getMessages(@Request() req, @Param('id') id: string, @Body() socketId) {
 		const res = await this.ChatroomService.getMessages(+id);
-		await this.ChatroomGateway.enterChatroom(req.user, id)
+		await this.ChatroomGateway.enterChatroom(req.user, id, socketId.id)
 		return res
 	}
 
