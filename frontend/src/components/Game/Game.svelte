@@ -24,10 +24,8 @@
 	function keyHandler(e) {
 		if (e.keyCode == DOWN_KEY) {
 			$game_socket.emit('move-paddle', "down");
-			$game_socket.emit('move-paddle', "down");
 		}
 		if (e.keyCode == UP_KEY) {
-			$game_socket.emit('move-paddle', "up");
 			$game_socket.emit('move-paddle', "up");
 		}
 	}

@@ -81,6 +81,8 @@ export class Game {
 			this.ball.velocityY = -this.ball.velocityY;
 		}
 		//collision check
+		Game.move_paddle(this.leftPlayer);
+		Game.move_paddle(this.rightPlayer);
 		let player: SiteUser = this.ball.x < Game.FIELD_WIDTH / 2 ? this._leftPlayer : this._rightPlayer;
 		if (this.collision(player)) {
 			//if collision, need check where exactly ball touched paddle to change ball direction
@@ -103,16 +105,36 @@ export class Game {
 		}
 	}
 
+	private static move_paddle(player: SiteUser) {
+		if (player.offset > 0) {
+			if (player.y + 5 <= Game.FIELD_HEIGHT - this.PADDLE_HEIGHT) {
+				player.y += 5;
+				player.offset -= 5;
+			} else {
+				player.y = Game.FIELD_HEIGHT - this.PADDLE_HEIGHT;
+				player.offset = 0;
+			}
+		} else if (player.offset < 0) {
+			if (player.y - 5 >= 0) {
+				player.y -= 5;
+				player.offset += 5;
+			} else {
+				player.offset = 0;
+				player.y = 0;
+			}
+		}
+	}
+
 	/* Interface for move paddle */
-	public movePaddle(siteUser: SiteUser, direction: string): void {
+	public setPaddleMovement(siteUser: SiteUser, direction: string): void {
 		if (this._leftPlayer.nickname == siteUser.nickname)
 			direction == "up" ?
-				this._leftPlayer.move_up(0) :
-				this._leftPlayer.move_down(Game.FIELD_HEIGHT - Game.PADDLE_HEIGHT);
+				this._leftPlayer.move_up() :
+				this._leftPlayer.move_down();
 		else if (this._rightPlayer.nickname == siteUser.nickname)
 			direction == "up" ?
-				this._rightPlayer.move_up(0) :
-				this._rightPlayer.move_down(Game.FIELD_HEIGHT - Game.PADDLE_HEIGHT);
+				this._rightPlayer.move_up() :
+				this._rightPlayer.move_down();
 	}
 
 	/*	Check connections, leave status and score */

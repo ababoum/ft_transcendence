@@ -72,7 +72,7 @@ export class GameRoom {
 
 	/* Move paddle */
 	public movePaddle(siteUser: SiteUser, direction: string): void {
-		this._game.movePaddle(siteUser, direction);
+		this._game.setPaddleMovement(siteUser, direction);
 	}
 
 	/*	Game status */

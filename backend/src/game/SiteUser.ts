@@ -183,12 +183,12 @@ export class SiteUser {
 		this._gameData.y = value;
 	}
 
-	public move_down(maxTopPos: number): void {
-		this._gameData.move_down(maxTopPos);
+	public move_down(): void {
+		this._gameData.move_down();
 	}
 
-	public move_up(maxBotPos: number): void {
-		this._gameData.move_up(maxBotPos);
+	public move_up(): void {
+		this._gameData.move_up();
 	}
 
 	public getPaddleTop(): number {
@@ -209,5 +209,13 @@ export class SiteUser {
 
 	get game_socket(): Socket {
 		return this._game_socket;
+	}
+
+	get offset(): number {
+		return  this._gameData.offset;
+	}
+
+	set offset(value: number) {
+		this._gameData.offset = value;
 	}
 }
