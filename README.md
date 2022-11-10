@@ -16,13 +16,14 @@ ISSUES:
 - Pour socket et Gateway, il faut verifier le token dans handleConnection et disconnect en cas d'erreur, car UseGuards() ne permet pas d'empecher la connection
 
 TO-DO Eliot:
-- Pouvoir aller sur le profil de quelqu'un en cliquant dessus
-- Pouvoir inviter quelqu'un via le chat
+- Corrrection
+	- Ne pas voir les direct message d'un blocked user
 - Private messages
 	- Chatroom a 2 participants
 	- Impossible a Join ou Leave
 	- Pas d'owner et admin
 	- Pas de mode
+- Gerer l'affichage si le socket n'est pas connecte
 
 TO-DO M'hamed:
 

@@ -26,11 +26,10 @@ export const game_socket = writable(io(get(GAME_URL), {
 }));
 export const show_nav = writable(true);
 
-export const friends = writable([])
+export const friends = writable([]);
+export const myavatar = writable("");
 
-export const chatroom_socket = writable(io('http://localhost:5678/chatroom'));
 export const GET_CHATROOMS_URL = readable('http://localhost:3000/chatrooms');
-
 
 // TRY TO USE THOSE, WE CAN TEST HOW IT WORKS OUT
 export const login = writable(localStorage.getItem("login") || "login");

@@ -5,12 +5,14 @@ import {
 	IsNotEmpty,
 	IsOptional,
 	IsString,
+	MaxLength,
 	MinLength,
 } from 'class-validator';
 
 export class CreateChatRoomDto {
   @IsNotEmpty()
-  @MinLength(6)
+  @MinLength(1)
+  @MaxLength(100)
   @ApiProperty()
   name: string;
  

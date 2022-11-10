@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+	import { myavatar } from "../stores/store";
 	import { get } from "svelte/store";
 
 	import { BACKEND_URL, GET_NICKNAME_AVATAR } from "../stores/store";
@@ -21,6 +22,7 @@
 		const resp2 = await fetch(
 			get(BACKEND_URL) + "/users/ft_avatar/" + nickname
 		);
+
 		if (resp1.ok) {
 			const imageBlob = await resp1.blob();
 			const reader = new FileReader();
@@ -40,27 +42,38 @@
 	})();
 </script>
 
-<div class={classes}>
-	{#await fetchImage}
+{#if !$myavatar}
+	<div class={classes}>
+		{#await fetchImage}
+			<img
+				src={loading_imageSrc}
+				alt="profile"
+				class="avatar-img"
+				style="width: {size}px;"
+			/>
+		{:then data}
+			<img
+				src={actual_img}
+				class={classes}
+				style="width: {size}px;"
+				alt="Avatar"
+			/>
+		{:catch error}
+			<img
+				src={default_imageSrc}
+				alt="profile"
+				class={classes}
+				style="width: {size}px;"
+			/>
+		{/await}
+	</div>
+{:else}
+	<div class={classes}>
 		<img
-			src={loading_imageSrc}
+			src={$myavatar}
 			alt="profile"
 			class="avatar-img"
 			style="width: {size}px;"
 		/>
-	{:then data}
-		<img
-			src={actual_img}
-			class={classes}
-			style="width: {size}px;"
-			alt="Avatar"
-		/>
-	{:catch error}
-		<img
-			src={default_imageSrc}
-			alt="profile"
-			class={classes}
-			style="width: {size}px;"
-		/>
-	{/await}
-</div>
+	</div>
+{/if}

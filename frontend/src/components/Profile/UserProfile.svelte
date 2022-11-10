@@ -6,7 +6,7 @@
 
 	export let user_to_display_nickname;
 
-	let user_to_display;
+	let user_to_display = undefined;
 
 	$: get_user_public_data(user_to_display_nickname).then((resp) => {
 		user_to_display = resp;

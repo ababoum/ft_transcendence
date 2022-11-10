@@ -2,11 +2,13 @@
 	import Header from "../components/Nav.svelte";
 	import {push} from "svelte-spa-router";
 	import {onDestroy, onMount} from "svelte";
-	import {chatroom_socket, user, game_socket, nickname, show_nav} from "../stores/store";
+	import {user, game_socket, nickname} from "../stores/store";
 	import {getCookie} from "../stores/auth";
     import Modal, { getModal } from "../components/Profile/Modal.svelte";
     import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
     import Avatar from "../components/Avatar.svelte";
+	import UserProfile from "../components/Profile/UserProfile.svelte"
+	import { io, Socket } from "socket.io-client";
 
 
 	let tmp: boolean;
@@ -18,13 +20,23 @@
 	let muteDuration: number = 1
 	let mutedUntil;
 	let currentTime;
+	let invite: boolean = true;
+	let chatroom_socket: Socket
 	let variable;
+	let ready: boolean = false;
+
+	//Profile popup
+	let user_to_display_nickname;
 
 	onMount(async () => { 
 		$user = await $user.upd()
 		if (!$user.isLogged)
 			await push("/login")
 		else{
+			chatroom_socket = await io('http://localhost:5678/chatroom', {
+				query: {
+					token: getCookie("jwt")
+			}})
 			await getChatRoomsList();
 			await getBlockList();
 		}
@@ -33,19 +45,19 @@
 			currentTime = new Date();
 		}, 1000);
 
-		$chatroom_socket.on('chatrooms-list', (data) => {
+		chatroom_socket.on('chatrooms-list', (data) => {
 			console.log("Received chatrooms-list")
 			chatRoomsList = data;
 			console.log(chatRoomsList)
 		});
 
-		$chatroom_socket.on('message', (data) => {
+		chatroom_socket.on('message', (data) => {
 			messagesList.push(data)
 			messagesList = [...messagesList]
 			console.log("Received message: " + data.content)
 		})
 
-		$chatroom_socket.on('you-have-been-banned', (data) => {
+		chatroom_socket.on('you-have-been-banned', (data) => {
 			console.log(data)
 			if (data = activeChatRoomId){
 				activeChatRoomId = undefined
@@ -53,9 +65,17 @@
 				alert("You have been banned from this chatroom")
 			}
 		});
+
+		$game_socket.on("game-invite-status", (resp) => {
+			if (resp["status"] === "sent")
+				invite = false;
+			else if (resp["status"] === "annulled")
+				invite = true;
+        });
 	})
 
 	onDestroy(() => {
+		chatroom_socket.disconnect()
 	})
 
 	async function getChatRoomsList() {
@@ -110,12 +130,15 @@
 	async function leaveChatRoom(chatRoomId: number){
 		console.log("In leaveChatRoom " + chatRoomId)
 
-		const test = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/exit', {
-			method: 'PATCH',
-			headers: {	
-				"Authorization": "Bearer " + getCookie("jwt"),
-			},
-		})
+		if (activeChatRoomId){
+			const test = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/exit', {
+				method: 'PATCH',
+				headers: {	
+					"Authorization": "Bearer " + getCookie("jwt"),
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({id: chatroom_socket.id})
+			})}
 
 		activeChatRoomId = undefined;
 
@@ -134,20 +157,25 @@
 	async function enterChatRoom(chatRoomId: number){
 		console.log("In enterChatRoom " + chatRoomId)
 
-		const test = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/exit', {
-			method: 'PATCH',
-			headers: {	
-				"Authorization": "Bearer " + getCookie("jwt"),
-			},
-		})
+		if (activeChatRoomId){
+			const test = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/exit', {
+				method: 'PATCH',
+				headers: {	
+					"Authorization": "Bearer " + getCookie("jwt"),
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({id: chatroom_socket.id})
+			})}
 
 		activeChatRoomId = chatRoomId;
 
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/messages', {
-			method: 'GET',
+			method: 'PATCH',
 			headers: {	
 				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
 			},
+			body: JSON.stringify({id: chatroom_socket.id})
 		})
 		const res = await rawresponse.json()
 
@@ -162,6 +190,8 @@
 		console.log("In banUser " + usernickname + " room " + chatRoomId)
 		if (usernickname === undefined)
 			return alert("Please provide a nickname")
+		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
+			return alert("Can't ban the owner")
 
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/banUser', {
 			method: 'PATCH',
@@ -225,6 +255,8 @@
 		console.log("In unadminUser " + usernickname + " room " + chatRoomId)
 		if (usernickname === undefined)
 			return alert("Please provide a nickname")
+		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
+			return alert("Can't unadmin the owner")
 
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/unadminUser', {
 			method: 'PATCH',
@@ -245,6 +277,8 @@
 		console.log("In muteUser " + usernickname + " room " + chatRoomId)
 		if (usernickname === undefined)
 			return alert("Please provide a nickname")
+		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
+			return alert("Can't mute the owner")
 
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/muteUser', {
 			method: 'PATCH',
@@ -381,8 +415,8 @@
 
 	async function blockUser(nickname:string) {
 		console.log("In blockUser " + nickname)
-		if (nickname === undefined)
-			return alert("Please provide a nickname")
+		if (nickname === $user.nickname)
+			return alert("You can't block yourself")
 
 		const rawresponse = await fetch('http://localhost:3000/users/blockUser/', {
 			method: 'POST',
@@ -408,6 +442,8 @@
 		console.log("In blockUser " + nickname)
 		if (nickname === undefined)
 			return alert("Please provide a nickname")
+		if (nickname === $user.nickname)
+			return alert("You can't unblock yourself")
 
 		const rawresponse = await fetch('http://localhost:3000/users/unblockUser/', {
 			method: 'DELETE',
@@ -433,18 +469,24 @@
 		$game_socket.emit('game-invite', nickname);
 	}
 
+	async function displayUserProfile(nickname: string) {
+		user_to_display_nickname = nickname;
+
+		getModal("user_profile").open();
+	}
+
 </script>
 
 <main>
 	<Header/>
 <section style="background-color: black; margin-top:50px">
-	{#if $show_nav}
-		<Header/>
-	{/if}
 
 <section style="background-color: black;">
   <div class="container py-5">
-
+	{#key chatroom_socket}
+	{#if !chatroom_socket}
+	<div>Socket not connected</div>
+	{:else}
     <div class="row">
       <div class="col-md-12">
 
@@ -460,7 +502,7 @@
 					<div id="chatroomlist" class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
 					{#key chatRoomsList}
 					<ul class="list-unstyled mb-0">
-						{#each chatRoomsList as chatroom (chatRoomsList)}
+						{#each chatRoomsList as chatroom (chatroom.id)}
 						<div class="pt-1 d-flex align-items-center">
 							{#if chatroom.mode === "PUBLIC"}
 							  {#if chatroom.participants.find(x => x.nickname === $user.nickname) !== undefined}
@@ -501,7 +543,7 @@
 						</ul>
 					{/key}
                   </div>
-				  <button type="button" class="btn btn-primary btn-sm update-btn" on:click={getModal().open}>Create Room Form</button>
+				  <button type="button" class="btn btn-primary btn-sm update-btn" on:click={getModal("create_chatroom").open}>Create Room Form</button>
 				  <div class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
 					<p>Private Messages List</p>
 					<p>Private Messages List</p>
@@ -525,10 +567,10 @@
 					</div>
 					{/if}
 		            <div id="messages" class="t-3 pe-3" style="position: relative; height: 400px; overflow-y: scroll">
-					  {#each messagesList as message}
+					  {#each messagesList as message (message)}
 
 		              <div class="d-flex flex-row justify-content-start" style="width: 60%">
-						<Avatar classes="rounded-circle" size="45" login="{"string"}"/>
+						<Avatar classes="rounded-circle" size="45" nickname="{message.author.nickname}"/>
 						<div>
 							<div class="dropdown">
 								<span class="dropdown-toggle mall ms-3 mb-3 rounded-3 text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: auto;height: 5px">
@@ -536,9 +578,13 @@
 								</span>
 								<span class="small ms-3 mb-3 rounded-3 text-muted" style="width: auto;height: 5px">{new Date(message.creationDate).toLocaleTimeString("en-US")}</span>
 								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-								  <p class="dropdown-item">Profile</p>
+								  <p class="dropdown-item" on:click={() => displayUserProfile(message.author.nickname)}>Profile</p>
 								  {#if message.author.nickname != $user.nickname}
+								  {#if invite === true}
 								  <p class="dropdown-item" on:click={() => findGame(message.author.nickname)}>Game</p>
+								  {:else}
+								  <p class="dropdown-item">Invite sent</p>
+								  {/if}
 								  <p class="dropdown-item" on:click={() => blockUser(message.author.nickname)}>Block</p>
 								  <p class="dropdown-item" on:click={() => unblockUser(message.author.nickname)}>Unblock</p>
 								  {/if}
@@ -560,7 +606,7 @@
 
 					{#if activeChatRoomId != undefined}
 					<div id="typezone" class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-						<Avatar classes="rounded-circle" size="45" login="{"string"}"/>
+						<Avatar classes="rounded-circle" size="45" nickname="{$user.nickname}"/>
 						{#key activeChatRoomId}
 						{#if mutedUntil = chatRoomsList[activeChatRoomId - 1].muteList.find(x => x.user.nickname === $user.nickname)}
 							{#if new Date(mutedUntil.mutedUntil) > currentTime}
@@ -636,7 +682,8 @@
 
       </div>
     </div>
-
+	{/if}
+	{/key}
   </div>
 </section>
 </main>
@@ -674,6 +721,8 @@
 	}
 </style>
 
-<Modal>
+<Modal id="create_chatroom">
 	<CreateChatRoomForm/>
 </Modal>
+
+<UserProfile user_to_display_nickname={user_to_display_nickname} />

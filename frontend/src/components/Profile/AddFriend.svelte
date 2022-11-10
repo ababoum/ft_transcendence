@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { add_friend } from "../../stores/requests";
+	import { add_friend, get_friends } from "../../stores/requests";
+	import { friends } from "../../stores/store";
+
 
 	export let profile_data;
 	let profile = undefined;
@@ -22,8 +24,7 @@
 		const resp = await add_friend(nickname);
 
 		if (resp.ok) {
-			// msg = `<p class="text-success">User successfully added as friend</p>`;
-			window.location.reload();
+			$friends = await get_friends(profile.login);
 		} else {
 			msg = `<p class="text-danger">${await resp
 				.json()

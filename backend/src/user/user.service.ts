@@ -210,14 +210,24 @@ export class UserService {
 		else if (friend.login === me.login)
 			throw new HttpException("You cannot add yourself as friend", 409);
 
-		const new_friendship = await this.prisma.friendship.create({
-			data: {
-				friendId: me.id,
-				friendWithId: friend.id,
+		try {
+			const new_friendship = await this.prisma.friendship.create({
+				data: {
+					friendId: me.id,
+					friendWithId: friend.id,
+				}
+			});
+			return new_friendship;
+		}
+		catch (e) {
+			if (e instanceof Prisma.PrismaClientKnownRequestError) {
+				if (e.code === 'P2002') {
+					throw new HttpException(
+						`${friend.nickname} is already your friend`, 409);
+				}
 			}
-		});
+		}
 
-		return new_friendship;
 	}
 
 	async friendsbyLogin(login: string): Promise<User[]> {

@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { get } from "svelte/store";
-	import { BACKEND_URL, user } from "../../stores/store";
+	import { BACKEND_URL, user, myavatar } from "../../stores/store";
 	import { getCookie } from "../../stores/auth";
 	import { onMount } from "svelte";
 	import Avatar from "../Avatar.svelte";
-
-	export let profile_data: any;
 
 	// default paths
 	const default_imageSrc = "static/default_avatar.png";
@@ -20,40 +18,15 @@
 		let data = new FormData();
 		data.append("file", image);
 
-		await fetch(get(BACKEND_URL) + "/users/upload_avatar", {
+		const img_id = await fetch(get(BACKEND_URL) + "/users/upload_avatar", {
 			method: "POST",
 			body: data,
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
-		}).then(() => {
-			reload_required = true;
-		});
-		if (reload_required) {
-			window.location.reload();
-		}
+		}).then( resp => resp.json());
+		$myavatar = get(BACKEND_URL) + "/users/image/" + img_id;
 	};
 
-	// retrieve avatar picture for the logged in user
-
-	onMount(async () => {
-		if (!profile_data.imageId) {
-			imageSrc = null;
-			return ;
-		}
-		const resp = await fetch(
-			get(BACKEND_URL) + "/users/image/" + profile_data.imageId
-		);
-		const imageBlob = await resp.blob();
-		const reader = new FileReader();
-		reader.readAsDataURL(imageBlob);
-		reader.onload = function (e) {
-			var rawLog = reader.result;
-			if (resp.ok) {
-				imageSrc = rawLog;
-			} else {
-				imageSrc = null;
-			}
-		};
-	});
+	onMount(async () => {});
 </script>
 
 <div class="avatar">
