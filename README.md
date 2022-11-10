@@ -24,6 +24,7 @@ TO-DO Eliot:
 	- Pas d'owner et admin
 	- Pas de mode
 - Gerer l'affichage si le socket n'est pas connecte
+- Seeding de la SB
 
 TO-DO M'hamed:
 

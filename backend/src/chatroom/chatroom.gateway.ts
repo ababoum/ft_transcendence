@@ -172,10 +172,10 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 
-		const client = await this.users.find(x => x.nickname === nickname)
-		if (client){
-			await client.connectionId.leave(String(chatRoomId))
-			client.connectionId.emit('you-have-been-banned', chatRoomId)
+		const clients = await this.users.filter(x => x.nickname === nickname)
+		if (clients){
+			clients.forEach(x => x.connectionId.leave(String(chatRoomId)))
+			clients.forEach(x => x.connectionId.emit('you-have-been-banned', chatRoomId))
 		}
 	}
 

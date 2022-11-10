@@ -96,7 +96,6 @@ model Messages {
 
 model DirectMessagesRooms {
     id            	Int                     @id @default(autoincrement())
-    name         	String
     creationDate  	DateTime                @default(now())
     participants  	User[]                  
     privateMessages	DirectMessages[]
