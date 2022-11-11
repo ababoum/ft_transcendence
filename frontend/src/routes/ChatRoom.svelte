@@ -580,6 +580,8 @@
 		console.log(res)
 		if (res.statusCode === 404)
 			alert("This user doesn't exist")
+		if (res.statusCode === 409)
+			alert("This DirectMessagesRoom already exist")
 		e.target.reset()
 	}
 
