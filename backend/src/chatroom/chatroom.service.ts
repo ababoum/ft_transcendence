@@ -1,10 +1,11 @@
 import { HttpCode, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChatRoom, User, UsersMutedinChatRooms, Prisma } from '@prisma/client';
+import { ChatRoom, User, UsersMutedinChatRooms, Prisma, DirectMessagesRoom } from '@prisma/client';
 import { CreateChatRoomDto } from './dto/create-chatroom.dto';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 import { MessageDto } from './dto/message.dto';
 import * as bcrypt from 'bcrypt';
+import { CreateDirectMessagesRoomDto } from './dto/create-directmessagesroom.dto';
 
 @Injectable()
 export class ChatroomService {
@@ -13,6 +14,7 @@ export class ChatroomService {
 	async chatRoom(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
 	  ): Promise<ChatRoom | null> {
+		console.log("chatRoom() called")
 		return await this.prisma.chatRoom.findUniqueOrThrow({
 		  where: userWhereUniqueInput,
 		});
@@ -24,6 +26,7 @@ export class ChatroomService {
 		cursor?: Prisma.UserWhereUniqueInput;
 		where?: Prisma.UserWhereInput;
 	  }){
+		console.log("chatRooms() called")
 		const { skip, take, cursor, where } = params;
 		return await this.prisma.chatRoom.findMany({
 		  skip,
@@ -372,12 +375,21 @@ export class ChatroomService {
 		throw new HttpException("You are not admin of this chatroom", 401)
 	}
 
-	async getMessages(chatroomid: number) {
-		const res =  await this.prisma.chatRoom.findUniqueOrThrow({
+	async getMessages(userlogin: string, chatroomid: number) {
+		const found = await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { messages: { select: { author: {select: {id: true, nickname: true}}, creationDate: true, content: true } } },
+			select: { 
+				participants: {where: {login: userlogin}}
+			}
 		})
-		return res.messages
+		if (found.participants[0]) {
+			const res =  await this.prisma.chatRoom.findUniqueOrThrow({
+				where: { id: chatroomid },
+				select: { messages: { select: { author: {select: {id: true, nickname: true}}, creationDate: true, content: true } } },
+			})
+			return res.messages
+		}
+		throw new HttpException("You are not participant of this chatroom", 401)
 	}
 
 	async postMessage(userlogin: string, chatroomid: number, MessageDto: MessageDto) {
@@ -401,5 +413,109 @@ export class ChatroomService {
 			})
 		}
 		throw new HttpException("You are not participant of this chatroom", 401)
+	}
+
+// DM //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	async DirectMessagesRoom(
+		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+	): Promise<DirectMessagesRoom | null> {
+		return await this.prisma.directMessagesRoom.findUniqueOrThrow({
+		  where: userWhereUniqueInput,
+		});
+	  }
+
+	async DirectMessagesRooms(params: {
+		skip?: number;
+		take?: number;
+		cursor?: Prisma.UserWhereUniqueInput;
+		where?: Prisma.UserWhereInput;
+	  }){
+		const { skip, take, cursor, where } = params;
+		return await this.prisma.directMessagesRoom.findMany({
+		  skip,
+		  take,
+		  cursor,
+		  where,
+		  orderBy: {id: "asc"},
+		  select: {
+			id: true,
+			creationDate: true,
+			participants: {select: {id: true, nickname: true}},
+		}
+		});
+	  }
+
+	async createDirectMessagesRoom(userlogin: string, CreateDirectMessagesRoomDto: CreateDirectMessagesRoomDto): Promise<DirectMessagesRoom> {
+		const found = await this.prisma.user.findUnique({
+			where: {login: userlogin},
+			select: {directRoomJoined: {select: {participants:{where:{nickname: CreateDirectMessagesRoomDto.nickname}}}}}
+		})
+		console.log("Found:")
+		console.log(found)
+		if (found.directRoomJoined[0] && found.directRoomJoined[0].participants[0])
+			throw new HttpException("This directMessagesRoom already exists", 409)
+		try {
+			const res = await this.prisma.directMessagesRoom.create({
+				data: {
+					participants: {connect: [
+						{login: userlogin },
+						{nickname: CreateDirectMessagesRoomDto.nickname}
+					]},
+				},
+				include :{
+					participants: {select: {id: true, nickname: true}},
+				}
+			});
+			return res;
+		}
+		catch {
+			throw new HttpException("This user doesn't exist", 404)
+		}
+	}
+
+	// PARTICIPANTS //
+	async participantsByDirectMessagesRoom(roomid: number) {
+		return await this.prisma.directMessagesRoom.findUniqueOrThrow({
+			where: { id: roomid },
+			select: { participants: { select: { id: true, nickname: true } } },
+		})
+	}
+
+	// MESSAGES
+	async getDirectMessages(userlogin: string, roomid: number) {
+		const found = await this.prisma.directMessagesRoom.findUniqueOrThrow({
+			where: { id: roomid },
+			select: { 
+				participants: {where: {login: userlogin}},
+			}
+		})
+		if (found.participants[0]) {
+			const res =  await this.prisma.directMessagesRoom.findUniqueOrThrow({
+				where: { id: roomid },
+				select: { privateMessages: { select: { author: {select: {id: true, nickname: true}}, creationDate: true, content: true } } },
+			})
+			return res.privateMessages
+		}
+		throw new HttpException("You are not participant of this chatroom", 401)
+	}
+
+	async postDirectMessage(userlogin: string, roomid: number, MessageDto: MessageDto) {
+		const res = await this.prisma.directMessagesRoom.findUniqueOrThrow({
+			where: { id: roomid },
+			select: { 
+				participants: {where: {login: userlogin}},
+			}
+		})
+		if (res.participants[0]) {
+			return await this.prisma.directMessages.create({
+				data: {
+					authorLogin: userlogin,
+					content: MessageDto.content,
+					DMRoomId: roomid
+				},
+				select: { author: {select: {id: true, nickname: true}}, creationDate: true, content: true },
+			})
+		}
+		throw new HttpException("You are not participant of this directMessagesRoom", 401)
 	}
 }

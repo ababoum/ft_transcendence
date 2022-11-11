@@ -18,13 +18,7 @@ ISSUES:
 TO-DO Eliot:
 - Corrrection
 	- Ne pas voir les direct message d'un blocked user
-- Private messages
-	- Chatroom a 2 participants
-	- Impossible a Join ou Leave
-	- Pas d'owner et admin
-	- Pas de mode
 - Gerer l'affichage si le socket n'est pas connecte
-- Seeding de la SB
 
 TO-DO M'hamed:
 

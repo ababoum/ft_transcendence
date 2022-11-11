@@ -1,15 +1,12 @@
 import {Logger} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import {ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
-import { ChatRoom } from "@prisma/client";
+import { ChatRoom, DirectMessagesRoom } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
 import {Socket, Server} from "socket.io";
 import { jwtConstants } from "../auth/auth.constants";
 import { UserService } from "../user/user.service";
 import { ChatroomService } from './chatroom.service';
-import { MessageDto } from './dto/message.dto';
-
-
 
 @WebSocketGateway(5678, {cors: '*', namespace: "/chatroom"})
 export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -19,6 +16,7 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 	private _interval;
 	private logger: Logger = new Logger('ChatGateway');
 	private chatRoomsList = [];
+	private directMessagesRoomsList = [];
 	private users: {connectionId: Socket, login: string, nickname: string}[] = [];
 
 	constructor(private readonly ChatroomService: ChatroomService,
@@ -28,7 +26,9 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 	async afterInit(server: any) {
 		this.logger.log('Initialized!');
 		this.chatRoomsList = await this.ChatroomService.chatRooms({})
-		console.log(this.chatRoomsList);
+		this.directMessagesRoomsList = await this.ChatroomService.DirectMessagesRooms({})
+		//console.log(this.chatRoomsList);
+		console.log(this.directMessagesRoomsList);
 	 }
 
 	async handleConnection(client: Socket) {
@@ -38,7 +38,6 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		try {
 			const verified: JwtPayload = this.JwtService.verify(token, {secret: jwtConstants.secret})
 			this.logger.log("User authenticated: " + verified.username);
-			client.emit('chatrooms-list', this.chatRoomsList);
 			const user = await this.UserService.user({login: verified.username})
 			this.users.push({connectionId: client, login: verified.username, nickname: user.nickname})
 			//console.log(this.users.map(({connectionId, ...rest}) => connectionId.id + " - " + rest.nickname))
@@ -60,6 +59,14 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 
 		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async createDirectMessagesRoom(DirectMessagesRoom: DirectMessagesRoom) {
+		// Update this.chatRoomsList to add this chatRoom
+		this.directMessagesRoomsList.push(DirectMessagesRoom)
+
+		// Emit update to everyone
+		this.wss.emit('directmessagesrooms-list', this.directMessagesRoomsList)
 	}
 
 	async addPassword(user, chatRoomId: number, res) {
@@ -99,7 +106,6 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 	}
 
 	async leaveChatroom(user, chatRoomId: number, res) {
-		console.log(res)
 		//Update this.chatRoomsList to remove this user as participant
 		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
 		this.chatRoomsList[chatRoomIndex].participants = res.participants
@@ -130,12 +136,34 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 			this.logger.log("The connection provided wasn't found")
 	}
 
+	async enterDirectMessagesRoom(user, DMRoom: string, socketId: string) {
+		console.log("User " + user.login + " entering DMRoom" + DMRoom + " from connection " + socketId)
+		const found = await this.users.find(x => x.connectionId.id === socketId)
+		if (found){
+			await found.connectionId.join("DM" + DMRoom);
+			this.logger.log(user.login + " entered the DMRoom DM" + DMRoom)
+		}
+		else
+			this.logger.log("The connection provided wasn't found")
+	}
+
 	async exitChatroom(user, chatRoomId: string, socketId: string) {
 		console.log("User " + user.login + " leaving " + chatRoomId + " from connection " + socketId)
 		const found = await this.users.find(x => x.connectionId.id === socketId)
 		if (found){
 			await found.connectionId.leave(chatRoomId);
 			this.logger.log(user.login + " exited the chatroom " + chatRoomId)
+		}
+		else
+			this.logger.log("The connection provided wasn't found")
+	}
+
+	async exitDirectMessagesRoom(user, DMRoom: string, socketId: string) {
+		console.log("User " + user.login + " leaving DM" + DMRoom + " from connection " + socketId)
+		const found = await this.users.find(x => x.connectionId.id === socketId)
+		if (found){
+			await found.connectionId.leave("DM" + DMRoom);
+			this.logger.log(user.login + " exited the DMRoom DM" + DMRoom)
 		}
 		else
 			this.logger.log("The connection provided wasn't found")
@@ -217,5 +245,11 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		console.log("Trying to emit " + message + " to room " + chatRoomId)
 		// Emit update to this room
 		this.wss.to(chatRoomId).emit('message', message)
+	}
+
+	async postDirectMessage(chatRoomId, message) {
+		console.log("Trying to emit " + message + " to room DM" + chatRoomId)
+		// Emit update to this room
+		this.wss.to("DM" + chatRoomId).emit('message', message)
 	}
 }

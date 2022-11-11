@@ -41,7 +41,7 @@ model User {
     chatRoomMuted   UsersMutedinChatRooms[]
     messages        Messages[]
 	// direct messages
-	directRoomJoined	DirectMessagesRooms[]
+	directRoomJoined	DirectMessagesRoom[]
 	directMessages		DirectMessages[]
     // games
     matchWinner     Match[]                 @relation(name: "match_winner")
@@ -94,7 +94,7 @@ model Messages {
     chatRoomId   Int
 }
 
-model DirectMessagesRooms {
+model DirectMessagesRoom {
     id            	Int                     @id @default(autoincrement())
     creationDate  	DateTime                @default(now())
     participants  	User[]                  
@@ -102,13 +102,13 @@ model DirectMessagesRooms {
 }
 
 model DirectMessages {
-    id           Int      @id @default(autoincrement())
-    creationDate DateTime @default(now())
-    author       User     @relation(fields: [authorLogin], references: [login])
-    authorLogin  String
-    content      String
-    location     DirectMessagesRooms @relation(fields: [DMRoomId], references: [id])
-    DMRoomId  	 Int
+    id				Int      @id @default(autoincrement())
+    creationDate	DateTime @default(now())
+    author			User     @relation(fields: [authorLogin], references: [login])
+    authorLogin		String
+    content			String
+    location		DirectMessagesRoom @relation(fields: [DMRoomId], references: [id])
+    DMRoomId		Int
 }
 
 model Image {

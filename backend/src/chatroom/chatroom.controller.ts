@@ -27,6 +27,7 @@ import { JwtAuthGuard } from '../auth/auth.guards';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 import { MessageDto } from './dto/message.dto';
 import { ChatRoomGateway } from './chatroom.gateway';
+import { CreateDirectMessagesRoomDto } from './dto/create-directmessagesroom.dto';
 
 @Controller('chatrooms')
 @ApiTags('chatrooms')
@@ -43,8 +44,54 @@ export class ChatroomController {
 		return this.ChatroomService.chatRooms({});
 	}
 
+/////////////////////DM/////////////////////////////////////////////////////////////////////////////////////////////////////
+	@Get('directmessages')
+	async findAllDirectMessagesRooms() {
+		console.log("findAllDirectMessagesRooms() called");
+		return this.ChatroomService.DirectMessagesRooms({});
+	}
+
+	@Post('directmessages')
+	async createDirectMessagesRoom(@Request() req, @Body() CreateDirectMessagesRoomDto: CreateDirectMessagesRoomDto) {
+		console.log(req.user)
+		const res = await this.ChatroomService.createDirectMessagesRoom(req.user.login, CreateDirectMessagesRoomDto)
+		await this.ChatroomGateway.createDirectMessagesRoom(res)
+		return res;
+	}
+
+	// PARTICIPANTS //
+	@Get('directmessages/:id/participantsList')
+	async participantsDirectMessagesRoom(@Param('id') id: string) {
+		return this.ChatroomService.participantsByDirectMessagesRoom(+id);
+	}
+
+	@Patch('directmessages/:id/exit')
+	async exitDirectMessagesRoom(@Request() req, @Param('id') id: string, @Body() socketId) {
+		const res = await this.ChatroomGateway.exitDirectMessagesRoom(req.user, id, socketId.id)
+		//return res
+	}
+
+	// MESSAGES //
+	@Patch('directmessages/:id/messages')
+	async getDirectMessages(@Request() req, @Param('id') id: string, @Body() socketId) {
+		const res = await this.ChatroomService.getDirectMessages(req.user.login, +id);
+		await this.ChatroomGateway.enterDirectMessagesRoom(req.user.login, id, socketId.id)
+		return res
+	}
+
+	@Post('directmessages:id/messages')
+	async postDirectMessage(@Request() req, @Param('id') id: string, @Body() MessageDto: MessageDto) {
+		const res = await this.ChatroomService.postDirectMessage(req.user.login, +id, MessageDto);
+		await this.ChatroomGateway.postDirectMessage(id, res)
+		return res;
+	}
+
+/////////////////////DM/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	@Get(':id')
 	async findOneChatRoom(@Param('id') id: string) {
+		console.log("findOneChatRoom() called");
 		return this.ChatroomService.chatRoom({ id: Number(id) });
 	}
 
@@ -99,7 +146,6 @@ export class ChatroomController {
 
 	@Patch(':id/leave')
 	async leave(@Request() req, @Param('id') id: string) {
-		console.log(req.user.login + " tries to leave")
 		const res = await this.ChatroomService.leaveChatRoom(req.user.login, +id);
 		await this.ChatroomGateway.leaveChatroom(req.user, Number(id), res)
 		return res.participants;
@@ -182,7 +228,7 @@ export class ChatroomController {
 // MESSAGES //
 	@Patch(':id/messages')
 	async getMessages(@Request() req, @Param('id') id: string, @Body() socketId) {
-		const res = await this.ChatroomService.getMessages(+id);
+		const res = await this.ChatroomService.getMessages(req.user.login, +id);
 		await this.ChatroomGateway.enterChatroom(req.user, id, socketId.id)
 		return res
 	}

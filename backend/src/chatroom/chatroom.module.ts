@@ -16,6 +16,7 @@ import { HttpModule } from '@nestjs/axios';
 		PrismaService,
 		ChatRoomGateway,
 		JwtService,
-		UserService]
+		UserService,
+	]
 })
 export class ChatroomModule { }

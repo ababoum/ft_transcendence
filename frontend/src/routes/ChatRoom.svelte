@@ -9,21 +9,26 @@
     import Avatar from "../components/Avatar.svelte";
 	import UserProfile from "../components/Profile/UserProfile.svelte"
 	import { io, Socket } from "socket.io-client";
+    import { xlink_attr } from "svelte/internal";
 
 
 	let tmp: boolean;
 	let chatRoomsList = [];
+	let directMessagesRoomsList = [];
 	let messagesList = [];
 	let blockList = [];
 	let activeChatRoomId;
+	let type: string
 	let adminNickname, banNickname, muteNickname, password: string;
 	let muteDuration: number = 1
 	let mutedUntil;
 	let currentTime;
 	let invite: boolean = true;
-	let chatroom_socket: Socket
+	let chatroom_socket: Socket = undefined
 	let variable;
+	let title;
 	let ready: boolean = false;
+	let DEBUG = true
 
 	//Profile popup
 	let user_to_display_nickname;
@@ -33,12 +38,20 @@
 		if (!$user.isLogged)
 			await push("/login")
 		else{
-			chatroom_socket = await io('http://localhost:5678/chatroom', {
+			chatroom_socket = io('http://localhost:5678/chatroom', {
 				query: {
 					token: getCookie("jwt")
 			}})
 			await getChatRoomsList();
+			await getDirectMessagesRoomsList();
 			await getBlockList();
+			while (chatroom_socket.id === undefined)
+			{
+				console.log("Socket not connected: " + chatroom_socket.id)
+				await new Promise(r => setTimeout(r, 100));
+			}
+			console.log("All received and socket connected: " + chatroom_socket.id)
+			ready = true
 		}
 
 		const interval = setInterval(() => {
@@ -46,9 +59,15 @@
 		}, 1000);
 
 		chatroom_socket.on('chatrooms-list', (data) => {
-			console.log("Received chatrooms-list")
+			console.log("Received chatrooms-list via emit()")
 			chatRoomsList = data;
 			console.log(chatRoomsList)
+		});
+
+		chatroom_socket.on('directmessagesrooms-list', (data) => {
+			console.log("Received directmessagesrooms-list via emit()")
+			directMessagesRoomsList = data;
+			console.log(directMessagesRoomsList)
 		});
 
 		chatroom_socket.on('message', (data) => {
@@ -83,7 +102,17 @@
 			method: 'GET',
 			headers: {"Authorization": "Bearer " + getCookie("jwt")}
 		}).then(chatrooms => chatrooms.json())
+		console.log("Received chatRoomsList via fetch()")
 		console.log(chatRoomsList)
+	}
+
+	async function getDirectMessagesRoomsList() {
+		directMessagesRoomsList = await fetch('http://localhost:3000/chatrooms/directmessages', {
+			method: 'GET',
+			headers: {"Authorization": "Bearer " + getCookie("jwt")}
+		}).then(rooms => rooms.json())
+		console.log("Received directMessagesRoomsList via fetch()")
+		console.log(directMessagesRoomsList)
 	}
 
 	async function getBlockList() {
@@ -91,6 +120,7 @@
 			method: 'GET',
 			headers: {"Authorization": "Bearer " + getCookie("jwt")}
 		}).then(blockList => blockList.json())
+		console.log("Received blocklist via fetch()")
 		console.log(blockList)
 	}
 
@@ -157,8 +187,17 @@
 	async function enterChatRoom(chatRoomId: number){
 		console.log("In enterChatRoom " + chatRoomId)
 
-		if (activeChatRoomId){
+		if (activeChatRoomId && type === "CHAT"){
 			const test = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/exit', {
+				method: 'PATCH',
+				headers: {	
+					"Authorization": "Bearer " + getCookie("jwt"),
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({id: chatroom_socket.id})
+			})}
+		else if (activeChatRoomId && type === "DM"){
+			const test = await fetch('http://localhost:3000/chatrooms/directmessages/' + activeChatRoomId + '/exit', {
 				method: 'PATCH',
 				headers: {	
 					"Authorization": "Bearer " + getCookie("jwt"),
@@ -168,6 +207,8 @@
 			})}
 
 		activeChatRoomId = chatRoomId;
+		type = "CHAT"
+		title = chatRoomsList[activeChatRoomId - 1].name
 
 		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + chatRoomId + '/messages', {
 			method: 'PATCH',
@@ -184,6 +225,49 @@
 
 		var box = document.getElementById('messages')
 		box.scrollTop = await box.scrollHeight
+	}
+
+	async function enterDirectMessagesRoom(DMRoomId: number){
+		console.log("In enterChatRoom " + DMRoomId)
+
+		if (activeChatRoomId && type === "CHAT"){
+			const test = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/exit', {
+				method: 'PATCH',
+				headers: {	
+					"Authorization": "Bearer " + getCookie("jwt"),
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({id: chatroom_socket.id})
+			})}
+		else if (activeChatRoomId && type === "DM"){
+			const test = await fetch('http://localhost:3000/chatrooms/directmessages/' + activeChatRoomId + '/exit', {
+				method: 'PATCH',
+				headers: {	
+					"Authorization": "Bearer " + getCookie("jwt"),
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({id: chatroom_socket.id})
+			})}
+
+		activeChatRoomId = DMRoomId;
+		type = "DM"
+		title = "Direct Message"
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/directmessages/' + DMRoomId + '/messages', {
+			method: 'PATCH',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({id: chatroom_socket.id})
+		})
+		const res = await rawresponse.json()
+
+		messagesList = res
+		blockList = [...blockList]
+
+		var box = document.getElementById('messages')
+		box.scrollTop = box.scrollHeight
 	}
 
 	async function banUser(chatRoomId: number, usernickname: string){
@@ -322,18 +406,32 @@
 	async function postMessageForm(e){
 		const formData = new FormData(e.target);
 		const message = formData.get("message");
-		console.log("In postMessage " + activeChatRoomId + " - message: " + message)
+		console.log("In postMessage " + activeChatRoomId + " - message: " + message + " type: " + type)
 
-		const rawresponse = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/messages', {
+		if (type === "CHAT"){
+			const rawresponse = await fetch('http://localhost:3000/chatrooms/' + activeChatRoomId + '/messages', {
 			method: 'POST',
 			headers: {	
 				"Authorization": "Bearer " + getCookie("jwt"),
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({content: message})
-		})
-		const res = await rawresponse.json()
-		console.log(res)
+			})
+			const res = await rawresponse.json()
+			console.log(res)
+		}
+		else {
+			const rawresponse = await fetch('http://localhost:3000/chatrooms/directmessages' + activeChatRoomId + '/messages', {
+			method: 'POST',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({content: message})
+			})
+			const res = await rawresponse.json()
+			console.log(res)
+		}
 
 		e.target.reset()
 	}
@@ -465,6 +563,26 @@
 		console.log(blockList)
 	}
 
+	async function createDirectMessagesRoomForm(e){
+		const formData = new FormData(e.target);
+		const participant = formData.get("participant")
+		console.log("createDirectMessagesRoomForm with " + participant)
+
+		const rawresponse = await fetch('http://localhost:3000/chatrooms/directmessages', {
+			method: 'POST',
+			headers: {	
+				"Authorization": "Bearer " + getCookie("jwt"),
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({nickname: participant})
+		})
+		const res = await rawresponse.json()
+		console.log(res)
+		if (res.statusCode === 404)
+			alert("This user doesn't exist")
+		e.target.reset()
+	}
+
 	async function findGame(nickname: string) {
 		$game_socket.emit('game-invite', nickname);
 	}
@@ -483,10 +601,15 @@
 
 <section style="background-color: black;">
   <div class="container py-5">
-	{#key chatroom_socket}
-	{#if !chatroom_socket}
-	<div>Socket not connected</div>
+	{#key ready}
+	{#if ready === false}
+	<div>Backend unavailable</div>
 	{:else}
+	{#if DEBUG === true}
+	<div>
+	  <p style="color: white;">Type: {type} - activeChatRoomId: {activeChatRoomId} - chatroom_socket: {chatroom_socket.id}</p>
+	</div>
+	{/if}
     <div class="row">
       <div class="col-md-12">
 
@@ -543,19 +666,23 @@
 						</ul>
 					{/key}
                   </div>
-				  <button type="button" class="btn btn-primary btn-sm update-btn" on:click={getModal("create_chatroom").open}>Create Room Form</button>
+				  <button type="button" style="margin-bottom: 10px; margin-top: 10px; width: 100%" class="btn btn-primary" on:click={getModal("create_chatroom").open}>Create Room Form</button>
 				  <div class="overflow-auto" style="position: relative; height: 300px; width:auto; overflow-y: scroll">
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
-					<p>Private Messages List</p>
+					{#each directMessagesRoomsList as DirectMessagesRoom}
+						{#if DirectMessagesRoom.participants[0].nickname === $user.nickname}
+						{#if blockList.find(x => x.nickname === DirectMessagesRoom.participants[1].nickname) === undefined}
+						<p class="btn btn-info" style="width: 100%; margin-bottom: 5px; margin-top: 0px; overflow: hidden" on:click={() => enterDirectMessagesRoom(DirectMessagesRoom.id)}>{DirectMessagesRoom.participants[1].nickname}</p>
+						{/if}
+						{:else if DirectMessagesRoom.participants[1].nickname === $user.nickname}
+						{#if blockList.find(x => x.nickname === DirectMessagesRoom.participants[0].nickname) === undefined}
+						<p class="btn btn-info" style="width: 100%; margin-bottom: 5px; margin-top: 0px; overflow: hidden" on:click={() => enterDirectMessagesRoom(DirectMessagesRoom.id)}>{DirectMessagesRoom.participants[0].nickname}</p>
+						{/if}
+						{/if}
+					{/each}	
 				  </div>
-
+				  <form on:submit|preventDefault={createDirectMessagesRoomForm} style="width: 100%;">
+					<input type="text" name="participant" minlength="3" placeholder="nickname" style="float: left; width:100%" required/>
+				  </form>
                 </div>
 
               </div>
@@ -563,7 +690,7 @@
 		          <div id="messageszone" class="col-md-6 col-lg-7 col-xl-8">
 					{#if activeChatRoomId}
 					<div class="d-flex justify-content-center" style="position: top">
-						<p class="p-2 rounded-3 chatroomtitle">{chatRoomsList[activeChatRoomId - 1].name}</p>
+						<p class="p-2 rounded-3 chatroomtitle">{title}</p>
 					</div>
 					{/if}
 		            <div id="messages" class="t-3 pe-3" style="position: relative; height: 400px; overflow-y: scroll">
@@ -608,7 +735,11 @@
 					<div id="typezone" class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
 						<Avatar classes="rounded-circle" size="45" nickname="{$user.nickname}"/>
 						{#key activeChatRoomId}
-						{#if mutedUntil = chatRoomsList[activeChatRoomId - 1].muteList.find(x => x.user.nickname === $user.nickname)}
+						{#if type === "DM"}
+							<form on:submit|preventDefault|stopPropagation={postMessageForm}>
+							<input name="message" type="text" minlength="1" maxlength="150" size="50" class="form-control form-control-lg" placeholder="Type here" required/>
+							</form>
+						{:else if mutedUntil = chatRoomsList[activeChatRoomId - 1].muteList.find(x => x.user.nickname === $user.nickname)}
 							{#if new Date(mutedUntil.mutedUntil) > currentTime}
 							<p>You are muted until {new Date(mutedUntil.mutedUntil).toLocaleTimeString("en-US")}, the current time is {currentTime.toLocaleTimeString("en-US")}</p>
 							{:else}
@@ -623,6 +754,7 @@
 						{/if}
 						{/key}
 					</div>
+					{#if type === "CHAT"}
 					<div id="adminzone">
 						<ul>
 							{#if chatRoomsList[activeChatRoomId - 1].admin.find(x => x.nickname === $user.nickname) !== undefined}
@@ -671,6 +803,7 @@
 							{/if}
 						</ul>
 					</div>
+					{/if}
 					{/if}
 
 		          </div>
