@@ -1,9 +1,4 @@
-NAME = ping_me_more
-IMG_TO_DEL = $(shell docker images -qa | wc -l)
-
-all: $(NAME)
-
-$(NAME):
+all:
 	docker-compose up --build -d
 	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data/"
 
@@ -15,18 +10,12 @@ fclean: clean
 	-rm -rf /goinfre/$(USER)/data/*
 	docker system prune -f
 	docker image prune -f
-ifneq (${IMG_TO_DEL}, 0)
-	$(shell docker rmi -f $(docker images -q))
-endif
+	-docker rmi -f $(shell docker images -qa | uniq)
 
 test_env:
 	docker-compose up -d postgres adminer
 	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data/"
-# update_scheme:
-# 	docker-compose up postgres -d
-# 	cd backend/
-# 	npx prisma migrate dev --name NAME
 
 re: fclean all
 
-.PHONY: linux all clean fclean re
+.PHONY: all clean fclean re test_env
