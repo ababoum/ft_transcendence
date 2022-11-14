@@ -5,7 +5,7 @@ all: $(NAME)
 
 $(NAME):
 	docker-compose up --build -d
-	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data"
+	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data/"
 
 clean:
 	docker-compose stop
@@ -21,7 +21,7 @@ endif
 
 test_env:
 	docker-compose up -d postgres adminer
-	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data"
+	docker exec -it postgres sh -c "chmod -R 777 /var/lib/postgresql/data/"
 # update_scheme:
 # 	docker-compose up postgres -d
 # 	cd backend/

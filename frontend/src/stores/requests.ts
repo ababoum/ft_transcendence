@@ -233,6 +233,10 @@ export async function delete_friend(nickname: string) {
 	return resp;
 }
 
+///////////////////////////////// BLOCKED /////////////////////////////////
+
+
+
 //////////////////////////// MATCHES and RATINGS /////////////////////////////
 
 export async function get_matches(login: string) {

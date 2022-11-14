@@ -1,10 +1,6 @@
 <script lang="ts">
-	import { onDestroy, onMount } from "svelte";
-	import {
-		delete_friend,
-		get_friends,
-		get_user_public_data,
-	} from "../../stores/requests";
+	import { onMount } from "svelte";
+	import { delete_friend, get_friends } from "../../stores/requests";
 	import Avatar from "../Avatar.svelte";
 	import { Modal as InviteModal } from "svelte-simple-modal";
 	import { getModal } from "./Modal.svelte";
@@ -17,7 +13,6 @@
 	$: profile = profile_data;
 
 	let user_to_display_nickname: string;
-
 
 	onMount(async () => {
 		$friends = await get_friends(profile.login);
