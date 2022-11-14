@@ -16,9 +16,8 @@ ISSUES:
 - Pour socket et Gateway, il faut verifier le token dans handleConnection et disconnect en cas d'erreur, car UseGuards() ne permet pas d'empecher la connection
 
 TO-DO Eliot:
-- Corrrection
-	- Ne pas voir les direct message d'un blocked user
 - Gerer l'affichage si le socket n'est pas connecte
+- Nettoyer l'interface Swagger
 
 TO-DO M'hamed:
 

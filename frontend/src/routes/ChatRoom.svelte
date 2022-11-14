@@ -18,7 +18,7 @@
 	let blockList = [];
 	let activeChatRoomId;
 	let type: string;
-	let adminNickname, banNickname, muteNickname, password: string;
+	let adminNickname, banNickname, muteNickname, roomPassword: string;
 	let muteDuration: number = 1;
 	let mutedUntil;
 	let currentTime;
@@ -334,7 +334,7 @@
 		banNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode) alert("This user doesn't exist");
+		if (res.statusCode === 404) alert("This user doesn't exist");
 	}
 
 	async function unbanUser(chatRoomId: number, usernickname: string) {
@@ -402,6 +402,7 @@
 			}
 		);
 		const res = await rawresponse.json();
+		adminNickname = undefined;
 
 		console.log(res);
 		if (res.statusCode) alert("This user doesn't exist");
@@ -436,7 +437,7 @@
 		muteNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode == 409) alert("This user doesn't exist");
+		if (res.statusCode == 404) alert("This user doesn't exist");
 		if (res.statusCode == 401) alert("You are not admin in this chatroom");
 	}
 
@@ -460,7 +461,8 @@
 		muteNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode) alert("This user doesn't exist");
+		if (res.statusCode === 404) alert("This user is not muted");
+		if (res.statusCode === 401) alert("You are not admin in this chatroom");
 	}
 
 	async function postMessageForm(e) {
@@ -533,8 +535,9 @@
 		const res = await rawresponse.json();
 		console.log(res);
 
-		if (res.statusCode === 409) alert("This user doesn't exist");
-		if (res.statusCode === 401) alert("This user is banned from this room");
+		if (res.statusCode === 401) alert("You are not participant of this room");
+		else if (res.statusCode === 404) alert("This user doesn't exist");
+		else if (res.statusCode === 409) alert("This user is banned from this room");
 
 		e.target.reset();
 	}
@@ -542,6 +545,8 @@
 	async function addPassword(chatRoomId: number, password: string) {
 		console.log("In addPassword " + password + " room " + chatRoomId);
 		if (password === undefined) return alert("Please provide a password");
+		else if (password.length < 3) return alert("Password must be at least 3 characters long");
+		else if (password.length > 100) return alert("Password must be at most 100 characters long");
 
 		const rawresponse = await fetch(
 			"http://localhost:3000/chatrooms/" + chatRoomId + "/addPassword",
@@ -555,6 +560,7 @@
 			}
 		);
 		const res = await rawresponse.json();
+		roomPassword = undefined
 
 		console.log(res);
 	}
@@ -562,6 +568,8 @@
 	async function changePassword(chatRoomId: number, password: string) {
 		console.log("In changePassword " + password + " room " + chatRoomId);
 		if (password === undefined) return alert("Please provide a password");
+		else if (password.length < 3) return alert("Password must be at least 3 characters long");
+		else if (password.length > 100) return alert("Password must be at most 100 characters long");
 
 		const rawresponse = await fetch(
 			"http://localhost:3000/chatrooms/" + chatRoomId + "/changePassword",
@@ -575,6 +583,7 @@
 			}
 		);
 		const res = await rawresponse.json();
+		roomPassword = undefined
 
 		console.log(res);
 	}
@@ -883,7 +892,7 @@
 															{#if DirectMessagesRoom.participants[0].nickname === $user.nickname}
 																{#if blockList.find((x) => x.nickname === DirectMessagesRoom.participants[1].nickname) === undefined}
 																	<p
-																		class="btn btn-info"
+																		class="btn btn-primary"
 																		style="width: 100%; margin-bottom: 5px; margin-top: 0px; overflow: hidden"
 																		on:click={() =>
 																			enterDirectMessagesRoom(
@@ -1225,7 +1234,8 @@
 																				type="text"
 																				class="form-control"
 																				placeholder="password"
-																				bind:value={password}
+																				minlength="3"
+																				bind:value={roomPassword}
 																				style="width: 50%"
 																			/>
 																			<button
@@ -1233,7 +1243,7 @@
 																				on:click={() =>
 																					addPassword(
 																						activeChatRoomId,
-																						password
+																						roomPassword
 																					)}
 																				>Add</button
 																			>
@@ -1246,7 +1256,7 @@
 																				type="text"
 																				class="form-control"
 																				placeholder="password"
-																				bind:value={password}
+																				bind:value={roomPassword}
 																				style="width: 50%"
 																			/>
 																			<button
@@ -1254,7 +1264,7 @@
 																				on:click={() =>
 																					changePassword(
 																						activeChatRoomId,
-																						password
+																						roomPassword
 																					)}
 																				>Change</button
 																			>

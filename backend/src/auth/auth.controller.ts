@@ -6,7 +6,7 @@ import {
 	FT_OAuthGuard
 } from './auth.guards';
 import { RequestWithUser } from './auth.interfaces';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './auth.dto';
 
@@ -45,12 +45,14 @@ export class AuthController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
 	@Get('profile')
 	async getProfile(@Request() req) {
 		return this.authService.getProfile(req.user.login);
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
 	@Get('check')
 	checkToken(@Request() req) {
 		return req.user;

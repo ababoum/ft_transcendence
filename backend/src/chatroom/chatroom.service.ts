@@ -227,14 +227,19 @@ export class ChatroomService {
 		})
 		if (res.participants[0]) {
 			if (res.banList[0])
-				throw new HttpException("This user is banned from this chatroom", 401)
-			return await this.prisma.chatRoom.update({
-				where: { id: chatroomid },
-				data: {
-					participants: { connect: { nickname: nickname } },
-				},
-				select: { participants: { select: { id: true, nickname: true } } },
-			});
+				throw new HttpException("This user is banned from this chatroom", 409)
+			try {
+				return await this.prisma.chatRoom.update({
+					where: { id: chatroomid },
+					data: {
+						participants: { connect: { nickname: nickname } },
+					},
+					select: { participants: { select: { id: true, nickname: true } } },
+				});
+			}
+			catch {
+				throw new HttpException("User not found", 404)
+			}
 		}
 		throw new HttpException("You are not participant of this chatroom", 401)
 	}
@@ -299,17 +304,22 @@ export class ChatroomService {
 			select: { admin: {where: {login: userlogin}} }
 		})
 		if (res.admin[0]) {
-			return await this.prisma.chatRoom.update({
-				where: {id: chatroomid},
-				data: {
-					banList: {connect: {nickname: UpdateChatRoomDto.nickname}},
-					participants: {disconnect: {nickname: UpdateChatRoomDto.nickname}}
-				},
-				select: {
-					banList: {select: {id: true, nickname: true, login: true}},
-					participants: {select: {id: true, nickname: true}},
-				}
-			})
+			try {
+				return await this.prisma.chatRoom.update({
+					where: {id: chatroomid},
+					data: {
+						banList: {connect: {nickname: UpdateChatRoomDto.nickname}},
+						participants: {disconnect: {nickname: UpdateChatRoomDto.nickname}}
+					},
+					select: {
+						banList: {select: {id: true, nickname: true, login: true}},
+						participants: {select: {id: true, nickname: true}},
+					}
+				})
+			}
+			catch {
+				throw new HttpException("User not found", 404)
+			}
 		}
 		throw new HttpException("You are not admin of this chatroom", 401)
 	}
@@ -347,17 +357,22 @@ export class ChatroomService {
 		if (res.admin[0]) {
 			let t = new Date()
 			t.setSeconds(t.getSeconds() + UpdateChatRoomDto.duration)
-			return await this.prisma.usersMutedinChatRooms.upsert({
-				where: {chatRoomId_nickname: {chatRoomId: chatroomid, nickname: UpdateChatRoomDto.nickname}},
-				create: {
-					chatRoom: {connect: {id: chatroomid}},
-					user: {connect: {nickname: UpdateChatRoomDto.nickname}},
-					mutedUntil:  t.toISOString(),
-				},
-				update: {
-					mutedUntil: t.toISOString(),
-				}
-			})
+			try {
+				return await this.prisma.usersMutedinChatRooms.upsert({
+					where: {chatRoomId_nickname: {chatRoomId: chatroomid, nickname: UpdateChatRoomDto.nickname}},
+					create: {
+						chatRoom: {connect: {id: chatroomid}},
+						user: {connect: {nickname: UpdateChatRoomDto.nickname}},
+						mutedUntil:  t.toISOString(),
+					},
+					update: {
+						mutedUntil: t.toISOString(),
+					}
+				})
+			}
+			catch {
+				throw new HttpException("User not found", 404)
+			}
 		}
 		throw new HttpException("You are not admin of this chatroom", 401)
 	}
@@ -368,9 +383,14 @@ export class ChatroomService {
 			select: { admin: {where: {login: userlogin}} }
 		})
 		if (res.admin[0]) {
-			return await this.prisma.usersMutedinChatRooms.delete({
-				where: {chatRoomId_nickname: {chatRoomId: chatroomid, nickname: UpdateChatRoomDto.nickname}}
-			})
+			try {
+				return await this.prisma.usersMutedinChatRooms.delete({
+					where: {chatRoomId_nickname: {chatRoomId: chatroomid, nickname: UpdateChatRoomDto.nickname}}
+				})
+			}
+			catch {
+				throw new HttpException("This user isn't muted", 404)
+			}
 		}
 		throw new HttpException("You are not admin of this chatroom", 401)
 	}

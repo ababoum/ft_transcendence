@@ -19,9 +19,11 @@ import { JwtAuthGuard } from '../auth.guards';
 import { RequestWithUser } from '../auth.interfaces';
 import { UserService } from '../../user/user.service';
 import { AuthService } from '../auth.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 
 @Controller('2fa')
+@ApiTags('2fa')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TwoFactorAuthenticationController {
 	constructor(
@@ -31,6 +33,7 @@ export class TwoFactorAuthenticationController {
 	) { }
 
 	@Post('generate')
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	async register(@Res() response: Response, @Req() request: RequestWithUser) {
 
@@ -45,6 +48,7 @@ export class TwoFactorAuthenticationController {
 
 	@Post('turn-on')
 	@HttpCode(200)
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	async turnOnTwoFactorAuthentication(
 		@Req() request: RequestWithUser,
@@ -82,6 +86,7 @@ export class TwoFactorAuthenticationController {
 	}
 
 	@Patch('disable')
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	async disable_2fa(
 		@Req() request: RequestWithUser

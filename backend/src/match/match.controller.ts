@@ -3,7 +3,7 @@ import { MatchService } from "./match.service";
 import { Match as MatchModel, User as UserModel } from '@prisma/client';
 import { UserService } from "../user/user.service";
 import { createMatchDTO } from './dto'
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/auth.guards";
 
 @Controller('match_history')
@@ -24,16 +24,6 @@ export class MatchController {
 			take: 10,
 			orderBy: { rating: 'desc' }
 		});
-	}
-
-	@Post('create')
-	async addMatch(
-		@Body() matchData: createMatchDTO)
-		: Promise<MatchModel> {
-		// record the match
-		const ret = await this.matchService.createMatch(matchData);
-
-		return ret;
 	}
 
 	@Get('/:login')
