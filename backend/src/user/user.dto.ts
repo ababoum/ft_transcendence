@@ -3,6 +3,7 @@ import { chatRoomType } from '@prisma/client';
 import {
 	IsEmail,
 	IsNotEmpty,
+	IsString,
 	MinLength,
 } from 'class-validator';
 
@@ -35,6 +36,7 @@ export class UpdateEmailDto {
 export class UpdateNicknameDto {
 
 	@IsNotEmpty()
+	@IsString()
 	@ApiProperty()
 	new_nickname: string;
 }

@@ -37,7 +37,7 @@
 		$user = await $user.upd();
 		if (!$user.isLogged) await push("/login");
 		else {
-			chatroom_socket = io("http://localhost:5678/chatroom", {
+			chatroom_socket = await io("http://localhost:5678/chatroom", {
 				query: {
 					token: getCookie("jwt"),
 				},

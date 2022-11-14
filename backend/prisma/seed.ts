@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 async function main() {
 	const salt = await bcrypt.genSalt();
 	let hash = await bcrypt.hash("iamfirst", salt);
-
+	
 	const adam = await prisma.user.upsert({
 		where: {id: 1},
 		update: {},
