@@ -352,18 +352,16 @@ export class UserService {
 	/////////////////////// MANAGE USER'S BLOCKLIST ////////////////////////
 
 
-	async blockUser(userLogin: string, friendNickname: string) {
-		const user = await this.prisma.user.findUnique({
+	async blockUser(userLogin: string, blockedNickname: string) {
+		const user = await this.prisma.user.findUniqueOrThrow({
 			where: { login: userLogin },
 			select: { nickname: true }
 		})
-		console.log(user.nickname);
-		console.log(friendNickname);
-		if (user.nickname !== friendNickname) {
+		if (user.nickname !== blockedNickname) {
 			const res = await this.prisma.user.update({
 				where: { login: userLogin },
 				data: {
-					blockedList: { connect: { nickname: friendNickname } }
+					blockedList: { connect: { nickname: blockedNickname } }
 				},
 				select: { blockedList: { select: { nickname: true } } }
 			})
@@ -381,11 +379,11 @@ export class UserService {
 		return res.blockedList;
 	}
 
-	async unblockUser(userLogin: string, friendNickname: string) {
+	async unblockUser(userLogin: string, blockedNickname: string) {
 		const res = await this.prisma.user.update({
 			where: { login: userLogin },
 			data: {
-				blockedList: { disconnect: { nickname: friendNickname } }
+				blockedList: { disconnect: { nickname: blockedNickname } }
 			},
 			select: { blockedList: { select: { nickname: true } } }
 		})
