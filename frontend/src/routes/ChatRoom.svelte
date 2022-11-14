@@ -614,6 +614,7 @@
 		const res = await rawresponse.json();
 
 		if (res.statusCode === 409) alert("You can't block yourself");
+		else if (res.statusCode == 404) alert("User not found")
 		else if (res.statusCode) alert("Can't block this user");
 		else blockList = res;
 
@@ -639,7 +640,7 @@
 		);
 		const res = await rawresponse.json();
 
-		if (res.statusCode === 409) alert("You can't unblock yourself");
+		if (res.statusCode === 404) alert("User not found in your blocklist");
 		else if (res.statusCode) alert("Can't unblock this user");
 		else blockList = res;
 

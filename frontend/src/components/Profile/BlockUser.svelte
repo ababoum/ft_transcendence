@@ -26,6 +26,8 @@
 
 		if (res.statusCode === 409)
 			msg = `<p class="text-danger">You can't block yourself</p>`;
+		else if (res.statusCode === 404)
+			msg = `<p class="text-danger">User not found</p>`;
 		else if (res.statusCode)
 			msg = `<p class="text-danger">Can't block this user</p>`;
 		else msg = `<p class="text-success">User successfully blocked</p>`;
@@ -50,8 +52,10 @@
 		);
 		const res = await rawresponse.json();
 
-		if (res.statusCode === 409) alert("You can't unblock yourself");
-		else if (res.statusCode) alert("Can't unblock this user");
+		if (res.statusCode === 404)
+			msg = `<p class="text-danger">User not found in your blocklist</p>`;
+		else if (res.statusCode)
+			msg = `<p class="text-danger">Can't unblock this user</p>`;
 		else msg = `<p class="text-success">User successfully unblocked</p>`;
 	}
 </script>

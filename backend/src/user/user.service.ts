@@ -351,25 +351,6 @@ export class UserService {
 
 	/////////////////////// MANAGE USER'S BLOCKLIST ////////////////////////
 
-
-	async blockUser(userLogin: string, blockedNickname: string) {
-		const user = await this.prisma.user.findUniqueOrThrow({
-			where: { login: userLogin },
-			select: { nickname: true }
-		})
-		if (user.nickname !== blockedNickname) {
-			const res = await this.prisma.user.update({
-				where: { login: userLogin },
-				data: {
-					blockedList: { connect: { nickname: blockedNickname } }
-				},
-				select: { blockedList: { select: { nickname: true } } }
-			})
-			return res.blockedList;
-		}
-		throw new HttpException("You can't block yourself", 409);
-	}
-
 	async getMyBlockList(userLogin: string) {
 		const res = await this.prisma.user.findUnique({
 			where: { login: userLogin },
@@ -379,16 +360,47 @@ export class UserService {
 		return res.blockedList;
 	}
 
-	async unblockUser(userLogin: string, blockedNickname: string) {
-		const res = await this.prisma.user.update({
+	async blockUser(userLogin: string, blockedNickname: string) {
+		const user = await this.prisma.user.findUniqueOrThrow({
 			where: { login: userLogin },
-			data: {
-				blockedList: { disconnect: { nickname: blockedNickname } }
-			},
-			select: { blockedList: { select: { nickname: true } } }
+			select: { nickname: true }
 		})
+		if (user.nickname !== blockedNickname) {
+			try {
+				const res = await this.prisma.user.update({
+					where: { login: userLogin },
+					data: {
+						blockedList: { connect: { nickname: blockedNickname } }
+					},
+					select: { blockedList: { select: { nickname: true } } }
+				})
+				return res.blockedList;
+			}
+			catch {
+				throw new HttpException("User not found", 404);
+			}
+		}
+		throw new HttpException("You can't block yourself", 409);
+	}
 
-		return res.blockedList;
+	async unblockUser(userLogin: string, blockedNickname: string) {
+		const relation = await this.prisma.user.findUniqueOrThrow({
+			where: {login: userLogin},
+			select: {blockedList: {where: {nickname: blockedNickname}}}
+		})
+		console.log(relation)
+		if (relation.blockedList[0]) {
+			const res = await this.prisma.user.update({
+				where: { login: userLogin },
+				data: {
+					blockedList: { disconnect: { nickname: blockedNickname } }
+				},
+				select: { blockedList: { select: { nickname: true } } }
+			})
+
+			return res.blockedList;
+		}
+		throw new HttpException("User not found in your blocklist", 404);
 	}
 
 
