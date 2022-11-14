@@ -13,6 +13,7 @@ export class CreateChatRoomDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(100)
+  @IsString()
   @ApiProperty()
   name: string;
  
@@ -23,6 +24,7 @@ export class CreateChatRoomDto {
 
   @IsOptional()
   @MinLength(3)
+  @MaxLength(100)
   @ApiPropertyOptional()
   password?: string;
 }

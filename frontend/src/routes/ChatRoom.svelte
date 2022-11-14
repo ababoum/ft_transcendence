@@ -33,6 +33,7 @@
 	let user_to_display_nickname;
 
 	onMount(async () => {
+		console.log("Mounting ChatRoom")
 		$user = await $user.upd();
 		if (!$user.isLogged) await push("/login");
 		else {
@@ -684,18 +685,17 @@
 
 <main>
 	<Header />
-	<section style="background-color: black; margin-top:50px">
-		<section style="background-color: black;">
+	<section style="background-color:darkcyan ; margin-top:50px">
+		<section style="background-color: darkcyan;">
 			<div class="container py-5">
 				{#key ready}
 					{#if ready === false}
-						<div>Backend unavailable</div>
+						<div>Backend unavailable - chatroom_socket: {chatroom_socket}</div>
 					{:else}
 						{#if DEBUG === true}
 							<div>
 								<p style="color: white;">
-									Type: {type} - activeChatRoomId: {activeChatRoomId}
-									- chatroom_socket: {chatroom_socket.id}
+									Type: {type} - activeChatRoomId: {activeChatRoomId} - chatroom_socket: {chatroom_socket.id}
 								</p>
 							</div>
 						{/if}
@@ -868,13 +868,14 @@
 													<button
 														type="button"
 														style="margin-bottom: 10px; margin-top: 10px; width: 100%"
-														class="btn btn-primary"
+														class="btn btn-info"
 														on:click={getModal(
 															"create_chatroom"
 														).open}
 														>Create Room Form</button
 													>
 													<div
+														id="DMList"
 														class="overflow-auto"
 														style="position: relative; height: 300px; width:auto; overflow-y: scroll"
 													>
@@ -897,7 +898,7 @@
 															{:else if DirectMessagesRoom.participants[1].nickname === $user.nickname}
 																{#if blockList.find((x) => x.nickname === DirectMessagesRoom.participants[0].nickname) === undefined}
 																	<p
-																		class="btn btn-info"
+																		class="btn btn-primary"
 																		style="width: 100%; margin-bottom: 5px; margin-top: 0px; overflow: hidden"
 																		on:click={() =>
 																			enterDirectMessagesRoom(
@@ -1373,7 +1374,7 @@
 		width: 50%;
 		text-align: center;
 		font-family: "PT Sans", sans-serif;
-		background-color: rgba(105, 105, 105, 0.295);
+		background-color: rgba(0, 139, 139, 0.301);
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;

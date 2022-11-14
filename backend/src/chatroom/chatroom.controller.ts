@@ -15,6 +15,7 @@ import {
 	Req,
 	Request,
 	Patch,
+	UseFilters,
 } from '@nestjs/common';
 import { ChatroomService } from './chatroom.service';
 import { ChatRoom as ChatRoomModel, Prisma } from '@prisma/client';

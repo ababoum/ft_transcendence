@@ -11,6 +11,9 @@ import {
 
 export class CreateDirectMessagesRoomDto {
   @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(150)
+  @IsString()
   @ApiProperty()
   nickname: string;
 }

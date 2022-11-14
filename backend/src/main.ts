@@ -1,12 +1,10 @@
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
-// import { PrismaClientExceptionFilter } from './prisma/prisma.filter';
 import { ApplicationModule } from './app.module';
 import * as bodyParser from 'body-parser';
 import { PrismaService } from './prisma/prisma.service';
-//import { NotFoundExceptionFilter } from './prisma/notFound.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-
+import { NotFoundExceptionFilter } from './notFound.filter';
 
 async function bootstrap() {
 	const app = await NestFactory.create(ApplicationModule);
@@ -30,11 +28,11 @@ async function bootstrap() {
 	// apply transform to all responses
 	app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-	app.use(bodyParser.json());
-
 	// 👇 apply PrismaClientExceptionFilter to entire application, requires HttpAdapterHost because it extends BaseExceptionFilter
-	// const { httpAdapter } = app.get(HttpAdapterHost);
-	// app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+	const { httpAdapter } = app.get(HttpAdapterHost);
+	app.useGlobalFilters(new NotFoundExceptionFilter());
+
+	app.use(bodyParser.json());
 
 	// enable CORS to allow communication with frontend via 'fetch'
 	app.enableCors();

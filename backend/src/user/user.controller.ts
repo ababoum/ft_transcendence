@@ -29,7 +29,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as shortid from 'shortid';
 import * as mime from 'mime-types';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto, NicknameDTO, UpdateEmailDto, UpdateNicknameDto, UpdatePasswordDto } from './user.dto';
 import { RequestWithUser } from '../auth/auth.interfaces';
 import { createReadStream } from 'fs';
@@ -39,6 +39,7 @@ import { AuthService } from '../auth/auth.service';
 
 @Controller('users')
 @ApiTags('users')
+@ApiBearerAuth()
 export class UserController {
 
 	constructor(

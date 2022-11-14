@@ -10,6 +10,7 @@ import {
 export class MessageDto {
 	@IsNotEmpty()
 	@MinLength(1)
+	@MaxLength(150)
 	@IsString()
 	@ApiProperty()
 	content: string;

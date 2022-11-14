@@ -28,21 +28,25 @@ export class CreateUserDto {
 export class UpdateEmailDto {
 	@IsNotEmpty()
 	@IsEmail()
+	@ApiProperty()
 	new_email: string;
 }
 
 export class UpdateNicknameDto {
 
 	@IsNotEmpty()
+	@ApiProperty()
 	new_nickname: string;
 }
 
 export class UpdatePasswordDto {
 
 	@MinLength(8)
+	@ApiProperty()
 	old_password: string;
 
 	@MinLength(8)
+	@ApiProperty()
 	new_password: string;
 }
 
@@ -50,5 +54,6 @@ export class UpdatePasswordDto {
 export class NicknameDTO {
 
 	@MinLength(1)
+	@ApiProperty()
 	nickname: string;
 }

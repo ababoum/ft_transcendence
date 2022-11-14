@@ -39,7 +39,7 @@
 	</fieldset>
 	{#if mode === "PROTECTED"}
 	<label>
-		Password: <input type="text" placeholder="password" bind:value={password} required>
+		Password: <input type="text" placeholder="password" bind:value={password} minlength="3" maxlength="100" required>
 	</label>
 	{/if}
 	<div>	
