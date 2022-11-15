@@ -13,6 +13,7 @@
 	let ball_color: string = "#0000FF";
 	let text_color: string = "#FFFF00";
 	let match_finished: boolean = false;
+	let custom_interface: boolean = false;
 	let innerWidth = 0;
 	let innerHeight = 0;
 	let data: object;
@@ -36,7 +37,7 @@
 				field.draw(innerHeight, innerHeight);
 			else {
 				if (data.winner === $user.nickname)
-				    field.draw_win();
+					field.draw_win();
 				else
 					field.draw_lost();
 			}
@@ -66,11 +67,47 @@
 	});
 </script>
 
-<div class="h-100 d-flex align-items-center justify-content-center">
-    <input style="height: 50px" type="color" bind:value={paddle_color}>
-    <input style="height: 50px" type="color" bind:value={ball_color}>
-    <input style="height: 50px" type="color" bind:value={text_color}>
-    <br>
+<div class="container">
+    <div class="h-100 d-flex align-items-center justify-content-center mb-3">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary active">
+                <input type="radio" name="options" id="option1" autocomplete="off" bind:group={custom_interface}
+                       value={false} checked> Normal
+            </label>
+            <label class="btn btn-secondary">
+                <input type="radio" name="options" id="option2" autocomplete="off" bind:group={custom_interface}
+                       value={true}> Football
+            </label>
+        </div>
+    </div>
+    {#if !custom_interface}
+        <div class="h-100 d-flex align-items-center justify-content-center mb-3">
+            <div class="d-flex align-items-center border border-3">
+                <div class="align-items-center">
+                    <img src="/static/icons/ping-pong.png" width="25px" height="25px" alt="paddle-color-icon">
+                </div>
+                <div>
+                    <input style="height: 50px" type="color" bind:value={paddle_color}>
+                </div>
+            </div>
+            <div class="d-flex align-items-center border border-3">
+                <div class="align-items-center">
+                    <img src="/static/icons/ball.png" width="25px" height="25px" alt="ball-color-icon">
+                </div>
+                <div>
+                    <input style="height: 50px" type="color" bind:value={ball_color}>
+                </div>
+            </div>
+            <div class="d-flex align-items-center border border-3">
+                <div class="align-items-center">
+                    <img src="/static/icons/score.png" width="25px" height="25px" alt="score-color-icon">
+                </div>
+                <div>
+                    <input style="height: 50px" type="color" bind:value={text_color}>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
 
 <svelte:window on:keydown|preventDefault={keyHandler} bind:innerWidth bind:innerHeight/>
@@ -85,7 +122,8 @@
            field="{data.field}"
            paddle_color="{paddle_color}"
            ball_color="{ball_color}"
-           text_color="{text_color}"/>
+           text_color="{text_color}"
+           custom_interface="{custom_interface}"/>
 
     {#if !is_ready}
         <div class="h-100 d-flex align-items-center justify-content-center mt-5">

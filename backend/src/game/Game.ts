@@ -3,10 +3,10 @@ import {Logger} from "./global.service";
 
 export class Game {
 	/*** CONSTANTS ***/
-	public static readonly FIELD_HEIGHT: number = 400;
-	public static readonly FIELD_WIDTH: number = 600;
-	public static readonly PADDLE_HEIGHT: number = 100;
-	public static readonly PADDLE_WIDTH: number = 10;
+	public static readonly FIELD_HEIGHT: number = 200;
+	public static readonly FIELD_WIDTH: number = 300;
+	public static readonly PADDLE_HEIGHT: number = 50;
+	public static readonly PADDLE_WIDTH: number = 5;
 	public static readonly MAX_SCORE: number = 12;
 
 	/*** VARS ***/
@@ -18,10 +18,17 @@ export class Game {
 	private ball = new class {
 		public x: number;
 		public y: number;
-		readonly radius: number = 10;
-		public speed: number = 5;
-		public velocityX: number = 5;
-		public velocityY: number = 5;
+		readonly radius: number;
+		public speed: number;
+		public velocityX: number;
+		public velocityY: number;
+
+		constructor() {
+			this.radius = 5;
+			this.speed = 2.5;
+			this.velocityX = 2;
+			this.velocityY = 2;
+		}
 
 		/* GETTERS */
 		public getTop(): number {
@@ -44,7 +51,7 @@ export class Game {
 		public reset(): void {
 			this.x = Game.FIELD_WIDTH / 2;
 			this.y = Game.FIELD_HEIGHT / 2;
-			this.speed = 5;
+			this.speed = 2.5;
 			this.velocityX = -this.velocityX;
 		}
 	};
@@ -62,7 +69,6 @@ export class Game {
 		this._rightPlayer.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
 		this.ball.x = Game.FIELD_WIDTH / 2;
 		this.ball.y = Game.FIELD_HEIGHT / 2;
-		this.ball.reset();
 	}
 
 	/*	Check if ball touch an elements */
@@ -88,10 +94,10 @@ export class Game {
 			//if collision, need check where exactly ball touched paddle to change ball direction
 			let collidePoint = (this.ball.y - (player.y + Game.PADDLE_HEIGHT / 2));
 			collidePoint = collidePoint / (Game.PADDLE_HEIGHT / 2);
-			let angeRad = (Math.PI / 4) * collidePoint;
-			let direction = (this.ball.x < Game.FIELD_WIDTH / 2) ? 1 : -1;
-			this.ball.velocityX = direction * this.ball.speed * Math.cos(angeRad);
-			this.ball.velocityY = direction * this.ball.speed * Math.sin(angeRad);
+			let angleRad = (Math.PI / 4) * collidePoint;
+			let direction = (this.ball.x + this.ball.radius < Game.FIELD_WIDTH / 2) ? 1 : -1;
+			this.ball.velocityX = direction * this.ball.speed * Math.cos(angleRad);
+			this.ball.velocityY = this.ball.speed * Math.sin(angleRad);
 			this.ball.speed += 0.1;
 		}
 		if (this.ball.x - this.ball.radius < 0) {
@@ -107,17 +113,17 @@ export class Game {
 
 	private static move_paddle(player: SiteUser) {
 		if (player.offset > 0) {
-			if (player.y + 5 <= Game.FIELD_HEIGHT - this.PADDLE_HEIGHT) {
-				player.y += 5;
-				player.offset -= 5;
+			if (player.y + 2.5 <= Game.FIELD_HEIGHT - this.PADDLE_HEIGHT) {
+				player.y += 2.5;
+				player.offset -= 2.5;
 			} else {
 				player.y = Game.FIELD_HEIGHT - this.PADDLE_HEIGHT;
 				player.offset = 0;
 			}
 		} else if (player.offset < 0) {
-			if (player.y - 5 >= 0) {
-				player.y -= 5;
-				player.offset += 5;
+			if (player.y - 2.5 >= 0) {
+				player.y -= 2.5;
+				player.offset += 2.5;
 			} else {
 				player.offset = 0;
 				player.y = 0;
