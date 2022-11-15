@@ -61,7 +61,9 @@ export class SiteUser {
 	}
 
 	get id(): string {
-		return this._game_socket.id;
+		if (this._game_socket != undefined)
+			return this._game_socket.id;
+		return this._all_sockets.values().next().value.id;
 	}
 
 	get login(): string {

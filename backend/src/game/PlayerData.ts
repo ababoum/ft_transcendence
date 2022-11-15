@@ -30,19 +30,19 @@ export class PlayerData {
 	public move_down(): void {
 		if (this._offset < 0)
 			this._offset = 0;
-		if (this._offset + 30 <= 30)
-			this._offset = 30;
+		if (this._offset + 15 <= 15)
+			this._offset = 15;
 		else
-			this._offset = 30;
+			this._offset = 15;
 	}
 
 	public move_up(): void {
 		if (this._offset > 0)
 			this._offset = 0;
-		if (this._offset - 30 <= -30)
-			this._offset = -30;
+		if (this._offset - 15 <= -15)
+			this._offset = -15;
 		else
-			this._offset = -30;
+			this._offset = -15;
 	}
 
     get x(): number {

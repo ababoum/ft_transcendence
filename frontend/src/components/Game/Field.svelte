@@ -10,6 +10,7 @@
 	export let paddle_color: string;
 	export let ball_color: string;
 	export let text_color: string;
+	export let custom_interface: boolean = false;
 
 	let canvas: any;
 	let context: any;
@@ -35,9 +36,14 @@
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		scaling = getScalingNumber();
 		let draw: Draw2D = new Draw2D(context);
+		if (custom_interface)
+		    context.drawImage(document.getElementById("grass"), 0, 0, canvas.width, canvas.height);
 		draw.rect(leftPlayer.x, leftPlayer.y, paddle.width, paddle.height, scaling, paddle_color);
 		draw.rect(rightPlayer.x, rightPlayer.y, paddle.width, paddle.height, scaling, paddle_color);
-		draw.circle(ball.x, ball.y, ball.radius, scaling, ball_color);
+		if (!custom_interface)
+		    draw.circle(ball.x, ball.y, ball.radius, scaling, ball_color);
+		else
+		    draw.image(document.getElementById("ball"), ball.x - ball.radius - 7.5, ball.y - ball.radius - 7.5, 0, 0, ball.radius + 15, scaling);
 		draw.text(leftPlayer.score, leftPlayer.score_x, leftPlayer.score_y, scaling, text_color);
 		draw.text(rightPlayer.score, rightPlayer.score_x, rightPlayer.score_y, scaling, text_color);
 	}
@@ -58,6 +64,11 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight/>
+
+<div style="display:none;">
+    <img id="ball" src="/static/canva_ball.png"/>
+    <img id="grass" src="/static/grass.jpeg"/>
+</div>
 
 <div class="h-100 d-flex align-items-center justify-content-center">
     <canvas

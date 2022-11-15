@@ -1,4 +1,5 @@
 // x, y are position. w and h are width and height of the shape
+
 export default class Draw2D {
 	private readonly _context;
 	private _font: string;
@@ -27,6 +28,13 @@ export default class Draw2D {
 		this._context.fillStyle = color;
 		this._context.font = (this._text_size * scaling) + "px "+ this._font;
 		this._context.fillText(text, x * scaling, y * scaling);
+	}
+
+	public image(img: HTMLElement, x: number, y: number, width: number, height: number, r: number, scaling: number): void {
+		if (r == 0)
+			this._context.drawImage(img, x * scaling, y * scaling, width, height);
+		else
+			this._context.drawImage(img, x * scaling, y * scaling, r * scaling, r * scaling);
 	}
 
 	set font(value: string) {
