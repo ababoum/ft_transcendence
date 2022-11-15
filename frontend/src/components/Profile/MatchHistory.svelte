@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { get_matches } from "../../stores/requests";
-	import Avatar from "../Avatar.svelte";
 
-	export let profile_data;
-	let profile = undefined;
-	$: profile = profile_data;
+	export let nickname_to_display: string;
 
 	let matches = [];
-	let msg = "";
+
+	$: get_matches(nickname_to_display).then((resp) => {
+		matches = resp;
+	});
 
 	const months = [
 		"January",
@@ -48,9 +48,11 @@
 		return formatted;
 	}
 
-	onMount(async () => {
-		matches = await get_matches(profile.login);
-	});
+	// onMount(async () => {
+	// 	if (nickname_to_display) {
+	// 		matches = await get_matches(nickname_to_display);
+	// 	}
+	// });
 </script>
 
 <div class="p-4 w-100">
@@ -65,7 +67,7 @@
 		</thead>
 		<tbody>
 			{#each matches as match}
-				{#if profile.login == match.winnerLogin}
+				{#if nickname_to_display == match.winner.nickname}
 					<tr class="win">
 						<th scope="row">🏆 {convert_date(match.createdAt)}</th>
 						<td>{match.loser.nickname}</td>

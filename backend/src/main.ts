@@ -37,7 +37,6 @@ async function bootstrap() {
 	// enable CORS to allow communication with frontend via 'fetch'
 	app.enableCors();
 
-
 	// Swagger config
 	const config = new DocumentBuilder()
 		.setTitle('ft_transcendence')

@@ -30,7 +30,7 @@
 </script>
 
 <div class="avatar">
-	<Avatar nickname={$user.nickname} size="125" />
+	<Avatar nickname={$user.nickname} size="125" personal={true}/>
 	<div class="avatar-content">
 		<span
 			class="avatar-text"
@@ -93,5 +93,7 @@
 		font-size: 12px;
 		width: 50%;
 		text-align: center;
+		color: black;
+		font-weight: bold;
 	}
 </style>

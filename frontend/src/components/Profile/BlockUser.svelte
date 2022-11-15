@@ -67,10 +67,10 @@
 		name="nickname"
 		placeholder="Type a player's nickname"
 	/>
-	<button on:click={blockUser} type="button" class="btn btn-info"
+	<button on:click={blockUser} type="button" class="btn btn-danger mx-2"
 		>Block this user</button
 	>
-	<button on:click={unblockUser} type="button" class="btn btn-info"
+	<button on:click={unblockUser} type="button" class="btn btn-secondary mx-2"
 		>Unblock this user</button
 	>
 </div>

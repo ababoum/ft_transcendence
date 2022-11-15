@@ -6,6 +6,7 @@ async function main() {
 	const salt = await bcrypt.genSalt();
 	let hash = await bcrypt.hash("iamfirst", salt);
 	
+	
 	const adam = await prisma.user.upsert({
 		where: {id: 1},
 		update: {},
@@ -14,6 +15,18 @@ async function main() {
 			login: "adam",
 			nickname: "Adam",
 			password: hash,
+		}
+	});
+
+	const adam_avatar = await prisma.image.upsert({
+		where: {id: 1},
+		update: {},
+		create: {
+			filename: 'adam_avatar',
+			filepath: 'seed_assets/adam.png',
+			mimetype: 'image/png',
+			size: 24477,
+			User: {connect: {login: 'adam'}}
 		}
 	});
 	
@@ -28,6 +41,18 @@ async function main() {
 		}
 	});
 
+	const eve_avatar = await prisma.image.upsert({
+		where: {id: 2},
+		update: {},
+		create: {
+			filename: 'eve_avatar',
+			filepath: 'seed_assets/eve.png',
+			mimetype: 'image/png',
+			size: 30384,
+			User: {connect: {login: 'eve'}}
+		}
+	});
+
 	const eden = await prisma.chatRoom.upsert({
 		where: {id: 1},
 		update: {},
@@ -38,7 +63,7 @@ async function main() {
 		}
 	});
 
-  console.log({ adam, eve, eden })
+  console.log({ adam, eve, eden });
 }
 main()
   .then(async () => {

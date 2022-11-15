@@ -35,10 +35,12 @@ export class TwoFactorAuthenticationController {
 	@Post('generate')
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
-	async register(@Res() response: Response, @Req() request: RequestWithUser) {
+	async register(
+		@Res() response: Response,
+		@Req() request: RequestWithUser
+	) {
 
 		const { otpauthUrl } = await this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(request.user.login);
-
 		return this.twoFactorAuthenticationService.pipeQrCodeStream(response, otpauthUrl);
 	}
 
@@ -74,6 +76,11 @@ export class TwoFactorAuthenticationController {
 		@Req() request: RequestWithUser,
 		@Body() body: TwoFactorAuthenticationDto
 	) {
+
+		if (parseInt(body.twoFactorAuthenticationCode) < 0) {
+			throw new HttpException("twoFactorAuthenticationCode must be a positive integer", 400);
+		}
+
 		const isCodeValid = await this.twoFactorAuthenticationService.isTwoFactorAuthenticationCodeValid(
 			body.twoFactorAuthenticationCode, body.login
 		);
@@ -82,7 +89,7 @@ export class TwoFactorAuthenticationController {
 		}
 
 		const accessTokenCookie = await this.authenticationService.getCookieWith_2FAJwtAccessToken(body.login);
-		return {access_token: accessTokenCookie};
+		return { access_token: accessTokenCookie };
 	}
 
 	@Patch('disable')

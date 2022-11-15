@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma, Match } from '@prisma/client';
 import { createMatchDTO } from './dto';
 import { UserService } from '../user/user.service';
+import { UserModule } from '../user/user.module';
 
 @Injectable()
 export class MatchService {
@@ -13,28 +14,47 @@ export class MatchService {
 
 	/////////////////////// ACCESS MATCH INFO ///////////////////////
 
-	async getMatches(userLogin?: string)
+	async getMatches(userNickname?: string)
 		: Promise<Match[]> {
 
 		let res: Match[];
 
 		// get all matches
-		if (!userLogin) {
+		if (userNickname === undefined) {
 			res = await this.prisma.match.findMany();
 			return res;
 		}
 
+		const user = await this.prisma.user.findUnique({
+			where: {
+				nickname: userNickname 
+			}
+		});
+
+		if (user === null)
+			return [];
+
 		res = await this.prisma.match.findMany({
 			where: {
 				OR: [{
-					winnerLogin: userLogin
+					winnerLogin: user.login
 				}, {
-					loserLogin: userLogin
+					loserLogin: user.login
 				}]
 			},
 			include: {
-				loser: true,
-				winner: true
+				loser: {
+					select: {
+						rating: true,
+						nickname: true
+					}
+				},
+				winner: {
+					select: {
+						rating: true,
+						nickname: true
+					}
+				}
 			},
 			orderBy: {
 				createdAt: 'desc' // most recent to less recent

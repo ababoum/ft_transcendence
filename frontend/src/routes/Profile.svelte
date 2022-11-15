@@ -57,7 +57,7 @@
 			<h1 class="profile-title">My friends</h1>
 			<Friends profile_data={full_profile} />
 			<h1 class="profile-title">My games</h1>
-			<MatchHistory profile_data={full_profile} />
+			<MatchHistory nickname_to_display={full_profile.nickname} />
 		</div>
 	{/if}
 </div>

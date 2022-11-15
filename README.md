@@ -26,9 +26,9 @@ TO-DO Eliot:
 - Rendre le owner invulnerable
 
 TO-DO M'hamed:
-- Se débarrasser des window.location.reload() dans le frontend
+- Seed avatars pour les users Seed ➔ **OK**
+- Add a stat component in the user profile (rating, wins, and losses) ➔ **OK**
 - Implement data validation for all user inputs and forms
-- Add a stat component in the profile (rating, wins, and losses)
 
 
 TO-DO Anton:
@@ -47,11 +47,10 @@ TESTS TO DO:
 - Monitor warnings and unhandled errors in the console
 
 TO DO
-- Update npm/prisma dans Dockerfile
+- Update npm/prisma dans Dockerfile ➔ **Finalement non, il n'y a pas de version node avec la dernière version de npm**
 - Voir pour input field plein d'espaces, interdire les espaces comme caracteres
 - Apres changement d'avatar, cancel fait un probleme
 - Tester 42auth + 2FA
 - Voir Modal Profile popup, l'avatar ne change pas quand on regarde des profils differents
-- Ajouter Match History dans Profile Modal
+- Ajouter Match History dans Profile Modal ➔ **OK**
 - Refaire une passe sur les services prisma et les proteger avec Try catch si besoin
-- Seed avatars pour les users Seed

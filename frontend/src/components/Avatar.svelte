@@ -7,18 +7,23 @@
 	import { get } from "svelte/store";
 
 	import { BACKEND_URL, GET_NICKNAME_AVATAR } from "../stores/store";
+	import { beforeUpdate, onMount } from "svelte";
 
 	export let size;
 	export let nickname = "";
 	export let classes = "";
+	export let personal: boolean = false;
 
 	// default paths
 	let default_imageSrc = "static/default_avatar.png";
 	let loading_imageSrc = "static/loading_icon.gif";
 	let actual_img = default_imageSrc;
+	let fetchImage;
 
-	const fetchImage = (async () => {
-		const resp1 = await fetch($GET_NICKNAME_AVATAR + nickname);
+	async function refresh_avatar() {
+		const resp1 = await fetch(
+			get(BACKEND_URL) + "/users/avatar/" + nickname
+		);
 		const resp2 = await fetch(
 			get(BACKEND_URL) + "/users/ft_avatar/" + nickname
 		);
@@ -39,10 +44,18 @@
 		} else {
 			throw new Error();
 		}
-	})();
+	}
+
+	onMount(async () => {
+		fetchImage = refresh_avatar();
+	});
+
+	beforeUpdate(() => {
+		fetchImage = refresh_avatar();
+	});
 </script>
 
-{#if !$myavatar}
+{#if (!$myavatar && personal === true) || personal === false}
 	<div class={classes}>
 		{#await fetchImage}
 			<img

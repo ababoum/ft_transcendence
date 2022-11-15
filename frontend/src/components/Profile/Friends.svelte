@@ -12,7 +12,7 @@
 	let profile = undefined;
 	$: profile = profile_data;
 
-	let user_to_display_nickname: string;
+	let user_to_display_nickname: string = "";
 
 	onMount(async () => {
 		$friends = await get_friends(profile.login);
@@ -33,8 +33,10 @@
 	}
 
 	async function displayUserProfile(nickname: string) {
-		user_to_display_nickname = nickname;
+		const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+		user_to_display_nickname = nickname;
+		while (typeof getModal !== "function") await sleep(500);
 		getModal("user_profile").open();
 	}
 </script>
@@ -50,7 +52,7 @@
 					<div class="nearby-user">
 						<div class="row d-flex align-items-center">
 							<div class="col-md-2 col-sm-2">
-								<Avatar size="100" {nickname} />
+								<Avatar size="75" {nickname} />
 							</div>
 							<div class="col-md-7 col-sm-7">
 								<h5>
@@ -82,7 +84,7 @@
 
 <!-- DISPLAY ANOTHER USER'S PROFILE -->
 
-<UserProfile user_to_display_nickname={user_to_display_nickname} />
+<UserProfile bind:user_to_display_nickname={user_to_display_nickname} />
 
 <style>
 	.people-nearby .nearby-user {
@@ -90,6 +92,8 @@
 		border-top: 1px solid #f1f2f2;
 		border-bottom: 1px solid #f1f2f2;
 		margin-bottom: 20px;
+		margin-left: 5px;
+		margin-right: 5px;
 	}
 
 	.profile-link {

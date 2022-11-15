@@ -6,7 +6,7 @@ export async function get_current_user_data() {
 	try {
 		return fetch(get(GET_PROFILE_URL), {
 			method: 'GET',
-			headers: {"Authorization": "Bearer " + getCookie("jwt")}
+			headers: { "Authorization": "Bearer " + getCookie("jwt") }
 		});
 	} catch (e) {
 		return undefined;
@@ -14,6 +14,7 @@ export async function get_current_user_data() {
 }
 
 export async function get_current_user_json() {
+
 	return fetch(get(GET_PROFILE_URL), {
 		method: 'GET',
 		headers: { "Authorization": "Bearer " + getCookie("jwt") }
@@ -36,8 +37,8 @@ export async function get_full_profile(nickname: string) {
 }
 
 export async function get_user_public_data(nickname: string) {
-	if(!nickname)
-		return ;
+	if (!nickname)
+		return;
 	const resp = await fetch(get(BACKEND_URL) + "/users/public/" + nickname, {
 		method: 'GET',
 		headers: { "Authorization": "Bearer " + getCookie("jwt") }
@@ -239,8 +240,11 @@ export async function delete_friend(nickname: string) {
 
 //////////////////////////// MATCHES and RATINGS /////////////////////////////
 
-export async function get_matches(login: string) {
-	const resp = await fetch(get(BACKEND_URL) + "/match_history/" + login, {
+export async function get_matches(nickname: string) {
+	if (!nickname) {
+		return [];
+	}
+	const resp = await fetch(get(BACKEND_URL) + "/match_history/" + nickname, {
 		method: 'GET',
 		headers: {
 			"Authorization": "Bearer " + getCookie("jwt"),

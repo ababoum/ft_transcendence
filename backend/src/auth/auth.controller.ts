@@ -39,7 +39,7 @@ export class AuthController {
 
 		// if 2FA is not enabled, immediately send access token
 		const { access_token } = await this.authService.login(req.user);
-		req.res.setHeader('Set-Cookie', [access_token]);
+		// req.res.setHeader('Set-Cookie', [access_token] + "; SameSite=None");
 
 		return { TwoFA: false, access_token: access_token };
 	}
@@ -85,7 +85,7 @@ export class AuthController {
 
 			// we update the user's status here because the frontend can't do it in this situation
 			await this.userService.updateStatus(usr.login, "online");
-			res.cookie('jwt', access_token);
+			res.cookie('jwt', access_token + "; SameSite=None");
 			res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
 		}
 		else {
@@ -108,7 +108,7 @@ export class AuthController {
 		const { user } = request;
 		const accessTokenCookie = await this.authService.getCookieWith_2FAJwtAccessToken(user.login);
 
-		request.res.setHeader('Set-Cookie', [accessTokenCookie]);
+		request.res.setHeader('Set-Cookie', [accessTokenCookie] + "; SameSite=None");
 
 		if (user.isTwoFAEnabled) {
 			return;

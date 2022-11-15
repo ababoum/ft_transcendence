@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import { get_user_public_data } from "../../stores/requests";
+    import { nickname } from "../../stores/store";
 	import Avatar from "../Avatar.svelte";
-	import Modal, { getModal } from "./Modal.svelte";
+    import MatchHistory from "./MatchHistory.svelte";
+	import Modal from "./Modal.svelte";
 
 	export let user_to_display_nickname;
 
@@ -18,9 +19,9 @@
 		{#if !user_to_display}
 			<p>Profile loading...</p>
 		{:else}
-			<h1>{user_to_display.nickname}</h1>
+			<h1>{user_to_display_nickname}</h1>
 			<Avatar
-				nickname={user_to_display.nickname}
+				bind:nickname={user_to_display_nickname}
 				size="100"
 				classes="rounded-circle"
 			/>
@@ -35,6 +36,7 @@
 			</div>
 		{/if}
 	</div>
+	<MatchHistory nickname_to_display={user_to_display_nickname}/>
 </Modal>
 
 <style>

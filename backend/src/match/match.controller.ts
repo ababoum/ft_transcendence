@@ -26,11 +26,11 @@ export class MatchController {
 		});
 	}
 
-	@Get('/:login')
+	@Get('/:nickname')
 	@UseGuards(JwtAuthGuard)
-	async getUserMatches(@Param('login') userLogin: string): Promise<MatchModel[]> {
+	async getUserMatches(@Param('nickname') userNickname: string): Promise<MatchModel[]> {
 		
-		const matches = await this.matchService.getMatches(userLogin);
+		const matches = await this.matchService.getMatches(userNickname);
 		return matches;
 	}
 }
