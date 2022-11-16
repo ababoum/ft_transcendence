@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { User, User as UserModel } from '@prisma/client';
 import { UserService } from '../../user/user.service';
@@ -45,6 +45,8 @@ export class TwoFactorAuthenticationService {
 	public async isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, login: string): Promise<boolean> {
 
 		const user = await this.usersService.user({ login: login });
+		if (!user)
+			throw new HttpException("User not found", 404);
 
 		const verif = authenticator.verify({
 			token: twoFactorAuthenticationCode,
@@ -55,9 +57,11 @@ export class TwoFactorAuthenticationService {
 	}
 
 	public async disable_TwoFA(login: string): Promise<User> {
-		return await this.usersService.updateUser({
+		const user = await this.usersService.updateUser({
 			where: { login: login },
 			data: { isTwoFAEnabled: false }
-		})
+		});
+
+		return user;
 	}
 }

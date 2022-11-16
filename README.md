@@ -48,9 +48,17 @@ TESTS TO DO:
 
 TO DO
 - Update npm/prisma dans Dockerfile ➔ **Finalement non, il n'y a pas de version node avec la dernière version de npm**
-- Voir pour input field plein d'espaces, interdire les espaces comme caracteres
+- Voir pour input field plein d'espaces, interdire les espaces comme caracteres 
 - Apres changement d'avatar, cancel fait un probleme
-- Tester 42auth + 2FA
-- Voir Modal Profile popup, l'avatar ne change pas quand on regarde des profils differents
+- Tester 42auth + 2FA ➔ **Normalement OK, cas d'usage standard**
+- Voir Modal Profile popup, l'avatar ne change pas quand on regarde des profils differents ➔ **OK**
 - Ajouter Match History dans Profile Modal ➔ **OK**
 - Refaire une passe sur les services prisma et les proteger avec Try catch si besoin
+
+
+
+
+
+
+TO KNOW ABOUT THE PROJECT
+- The Http Status 210 means that the avatar is not found and should be replaced with a default one

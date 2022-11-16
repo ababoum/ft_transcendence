@@ -63,6 +63,18 @@ async function main() {
 		}
 	});
 
+	// Default Avatar
+	const default_avatar = await prisma.image.upsert({
+		where: {id: 3},
+		update: {},
+		create: {
+			filename: 'default_avatar',
+			filepath: 'seed_assets/default_avatar.png',
+			mimetype: 'image/png',
+			size: 15279
+		}
+	});
+
   console.log({ adam, eve, eden });
 }
 main()

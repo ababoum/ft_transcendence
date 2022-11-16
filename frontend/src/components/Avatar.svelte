@@ -21,14 +21,14 @@
 	let fetchImage;
 
 	async function refresh_avatar() {
-		const resp1 = await fetch(
-			get(BACKEND_URL) + "/users/avatar/" + nickname
-		);
-		const resp2 = await fetch(
-			get(BACKEND_URL) + "/users/ft_avatar/" + nickname
-		);
 
-		if (resp1.ok) {
+
+		const resp1 = await fetch(get(BACKEND_URL) + "/users/avatar/" + nickname);
+		const resp2 = await fetch(get(BACKEND_URL) + "/users/ft_avatar/" + nickname);
+
+		try {
+			if (resp1.status == 210)
+				throw new Error();
 			const imageBlob = await resp1.blob();
 			const reader = new FileReader();
 			reader.readAsDataURL(imageBlob);
@@ -37,21 +37,23 @@
 				var rawLog = reader.result;
 				actual_img = rawLog as string;
 			};
-		} else if (resp2.ok) {
+		} 
+		catch (e) {
 			const url = await resp2.text();
-			if (!url) throw new Error();
-			actual_img = url;
-		} else {
-			throw new Error();
+			if (!url)
+				actual_img = default_imageSrc;
+			else
+				actual_img = url;
 		}
+		
 	}
 
 	onMount(async () => {
-		fetchImage = refresh_avatar();
+		fetchImage = await refresh_avatar();
 	});
 
-	beforeUpdate(() => {
-		fetchImage = refresh_avatar();
+	beforeUpdate(async () => {
+		fetchImage = await refresh_avatar();
 	});
 </script>
 

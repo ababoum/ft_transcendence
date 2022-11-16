@@ -36,7 +36,6 @@ export class AuthController {
 			return { TwoFA: true, access_token: null };
 		}
 
-
 		// if 2FA is not enabled, immediately send access token
 		const { access_token } = await this.authService.login(req.user);
 		// req.res.setHeader('Set-Cookie', [access_token] + "; SameSite=None");
@@ -48,7 +47,9 @@ export class AuthController {
 	@ApiBearerAuth()
 	@Get('profile')
 	async getProfile(@Request() req) {
-		return this.authService.getProfile(req.user.login);
+		const profile = await this.authService.getProfile(req.user.login);
+
+		return profile;
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -91,7 +92,6 @@ export class AuthController {
 		else {
 			const url = new URL(process.env.FRONTEND_URL + "/#/2FA");
 			url.port = process.env.FRONT_PORT;
-			// url.pathname = '#/2FA';
 			url.searchParams.append('login', usr.login);
 			console.log(url.hash);
 			res.status(HttpStatus.FOUND).redirect(url.href);

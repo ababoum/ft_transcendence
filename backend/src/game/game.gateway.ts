@@ -231,7 +231,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this._users.add(user);
 			if (user.is_logged)
 				this.userService.updateStatus(user.login, "online");
-			console.log("connect --- " + (user.is_logged ? user.nickname : client.id));
+			Logger.write("connect --- " + (user.is_logged ? user.nickname : client.id));
 		}
 		this.updateServerInfo();
 	}

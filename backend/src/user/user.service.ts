@@ -30,15 +30,15 @@ export class UserService {
 	}
 
 	async userFindOrCreate(login: string, email: string, FT_id: number, avatar_url: string) {
-		const usr = await this.prisma.user.findUnique({
+		const user = await this.prisma.user.findUnique({
 			where: {
 				login: login
 			},
 		});
 
 		// if user not found, create it with 42 info
-		if (!usr) {
-			const new_usr = await this.prisma.user.create({
+		if (!user) {
+			const new_user = await this.prisma.user.create({
 				data: {
 					email: email,
 					login: login,
@@ -50,10 +50,10 @@ export class UserService {
 				}
 			});
 
-			return new_usr;
+			return new_user;
 		}
 		else {
-			return usr;
+			return user;
 		}
 	}
 
@@ -88,6 +88,9 @@ export class UserService {
 				status: true
 			}
 		});
+
+		if (!user)
+			throw new HttpException("User not found", 404);
 
 		return user;
 	}
@@ -313,14 +316,14 @@ export class UserService {
 	): Promise<Image | null> {
 
 		if (imageWhereUniqueInput.id === null)
-			throw new HttpException("Requested image not found", 404);
+			throw new HttpException("Requested image not found", 210);
 
 		const img = await this.prisma.image.findUnique({
 			where: imageWhereUniqueInput,
 		});
 
 		if (!img)
-			throw new HttpException("Requested image not found", 404);
+			throw new HttpException("Requested image not found", 210);
 		return img;
 	}
 

@@ -13,11 +13,11 @@ export function getCookie(name: string): string {
 }
 
 export function setCookie(name: string, value: string) {
-	document.cookie = name + "=" + value + "; SameSite=None";
+	document.cookie = name + "=" + value + "; SameSite=Lax";
 }
 
 export function eraseCookie(name) {
-	document.cookie = name + '=; Max-Age=0; SameSite=None'
+	document.cookie = name + '=; Max-Age=0; SameSite=Lax'
 }
 
 export async function logout() {

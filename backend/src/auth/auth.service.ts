@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -37,7 +37,7 @@ export class AuthService {
 	}
 
 	async getProfile(login: string): Promise<object | null> {
-		return this.prisma.user.findUnique({
+		const user = await this.prisma.user.findUnique({
 			where: {
 				login: login
 			},
@@ -51,6 +51,11 @@ export class AuthService {
 				rating: true
 			}
 		});
+
+		if (!user)
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+
+		return user;
 	}
 
 
@@ -72,7 +77,6 @@ export class AuthService {
 			secret: jwt_secret,
 			expiresIn: `${exp_time}s`
 		});
-		// return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${exp_time}`;
 		return `${token}`;
 	}
 
