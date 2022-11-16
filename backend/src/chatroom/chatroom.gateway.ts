@@ -53,7 +53,7 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		this.users.splice(this.users.findIndex(x => x.connectionId.id === client.id),1)
 	}
 
-	async createChatroom(chatRoom: ChatRoom) {
+	async createChatroom(chatRoom) {
 		// Update this.chatRoomsList to add this chatRoom
 		this.chatRoomsList.push(chatRoom)
 
@@ -123,6 +123,21 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 
 		// Emit update to everyone
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
+	}
+
+	async kickUser(chatRoomId: number, nickname: string, res) {
+		//Update this.chatRoomsList with the new list of participants
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].participants = res.participants
+
+		// Emit update to everyone
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+
+		const clients = await this.users.filter(x => x.nickname === nickname)
+		if (clients){
+			clients.forEach(x => x.connectionId.leave(String(chatRoomId)))
+			clients.forEach(x => x.connectionId.emit('you-have-been-kicked', chatRoomId))
+		}
 	}
 
 	async enterChatroom(user, chatRoomId: string, socketId: string) {

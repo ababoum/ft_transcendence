@@ -9,7 +9,8 @@
 
 	let is_log: boolean = true;
 	onMount(async () => {
-		$user = await $user.upd();
+		try { $user = await $user.upd(); } 
+		catch (e) { console.log("Backend unavailable") }
 		if ($user.isLogged) await push("/");
 	});
 </script>

@@ -159,6 +159,13 @@ export class ChatroomController {
 		return res;
 	}
 
+	@Patch(':id/kick')
+	async kickUser(@Request() req, @Param('id') id: string, @Body() UpdateChatRoomDto: UpdateChatRoomDto) {
+		const res = await this.ChatroomService.kickUser(req.user.login, +id, UpdateChatRoomDto.nickname);
+		await this.ChatroomGateway.kickUser(Number(id), UpdateChatRoomDto.nickname, res)
+		return res;
+	}
+
 	@Patch(':id/exit')
 	async exitRoom(@Request() req, @Param('id') id: string, @Body() socketId) {
 		const res = await this.ChatroomGateway.exitChatroom(req.user, id, socketId.id)

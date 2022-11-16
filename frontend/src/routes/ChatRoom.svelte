@@ -18,7 +18,7 @@
 	let blockList = [];
 	let activeChatRoomId;
 	let type: string;
-	let adminNickname, banNickname, muteNickname, roomPassword: string;
+	let adminNickname, banNickname, muteNickname, inviteNickname, roomPassword: string;
 	let muteDuration: number = 1;
 	let mutedUntil;
 	let currentTime;
@@ -34,10 +34,11 @@
 
 	onMount(async () => {
 		console.log("Mounting ChatRoom")
-		$user = await $user.upd();
+		try { $user = await $user.upd(); } 
+		catch (e) { console.log("Backend unavailable") }
 		if (!$user.isLogged) await push("/login");
 		else {
-			chatroom_socket = await io("http://localhost:5678/chatroom", {
+			chatroom_socket = io("http://localhost:5678/chatroom", {
 				query: {
 					token: getCookie("jwt"),
 				},
@@ -47,53 +48,68 @@
 			await getBlockList();
 			while (chatroom_socket.id === undefined) {
 				console.log("Socket not connected: " + chatroom_socket.id);
+				chatroom_socket = io("http://localhost:5678/chatroom", {
+				query: {
+					token: getCookie("jwt"),
+				},
+			});
 				await new Promise((r) => setTimeout(r, 100));
 			}
 			console.log(
 				"All received and socket connected: " + chatroom_socket.id
 			);
 			ready = true;
-		}
 
-		const interval = setInterval(() => {
-			currentTime = new Date();
-		}, 1000);
+			const interval = setInterval(() => {
+				currentTime = new Date();
+			}, 1000);
 
-		chatroom_socket.on("chatrooms-list", (data) => {
-			console.log("Received chatrooms-list via emit()");
-			chatRoomsList = data;
-			console.log(chatRoomsList);
-		});
+			chatroom_socket.on("chatrooms-list", (data) => {
+				console.log("Received chatrooms-list via emit()");
+				chatRoomsList = data;
+				console.log(chatRoomsList);
+			});
 
-		chatroom_socket.on("directmessagesrooms-list", (data) => {
-			console.log("Received directmessagesrooms-list via emit()");
-			directMessagesRoomsList = data;
-			console.log(directMessagesRoomsList);
-		});
+			chatroom_socket.on("directmessagesrooms-list", (data) => {
+				console.log("Received directmessagesrooms-list via emit()");
+				directMessagesRoomsList = data;
+				console.log(directMessagesRoomsList);
+			});
 
-		chatroom_socket.on("message", (data) => {
-			messagesList.push(data);
-			messagesList = [...messagesList];
-			console.log("Received message: " + data.content);
-		});
+			chatroom_socket.on("message", (data) => {
+				messagesList.push(data);
+				messagesList = [...messagesList];
+				console.log("Received message: " + data.content);
+			});
 
-		chatroom_socket.on("you-have-been-banned", (data) => {
-			console.log(data);
-			if ((data = activeChatRoomId)) {
-				activeChatRoomId = undefined;
-				messagesList = [];
-				alert("You have been banned from this chatroom");
-			}
-		});
+			chatroom_socket.on("you-have-been-banned", (data) => {
+				console.log(data);
+				if ((data = activeChatRoomId)) {
+					activeChatRoomId = undefined;
+					messagesList = [];
+					alert("You have been banned from this chatroom");
+				}
+			});
 
-		$game_socket.on("game-invite-status", (resp) => {
-			if (resp["status"] === "sent") invite = false;
-			else if (resp["status"] === "annulled") invite = true;
-		});
+			chatroom_socket.on("you-have-been-kicked", (data) => {
+				console.log(data);
+				if ((data = activeChatRoomId)) {
+					activeChatRoomId = undefined;
+					messagesList = [];
+					alert("You have been kicked from this chatroom");
+				}
+			});
+
+			$game_socket.on("game-invite-status", (resp) => {
+				if (resp["status"] === "sent") invite = false;
+				else if (resp["status"] === "annulled") invite = true;
+			});
+	}
 	});
 
 	onDestroy(() => {
-		chatroom_socket.disconnect();
+		if (chatroom_socket)
+			chatroom_socket.disconnect();
 	});
 
 	async function getChatRoomsList() {
@@ -334,7 +350,9 @@
 		banNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode === 404) alert("This user doesn't exist");
+		if (res.statusCode === 401) alert("You are not admin");
+		else if (res.statusCode === 404) alert("This user doesn't exist");
+		else if (res.statusCode === 409) alert("Can't ban the owner");
 	}
 
 	async function unbanUser(chatRoomId: number, usernickname: string) {
@@ -357,11 +375,13 @@
 		banNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode) alert("This user doesn't exist");
+		if (res.statusCode === 401) alert("You are not admin");
 	}
 
 	async function adminUser(chatRoomId: number, usernickname: string) {
 		console.log("In adminUser " + usernickname + " room " + chatRoomId);
+		if ($user.nickname != chatRoomsList[chatRoomId - 1].ownerNickname)
+			return alert("You are not owner");
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 
@@ -380,7 +400,8 @@
 		adminNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode) alert("This user doesn't exist");
+		if (res.statusCode === 401) alert("You are not owner");
+		else if (res.statusCode === 404) alert("This user doesn't exist");
 	}
 
 	async function unadminUser(chatRoomId: number, usernickname: string) {
@@ -437,8 +458,10 @@
 		muteNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode == 404) alert("This user doesn't exist");
 		if (res.statusCode == 401) alert("You are not admin in this chatroom");
+		if (res.statusCode == 404) alert("This user doesn't exist");
+		if (res.statusCode == 409) alert("Can't mute the owner");
+
 	}
 
 	async function unmuteUser(chatRoomId: number, usernickname: string) {
@@ -461,8 +484,8 @@
 		muteNickname = undefined;
 
 		console.log(res);
-		if (res.statusCode === 404) alert("This user is not muted");
 		if (res.statusCode === 401) alert("You are not admin in this chatroom");
+		if (res.statusCode === 404) alert("This user is not muted");
 	}
 
 	async function postMessageForm(e) {
@@ -514,32 +537,55 @@
 		e.target.reset();
 	}
 
-	async function inviteUser(e) {
-		const formData = new FormData(e.target);
-		const nickname = formData.get("nickname");
-		console.log(
-			"In inviteUser " + activeChatRoomId + " - nickname: " + nickname
-		);
+	async function inviteUser(chatRoomId: number, usernickname: string) {
+		console.log("In inviteUser " + usernickname + " room " + chatRoomId);
+		if (usernickname === undefined)
+			return alert("Please provide a nickname");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + activeChatRoomId + "/invite",
+			"http://localhost:3000/chatrooms/" + chatRoomId + "/invite",
 			{
 				method: "PATCH",
 				headers: {
 					Authorization: "Bearer " + getCookie("jwt"),
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ nickname: nickname }),
+				body: JSON.stringify({ nickname: usernickname }),
 			}
 		);
 		const res = await rawresponse.json();
-		console.log(res);
+		inviteNickname = undefined;
 
+		console.log(res);
 		if (res.statusCode === 401) alert("You are not participant of this room");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("This user is banned from this room");
+	}
 
-		e.target.reset();
+	async function kickUser(chatRoomId: number, usernickname: string) {
+		console.log("In kickUser " + usernickname + " room " + chatRoomId);
+		if (usernickname === undefined)
+			return alert("Please provide a nickname");
+		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
+			return alert("Can't kick the owner");
+
+		const rawresponse = await fetch(
+			"http://localhost:3000/chatrooms/" + chatRoomId + "/kick",
+			{
+				method: "PATCH",
+				headers: {
+					Authorization: "Bearer " + getCookie("jwt"),
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ nickname: usernickname }),
+			}
+		);
+		const res = await rawresponse.json();
+		inviteNickname = undefined;
+
+		console.log(res);
+		if (res.statusCode === 401) alert("You are not admin of this room");
+		else if (res.statusCode === 409) alert("Can't kick the owner");
 	}
 
 	async function addPassword(chatRoomId: number, password: string) {
@@ -727,7 +773,7 @@
 												>
 													<div
 														id="chatroomlist"
-														class="overflow-auto"
+														class="overflow-auto DMList rounded"
 														style="position: relative; height: 300px; width:auto; overflow-y: scroll"
 													>
 														{#key chatRoomsList}
@@ -743,7 +789,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				💬 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -775,7 +821,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				💬{chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -791,7 +837,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				🔐 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -813,7 +859,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				🔐 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-danger"
@@ -827,7 +873,7 @@
 																					<p
 																						class="chatroomname"
 																					>
-																						{chatroom.name}
+																					🔐 {chatroom.name}
 																					</p>
 																					<input
 																						type="text"
@@ -849,7 +895,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				🤫 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -885,7 +931,7 @@
 													>
 													<div
 														id="DMList"
-														class="overflow-auto"
+														class="overflow-auto DMList rounded"
 														style="position: relative; height: 300px; width:auto; overflow-y: scroll"
 													>
 														{#each directMessagesRoomsList as DirectMessagesRoom}
@@ -1164,36 +1210,33 @@
 															<ul>
 																{#if chatRoomsList[activeChatRoomId - 1].admin.find((x) => x.nickname === $user.nickname) !== undefined}
 																	<div
-																		class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2"
+																	class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2"
 																	>
-																		<form
-																			on:submit|preventDefault|stopPropagation={inviteUser}
-																			style="width: 100%;"
-																		>
-																			<div
-																				class="input-group"
-																				style="width: 60%;"
-																			>
-																				<input
-																					type="text"
-																					name="nickname"
-																					minlength="1"
-																					maxlength="150"
-																					class="form-control"
-																					placeholder="nickname"
-																					required
-																				/>
-																				<span
-																					class="input-group-btn"
-																				>
-																					<button
-																						type="submit"
-																						class="btn btn-info"
-																						>Invite</button
-																					>
-																				</span>
-																			</div>
-																		</form>
+																	<input
+																		type="text"
+																		class="form-control"
+																		placeholder="nickname"
+																		bind:value={inviteNickname}
+																		style="width: 50%"
+																	/>
+																	<button
+																		class="btn btn-success"
+																		on:click={() =>
+																			inviteUser(
+																				activeChatRoomId,
+																				inviteNickname
+																			)}
+																		>Invite</button
+																	>
+																	<button
+																		class="btn btn-danger"
+																		on:click={() =>
+																			kickUser(
+																				activeChatRoomId,
+																				inviteNickname
+																			)}
+																		>Kick</button
+																	>
 																	</div>
 																{/if}
 																{#if chatRoomsList[activeChatRoomId - 1].ownerNickname === $user.nickname}
@@ -1400,5 +1443,8 @@
 	.blockedmessage {
 		background-color: grey;
 		height: auto;
+	}
+	.DMList {
+		border: solid rgba(0, 139, 139, 0.568);
 	}
 </style>

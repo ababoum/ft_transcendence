@@ -46,7 +46,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			return ;
 		if (leavedUser.is_logged) {
 			if (leavedUser.is_playing && client == leavedUser.game_socket) {
-				console.log("WATAFAK")
 				leavedUser.is_leaved = true;
 			}
 			if (leavedUser.is_searching)
