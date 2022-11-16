@@ -36,8 +36,10 @@
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		scaling = getScalingNumber();
 		let draw: Draw2D = new Draw2D(context);
-		if (custom_interface)
-		    context.drawImage(document.getElementById("grass"), 0, 0, canvas.width, canvas.height);
+		if (custom_interface) {
+			context.drawImage(document.getElementById("grass"), 0, 0, canvas.width, canvas.height);
+			paddle_color = "black";
+		}
 		draw.rect(leftPlayer.x, leftPlayer.y, paddle.width, paddle.height, scaling, paddle_color);
 		draw.rect(rightPlayer.x, rightPlayer.y, paddle.width, paddle.height, scaling, paddle_color);
 		if (!custom_interface)
@@ -66,8 +68,8 @@
 <svelte:window bind:innerWidth bind:innerHeight/>
 
 <div style="display:none;">
-    <img id="ball" src="/static/canva_ball.png"/>
-    <img id="grass" src="/static/grass.jpeg"/>
+    <img id="ball" src="static/canva_ball.png"/>
+    <img id="grass" src="static/grass.jpeg"/>
 </div>
 
 <div class="h-100 d-flex align-items-center justify-content-center">
