@@ -949,7 +949,7 @@
 													</div>
 													<form
 														on:submit|preventDefault={createDirectMessagesRoomForm}
-														style="width: 100%;"
+														style="width: 100%; margin-top: 10px"
 													>
 														<input
 															type="text"
@@ -1413,14 +1413,17 @@
 	}
 	.message {
 		background-color: rgba(0, 128, 0, 0.315);
+		min-height: 37px;
 		height: auto;
 	}
 	.ownmessage {
 		background-color: rgba(0, 162, 255, 0.26);
+		min-height: 37px;
 		height: auto;
 	}
 	.blockedmessage {
 		background-color: grey;
+		min-height: 37px;
 		height: auto;
 	}
 	.DMList {
