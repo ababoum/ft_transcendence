@@ -49,7 +49,5 @@ TO DO
 
 
 
-
-
 TO KNOW ABOUT THE PROJECT
 - The Http Status 210 means that the avatar is not found and should be replaced with a default one

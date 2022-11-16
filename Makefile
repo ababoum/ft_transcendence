@@ -10,7 +10,7 @@ fclean: clean
 	-rm -rf /goinfre/$(USER)/data/*
 	docker system prune -f
 	docker image prune -f
-	-docker rmi -f $(shell docker images -qa | uniq)
+	@-docker rmi -f $(shell docker images -qa | uniq)
 
 test_env:
 	docker-compose up -d postgres adminer
