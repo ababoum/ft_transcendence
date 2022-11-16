@@ -757,7 +757,7 @@
 														{#key chatRoomsList}
 															<ul
 																class="list-unstyled mb-0"
-																style="margin-left: 5%;"
+																style="margin-left: 5%; margin-right: 5%"
 															>
 																{#each chatRoomsList as chatroom (chatroom.id)}
 																	<div
@@ -771,7 +771,7 @@
 																				💬 {chatroom.name}
 																				</p>
 																				<button
-																					class="btn btn-primary"
+																					class="btn btn-primary Enter"
 																					on:click={() =>
 																						enterChatRoom(
 																							chatroom.id
@@ -779,7 +779,7 @@
 																					>Enter</button
 																				>
 																				<button
-																					class="btn btn-secondary"
+																					class="btn btn-secondary Enter"
 																					on:click={() =>
 																						leaveChatRoom(
 																							chatroom.id
@@ -819,7 +819,7 @@
 																				🔐 {chatroom.name}
 																				</p>
 																				<button
-																					class="btn btn-primary"
+																					class="btn btn-primary Enter"
 																					on:click={() =>
 																						enterChatRoom(
 																							chatroom.id
@@ -827,7 +827,7 @@
 																					>Enter</button
 																				>
 																				<button
-																					class="btn btn-secondary"
+																					class="btn btn-secondary Enter"
 																					on:click={() =>
 																						leaveChatRoom(
 																							chatroom.id
@@ -859,7 +859,7 @@
 																						name="password"
 																						minlength="3"
 																						placeholder="password"
-																						style="float: right; margin-right: 5%; width:45%"
+																						style="float: right; width:50%"
 																						required
 																					/>
 																					<input
@@ -877,7 +877,7 @@
 																				🤫 {chatroom.name}
 																				</p>
 																				<button
-																					class="btn btn-primary"
+																					class="btn btn-primary Enter"
 																					on:click={() =>
 																						enterChatRoom(
 																							chatroom.id
@@ -885,7 +885,7 @@
 																					>Enter</button
 																				>
 																				<button
-																					class="btn btn-secondary"
+																					class="btn btn-secondary Enter"
 																					on:click={() =>
 																						leaveChatRoom(
 																							chatroom.id
@@ -1425,5 +1425,8 @@
 	}
 	.DMList {
 		border: solid rgba(0, 139, 139, 0.568);
+	}
+	.Enter {
+		width: 25%;
 	}
 </style>

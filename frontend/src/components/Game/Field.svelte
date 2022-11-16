@@ -68,8 +68,8 @@
 <svelte:window bind:innerWidth bind:innerHeight/>
 
 <div style="display:none;">
-    <img id="ball" src="static/canva_ball.png"/>
-    <img id="grass" src="static/grass.jpeg"/>
+    <img id="ball" alt="A ball" src="static/canva_ball.png"/>
+    <img id="grass" alt="grass" src="static/grass.jpeg"/>
 </div>
 
 <div class="h-100 d-flex align-items-center justify-content-center">

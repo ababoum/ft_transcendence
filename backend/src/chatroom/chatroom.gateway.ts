@@ -1,7 +1,7 @@
 import {Logger} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import {ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
-import { ChatRoom, DirectMessagesRoom } from "@prisma/client";
+import {OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, WebSocketGateway, WebSocketServer} from "@nestjs/websockets";
+import { DirectMessagesRoom } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
 import {Socket, Server} from "socket.io";
 import { jwtConstants } from "../auth/auth.constants";
