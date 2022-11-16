@@ -24,7 +24,7 @@ export class AuthController {
 	@Post('login')
 	async login(@Body() body: LoginDto, @Request() req: RequestWithUser) {
 
-		const user = await this.userService.user({ login: req.user.login });
+		const user = await this.userService.getUser({ login: req.user.login });
 
 		// check if login exists
 		if (!user) {

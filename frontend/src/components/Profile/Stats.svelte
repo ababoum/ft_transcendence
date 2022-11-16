@@ -11,7 +11,7 @@
 	let matches;
 
 	onMount(async () => {
-		matches = await get_matches(profile.login);
+		matches = await get_matches(profile.nickname);
 		wins = matches.filter((match) => match.winnerLogin === profile.login).length;
 		losses = matches.filter((match) => match.loserLogin === profile.login).length;
 	});

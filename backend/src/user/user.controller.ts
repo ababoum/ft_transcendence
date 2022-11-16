@@ -51,8 +51,10 @@ export class UserController {
 	/////////////////////// ACCESS USER INFO ////////////////////////
 
 	@Get('id/:id')
-	async getUserById(@Param('id') id: string): Promise<UserModel> {
-		const user = await this.userService.user({ id: Number(id) });
+	async getUserById(@Param('id') id: string) {
+		const user = await this.userService.getUser({
+			id: Number(id)
+		});
 
 		if (!user)
 			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
@@ -60,18 +62,20 @@ export class UserController {
 	}
 
 	@Get('profile/:nickname')
-	async getUserByLogin(@Param('nickname') nickname: string): Promise<UserModel> {
-		const user = await this.userService.user({ nickname: nickname });
+	async getUserByLogin(@Param('nickname') nickname: string) {
+		const user = await this.userService.getUser({
+			nickname: nickname
+		});
 
 		if (!user)
 			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
 		return user;
 	}
 
-	@Get()
-	async findUsersById(): Promise<UserModel[]> {
-		return await this.userService.users({});
-	}
+	// @Get()
+	// async findUsersById(): Promise<UserModel[]> {
+	// 	return await this.userService.users({});
+	// }
 
 	// public data of a user
 	@Get('public/:nickname')
@@ -86,9 +90,10 @@ export class UserController {
 	@Post('create')
 	@ApiBody({ type: CreateUserDto })
 	async signupUser(
-		@Body() userData: CreateUserDto)
-		: Promise<UserModel> {
-		return this.userService.createUser(userData);
+		@Body() userData: CreateUserDto) {
+
+		const new_user = await this.userService.createUser(userData);
+		return new_user;
 	}
 
 	// @Delete('id/:id')
@@ -139,7 +144,7 @@ export class UserController {
 		@Request() req,
 		@Body() body: UpdatePasswordDto) {
 
-		const usr = await this.userService.user({ login: req.user.login });
+		const usr = await this.userService.getUser({ login: req.user.login });
 		// check old password only if it was not random (42-logged in user)
 		if (!usr.random_password) {
 			const valid_user = await this.authService.validateUser(req.user.login, body.old_password);
@@ -184,8 +189,7 @@ export class UserController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('/myfriends')
-	async getMyFriendsList(@Req() req)
-		: Promise<UserModel[]> {
+	async getMyFriendsList(@Req() req) {
 		return await this.userService.friendsbyLogin(req.user.login);
 	}
 
@@ -264,7 +268,7 @@ export class UserController {
 		: Promise<StreamableFile> {
 
 		const img_object: ImageModel = await this.userService.image({
-			id: await this.userService.user({ nickname: nickname }).then(usr => usr.imageId)
+			id: await this.userService.getUser({ nickname: nickname }).then(usr => usr.imageId)
 		});
 
 		const file = createReadStream(img_object.filepath);
@@ -281,7 +285,7 @@ export class UserController {
 		@Param('nickname') nickname: string)
 		: Promise<string> {
 
-		return await this.userService.user({ nickname: nickname })
+		return await this.userService.getUser({ nickname: nickname })
 			.then(user => user.profile_picture);
 	}
 

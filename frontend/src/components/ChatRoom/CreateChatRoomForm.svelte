@@ -1,6 +1,6 @@
 <script>
     import { getCookie } from "../../stores/auth";
-
+    import { BACKEND_URL } from "../../stores/store";
 
 	let name;
 	let mode = "PUBLIC";
@@ -10,7 +10,7 @@
 		const formData = new FormData(e.target);
 		console.log("createChatRoomForm " + name + " " + mode + " " + password)
 
-		const rawresponse = await fetch('http://localhost:3000/chatrooms', {
+		const rawresponse = await fetch(get(BACKEND_URL) + '/chatrooms', {
 			method: 'POST',
 			headers: {	
 				"Authorization": "Bearer " + getCookie("jwt"),

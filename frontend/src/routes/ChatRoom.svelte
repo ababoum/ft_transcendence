@@ -2,7 +2,7 @@
 	import Header from "../components/Nav.svelte";
 	import { push } from "svelte-spa-router";
 	import { onDestroy, onMount } from "svelte";
-	import { user, game_socket } from "../stores/store";
+	import { user, game_socket, BACKEND_URL, SOCKET_URL } from "../stores/store";
 	import { getCookie } from "../stores/auth";
 	import Modal, { getModal } from "../components/Profile/Modal.svelte";
 	import CreateChatRoomForm from "../components/ChatRoom/CreateChatRoomForm.svelte";
@@ -10,6 +10,7 @@
 	import UserProfile from "../components/Profile/UserProfile.svelte";
 	import { io, Socket } from "socket.io-client";
 	import { xlink_attr } from "svelte/internal";
+    import { get } from "svelte/store";
 
 	let tmp: boolean;
 	let chatRoomsList = [];
@@ -38,7 +39,7 @@
 		catch (e) { console.log("Backend unavailable") }
 		if (!$user.isLogged) await push("/login");
 		else {
-			chatroom_socket = io("http://localhost:5678/chatroom", {
+			chatroom_socket = io(`${get(SOCKET_URL)}/chatroom`, {
 				query: {
 					token: getCookie("jwt"),
 				},
@@ -48,7 +49,7 @@
 			await getBlockList();
 			while (chatroom_socket.id === undefined) {
 				console.log("Socket not connected: " + chatroom_socket.id);
-				chatroom_socket = io("http://localhost:5678/chatroom", {
+				chatroom_socket = io(`${get(SOCKET_URL)}/chatroom`, {
 				query: {
 					token: getCookie("jwt"),
 				},
@@ -113,7 +114,7 @@
 	});
 
 	async function getChatRoomsList() {
-		chatRoomsList = await fetch("http://localhost:3000/chatrooms", {
+		chatRoomsList = await fetch(get(BACKEND_URL) + "/chatrooms", {
 			method: "GET",
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
 		}).then((chatrooms) => chatrooms.json());
@@ -123,7 +124,7 @@
 
 	async function getDirectMessagesRoomsList() {
 		directMessagesRoomsList = await fetch(
-			"http://localhost:3000/chatrooms/directmessages",
+			get(BACKEND_URL) + "/chatrooms/directmessages",
 			{
 				method: "GET",
 				headers: { Authorization: "Bearer " + getCookie("jwt") },
@@ -134,7 +135,7 @@
 	}
 
 	async function getBlockList() {
-		blockList = await fetch("http://localhost:3000/users/blockList", {
+		blockList = await fetch(get(BACKEND_URL) + "/users/blockList", {
 			method: "GET",
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
 		}).then((blockList) => blockList.json());
@@ -146,7 +147,7 @@
 		console.log("In joinChatRoom " + chatRoomId);
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/join",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/join",
 			{
 				method: "PATCH",
 				headers: {
@@ -167,7 +168,7 @@
 		);
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/joinProtected",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/joinProtected",
 			{
 				method: "PATCH",
 				headers: {
@@ -187,7 +188,7 @@
 
 		if (activeChatRoomId) {
 			const test = await fetch(
-				"http://localhost:3000/chatrooms/" + activeChatRoomId + "/exit",
+				get(BACKEND_URL) + "/chatrooms/" + activeChatRoomId + "/exit",
 				{
 					method: "PATCH",
 					headers: {
@@ -202,7 +203,7 @@
 		activeChatRoomId = undefined;
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/leave",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/leave",
 			{
 				method: "PATCH",
 				headers: {
@@ -221,7 +222,7 @@
 
 		if (activeChatRoomId && type === "CHAT") {
 			const test = await fetch(
-				"http://localhost:3000/chatrooms/" + activeChatRoomId + "/exit",
+				get(BACKEND_URL) + "/chatrooms/" + activeChatRoomId + "/exit",
 				{
 					method: "PATCH",
 					headers: {
@@ -233,7 +234,7 @@
 			);
 		} else if (activeChatRoomId && type === "DM") {
 			const test = await fetch(
-				"http://localhost:3000/chatrooms/directmessages/" +
+				get(BACKEND_URL) + "/chatrooms/directmessages/" +
 					activeChatRoomId +
 					"/exit",
 				{
@@ -252,7 +253,7 @@
 		title = chatRoomsList[activeChatRoomId - 1].name;
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/messages",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/messages",
 			{
 				method: "PATCH",
 				headers: {
@@ -276,7 +277,7 @@
 
 		if (activeChatRoomId && type === "CHAT") {
 			const test = await fetch(
-				"http://localhost:3000/chatrooms/" + activeChatRoomId + "/exit",
+				get(BACKEND_URL) + "/chatrooms/" + activeChatRoomId + "/exit",
 				{
 					method: "PATCH",
 					headers: {
@@ -288,7 +289,7 @@
 			);
 		} else if (activeChatRoomId && type === "DM") {
 			const test = await fetch(
-				"http://localhost:3000/chatrooms/directmessages/" +
+				get(BACKEND_URL) + "/chatrooms/directmessages/" +
 					activeChatRoomId +
 					"/exit",
 				{
@@ -307,7 +308,7 @@
 		title = "Direct Message";
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/directmessages/" +
+			get(BACKEND_URL) + "/chatrooms/directmessages/" +
 				DMRoomId +
 				"/messages",
 			{
@@ -336,7 +337,7 @@
 			return alert("Can't ban the owner");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/banUser",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/banUser",
 			{
 				method: "PATCH",
 				headers: {
@@ -361,7 +362,7 @@
 			return alert("Please provide a nickname");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/unbanUser",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/unbanUser",
 			{
 				method: "PATCH",
 				headers: {
@@ -386,7 +387,7 @@
 			return alert("Please provide a nickname");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/adminUser",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/adminUser",
 			{
 				method: "PATCH",
 				headers: {
@@ -412,7 +413,7 @@
 			return alert("Can't unadmin the owner");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/unadminUser",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/unadminUser",
 			{
 				method: "PATCH",
 				headers: {
@@ -441,7 +442,7 @@
 			return alert("Can't mute the owner");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/muteUser",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/muteUser",
 			{
 				method: "PATCH",
 				headers: {
@@ -470,7 +471,7 @@
 			return alert("Please provide a nickname");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/unmuteUser",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/unmuteUser",
 			{
 				method: "PATCH",
 				headers: {
@@ -502,7 +503,7 @@
 
 		if (type === "CHAT") {
 			const rawresponse = await fetch(
-				"http://localhost:3000/chatrooms/" +
+				get(BACKEND_URL) + "/chatrooms/" +
 					activeChatRoomId +
 					"/messages",
 				{
@@ -518,7 +519,7 @@
 			console.log(res);
 		} else {
 			const rawresponse = await fetch(
-				"http://localhost:3000/chatrooms/directmessages" +
+				get(BACKEND_URL) + "/chatrooms/directmessages" +
 					activeChatRoomId +
 					"/messages",
 				{
@@ -543,7 +544,7 @@
 			return alert("Please provide a nickname");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/invite",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/invite",
 			{
 				method: "PATCH",
 				headers: {
@@ -570,7 +571,7 @@
 			return alert("Can't kick the owner");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/kick",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/kick",
 			{
 				method: "PATCH",
 				headers: {
@@ -595,7 +596,7 @@
 		else if (password.length > 100) return alert("Password must be at most 100 characters long");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/addPassword",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/addPassword",
 			{
 				method: "PATCH",
 				headers: {
@@ -618,7 +619,7 @@
 		else if (password.length > 100) return alert("Password must be at most 100 characters long");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/changePassword",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/changePassword",
 			{
 				method: "PATCH",
 				headers: {
@@ -638,7 +639,7 @@
 		console.log("In removePassword " + chatRoomId + " chatRoomId");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/" + chatRoomId + "/removePassword",
+			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/removePassword",
 			{
 				method: "PATCH",
 				headers: {
@@ -652,12 +653,12 @@
 	}
 
 	async function blockUser(nickname: string) {
-		console.log("In blockUser " + nickname);
+		// console.log("In blockUser " + nickname);
 		if (nickname === $user.nickname)
 			return alert("You can't block yourself");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/users/blockUser/",
+			get(BACKEND_URL) + "/users/blockUser/",
 			{
 				method: "POST",
 				headers: {
@@ -678,13 +679,13 @@
 	}
 
 	async function unblockUser(nickname: string) {
-		console.log("In blockUser " + nickname);
+		// console.log("In blockUser " + nickname);
 		if (nickname === undefined) return alert("Please provide a nickname");
 		if (nickname === $user.nickname)
 			return alert("You can't unblock yourself");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/users/unblockUser/",
+			get(BACKEND_URL) + "/users/unblockUser/",
 			{
 				method: "DELETE",
 				headers: {
@@ -709,7 +710,7 @@
 		console.log("createDirectMessagesRoomForm with " + participant);
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/chatrooms/directmessages",
+			get(BACKEND_URL) + "/chatrooms/directmessages",
 			{
 				method: "POST",
 				headers: {

@@ -38,7 +38,7 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		try {
 			const verified: JwtPayload = this.JwtService.verify(token, {secret: jwtConstants.secret})
 			this.logger.log("User authenticated: " + verified.username);
-			const user = await this.UserService.user({login: verified.username})
+			const user = await this.UserService.getUser({login: verified.username})
 			this.users.push({connectionId: client, login: verified.username, nickname: user.nickname})
 			//console.log(this.users.map(({connectionId, ...rest}) => connectionId.id + " - " + rest.nickname))
 		}

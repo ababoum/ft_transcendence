@@ -18,6 +18,7 @@ export class UserService {
 		return password;
 	}
 
+	// FOR INTERNAL USE ONLY
 	async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput)
 		: Promise<User | null> {
 
@@ -27,6 +28,27 @@ export class UserService {
 		if (!usr)
 			throw new HttpException("User not found", 404);
 		return usr;
+	}
+
+	async getUser(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
+		const user = await this.prisma.user.findUnique({
+			where: userWhereUniqueInput,
+			select: {
+				id: true,
+				email: true,
+				login: true,
+				nickname: true,
+				status: true,
+				imageId: true,
+				isTwoFAEnabled: true,
+				profile_picture: true,
+				random_password: true,
+				rating: true
+			}
+		});
+		if (!user)
+			throw new HttpException("User not found", 404);
+		return user;
 	}
 
 	async userFindOrCreate(login: string, email: string, FT_id: number, avatar_url: string) {
@@ -99,11 +121,31 @@ export class UserService {
 	/////////////////////// CREATE/DELETE USERS ////////////////////////
 
 
-	async createUser(data: Prisma.UserCreateInput): Promise<User> {
+	async createUser(data: Prisma.UserCreateInput) {
 		try {
-			return await this.prisma.user.create({
+			await this.prisma.user.create({
 				data,
 			});
+
+			const light_new_user = await this.prisma.user.findUnique({
+				where: {
+					login: data.login
+				},
+				select: {
+					id: true,
+					email: true,
+					login: true,
+					nickname: true,
+					status: true,
+					imageId: true,
+					isTwoFAEnabled: true,
+					profile_picture: true,
+					random_password: true,
+					rating: true
+				}
+			});
+
+			return light_new_user;
 		}
 		catch (e) {
 			if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -119,14 +161,32 @@ export class UserService {
 	async updateUser(params: {
 		where: Prisma.UserWhereUniqueInput;
 		data: Prisma.UserUpdateInput;
-	}): Promise<User> {
+	}) {
 		const { where, data } = params;
 
 		try {
-			return await this.prisma.user.update({
+			const updated_user = await this.prisma.user.update({
 				data,
-				where,
+				where
 			});
+
+			const light_updated_user = await this.prisma.user.findUnique({
+				where: params.where,
+				select: {
+					id: true,
+					email: true,
+					login: true,
+					nickname: true,
+					status: true,
+					imageId: true,
+					isTwoFAEnabled: true,
+					profile_picture: true,
+					random_password: true,
+					rating: true
+				}
+			});
+
+			return light_updated_user;
 		}
 		catch (e) {
 			if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -139,13 +199,13 @@ export class UserService {
 		}
 	}
 
-	async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
+	// async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
 
-		const result = await this.prisma.user.delete({
-			where,
-		});
-		return result;
-	}
+	// 	const result = await this.prisma.user.delete({
+	// 		where,
+	// 	});
+	// 	return result;
+	// }
 
 	///////////////////////    UPDATE USER STATUS    ////////////////////////
 
@@ -233,7 +293,7 @@ export class UserService {
 
 	}
 
-	async friendsbyLogin(login: string): Promise<User[]> {
+	async friendsbyLogin(login: string) {
 
 		const me = await this.prisma.user.findUnique({
 			where: { login: login }
@@ -253,6 +313,18 @@ export class UserService {
 				id: {
 					in: friendsListId
 				}
+			},
+			select: {
+				id: true,
+				email: true,
+				login: true,
+				nickname: true,
+				status: true,
+				imageId: true,
+				isTwoFAEnabled: true,
+				profile_picture: true,
+				random_password: true,
+				rating: true
 			}
 		});
 
@@ -388,8 +460,8 @@ export class UserService {
 
 	async unblockUser(userLogin: string, blockedNickname: string) {
 		const relation = await this.prisma.user.findUniqueOrThrow({
-			where: {login: userLogin},
-			select: {blockedList: {where: {nickname: blockedNickname}}}
+			where: { login: userLogin },
+			select: { blockedList: { where: { nickname: blockedNickname } } }
 		})
 		console.log(relation)
 		if (relation.blockedList[0]) {

@@ -1,14 +1,13 @@
 <script lang="ts">
 	import Router from "svelte-spa-router";
-	import {routes} from "./routes";
-	import {Modal} from "svelte-simple-modal";
+	import { routes } from "./routes";
+	import { Modal } from "svelte-simple-modal";
 	import GlobalModalService from "./components/GlobalModal/GlobalModalService.svelte";
-
 </script>
 
 <main>
 	<Modal>
-		<GlobalModalService/>
+		<GlobalModalService />
 	</Modal>
-	<Router {routes}/>
+	<Router {routes} />
 </main>

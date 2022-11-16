@@ -2,24 +2,26 @@ import { get, readable, writable } from "svelte/store";
 import { io } from "socket.io-client";
 import { User } from "../types";
 import { getCookie } from "./auth";
+import { FRONTEND_URL_ENV, BACKEND_URL_ENV, SOCKET_URL_ENV } from "../domain.js"
+
 
 export const PROFILE_PAGE = readable("/profile");
 export const LOBBY_PAGE = readable("/");
 export const LOGIN_PAGE = readable("/log");
 export const CHATROOM_PAGE = readable("/chatroom");
 
-export const FRONTEND_URL = readable('http://localhost:8080');
-export const BACKEND_URL = readable('http://localhost:3000');
-export const GAME_URL = readable('http://localhost:5678');
-export const CHECK_AUTH_URL = readable('http://localhost:3000/auth/check');
-export const GET_PROFILE_URL = readable('http://localhost:3000/auth/profile');
-export const LOGIN_URL = readable('http://localhost:3000/auth/login');
-export const CREATE_ACC_URL = readable('http://localhost:3000/users/create');
-export const TOP_10 = readable('http://localhost:3000/match_history/top10');
-export const GET_NICKNAME_AVATAR = readable('http://localhost:3000/users/avatar/')
+export const FRONTEND_URL = readable(`${FRONTEND_URL_ENV}`);
+export const BACKEND_URL = readable(`${BACKEND_URL_ENV}`);
+export const SOCKET_URL = readable(`${SOCKET_URL_ENV}`);
+export const CHECK_AUTH_URL = readable(`${BACKEND_URL_ENV}/auth/check`);
+export const GET_PROFILE_URL = readable(`${BACKEND_URL_ENV}/auth/profile`);
+export const LOGIN_URL = readable(`${BACKEND_URL_ENV}/auth/login`);
+export const CREATE_ACC_URL = readable(`${BACKEND_URL_ENV}/users/create`);
+export const TOP_10 = readable(`${BACKEND_URL_ENV}/match_history/top10`);
+export const GET_NICKNAME_AVATAR = readable(`${BACKEND_URL_ENV}/users/avatar/`)
 
 export const user = writable(new User());
-export const game_socket = writable(io(get(GAME_URL), {
+export const game_socket = writable(io(get(SOCKET_URL), {
 	query: {
 		token: getCookie("jwt")
 	}
@@ -29,7 +31,7 @@ export const show_nav = writable(true);
 export const friends = writable([]);
 export const myavatar = writable("");
 
-export const GET_CHATROOMS_URL = readable('http://localhost:3000/chatrooms');
+export const GET_CHATROOMS_URL = readable(`${BACKEND_URL_ENV}/chatrooms`);
 
 // TRY TO USE THOSE, WE CAN TEST HOW IT WORKS OUT
 export const login = writable(localStorage.getItem("login") || "login");

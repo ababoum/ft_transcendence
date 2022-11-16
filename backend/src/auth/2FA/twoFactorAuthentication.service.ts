@@ -56,7 +56,7 @@ export class TwoFactorAuthenticationService {
 		return verif;
 	}
 
-	public async disable_TwoFA(login: string): Promise<User> {
+	public async disable_TwoFA(login: string){
 		const user = await this.usersService.updateUser({
 			where: { login: login },
 			data: { isTwoFAEnabled: false }

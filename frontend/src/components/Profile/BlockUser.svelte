@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { user } from "../../stores/store";
+	import { BACKEND_URL, user } from "../../stores/store";
 	import { getCookie } from "../../stores/auth";
+    import { get } from "svelte/store";
 
 	let msg = "";
 	let nickname_to_block;
 
 	async function blockUser() {
 		if (!nickname_to_block) return alert("Please provide a nickname");
-		console.log("In blockUser " + nickname_to_block);
+		// console.log("In blockUser " + nickname_to_block);
 		if (nickname_to_block === $user.nickname)
 			return alert("You can't block yourself");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/users/blockUser/",
+			get(BACKEND_URL) + "/users/blockUser/",
 			{
 				method: "POST",
 				headers: {
@@ -35,12 +36,12 @@
 
 	async function unblockUser() {
 		if (!nickname_to_block) return alert("Please provide a nickname");
-		console.log("In blockUser " + nickname_to_block);
+		// console.log("In blockUser " + nickname_to_block);
 		if (nickname_to_block === $user.nickname)
 			return alert("You can't unblock yourself");
 
 		const rawresponse = await fetch(
-			"http://localhost:3000/users/unblockUser/",
+			get(BACKEND_URL) + "/users/unblockUser/",
 			{
 				method: "DELETE",
 				headers: {

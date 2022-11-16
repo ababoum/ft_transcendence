@@ -65,7 +65,7 @@ export class AuthService {
 
 	public async getCookieWith_2FAJwtAccessToken(login: string) {
 
-		const user = await this.userService.user({login: login});
+		const user = await this.userService.getUser({login: login});
 
 		const payload = { username: user.login, sub: user.id };
 
