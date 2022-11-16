@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { chatRoomType } from '@prisma/client';
 import {
+	IsAlphanumeric,
 	IsEnum,
 	IsNotEmpty,
 	IsOptional,
@@ -14,6 +15,7 @@ export class CreateDirectMessagesRoomDto {
   @MinLength(1)
   @MaxLength(150)
   @IsString()
+  @IsAlphanumeric()
   @ApiProperty()
   nickname: string;
 }
