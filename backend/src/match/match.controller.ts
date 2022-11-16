@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import {Controller, Get, Param, UseGuards } from "@nestjs/common";
 import { MatchService } from "./match.service";
 import { Match as MatchModel, User as UserModel } from '@prisma/client';
 import { UserService } from "../user/user.service";
-import { createMatchDTO } from './match.dto'
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/auth.guards";
 
 @Controller('match_history')
@@ -28,6 +27,7 @@ export class MatchController {
 
 	@Get('/:nickname')
 	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
 	async getUserMatches(@Param('nickname') userNickname: string)
 		: Promise<MatchModel[]> {
 

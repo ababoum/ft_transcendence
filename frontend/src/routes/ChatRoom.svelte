@@ -25,16 +25,12 @@
 	let currentTime;
 	let invite: boolean = true;
 	let chatroom_socket: Socket = undefined;
-	let variable;
 	let title;
-	let ready: boolean = false;
-	let DEBUG = true;
 
 	//Profile popup
 	let user_to_display_nickname;
 
 	onMount(async () => {
-		console.log("Mounting ChatRoom")
 		try { $user = await $user.upd(); } 
 		catch (e) { console.log("Backend unavailable") }
 		if (!$user.isLogged) await push("/login");
@@ -47,19 +43,6 @@
 			await getChatRoomsList();
 			await getDirectMessagesRoomsList();
 			await getBlockList();
-			while (chatroom_socket.id === undefined) {
-				console.log("Socket not connected: " + chatroom_socket.id);
-				chatroom_socket = io(`${get(SOCKET_URL)}/chatroom`, {
-				query: {
-					token: getCookie("jwt"),
-				},
-			});
-				await new Promise((r) => setTimeout(r, 100));
-			}
-			console.log(
-				"All received and socket connected: " + chatroom_socket.id
-			);
-			ready = true;
 
 			const interval = setInterval(() => {
 				currentTime = new Date();
@@ -85,7 +68,7 @@
 
 			chatroom_socket.on("you-have-been-banned", (data) => {
 				console.log(data);
-				if ((data = activeChatRoomId)) {
+				if ((data === activeChatRoomId)) {
 					activeChatRoomId = undefined;
 					messagesList = [];
 					alert("You have been banned from this chatroom");
@@ -94,7 +77,7 @@
 
 			chatroom_socket.on("you-have-been-kicked", (data) => {
 				console.log(data);
-				if ((data = activeChatRoomId)) {
+				if ((data === activeChatRoomId)) {
 					activeChatRoomId = undefined;
 					messagesList = [];
 					alert("You have been kicked from this chatroom");
@@ -157,15 +140,15 @@
 		);
 		const res = await rawresponse.json();
 		console.log(res);
+
+		if (res.statusCode === 401) {alert("You are banned from this room")}
 	}
 
 	async function joinProtectedChatRoom(e) {
 		const formData = new FormData(e.target);
 		const chatRoomId = formData.get("chatroomId");
 		const password = formData.get("password");
-		console.log(
-			"In joinProtectedChatRoom: " + chatRoomId + " password: " + password
-		);
+		console.log("In joinProtectedChatRoom: " + chatRoomId + " password: " + password);
 
 		const rawresponse = await fetch(
 			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/joinProtected",
@@ -181,6 +164,8 @@
 		const res = await rawresponse.json();
 		console.log(res);
 		e.target.reset();
+
+		if (res.statusCode === 401) {alert("You are banned from this room")}
 	}
 
 	async function leaveChatRoom(chatRoomId: number) {
@@ -681,8 +666,7 @@
 	async function unblockUser(nickname: string) {
 		// console.log("In blockUser " + nickname);
 		if (nickname === undefined) return alert("Please provide a nickname");
-		if (nickname === $user.nickname)
-			return alert("You can't unblock yourself");
+		if (nickname === $user.nickname) return alert("You can't unblock yourself");
 
 		const rawresponse = await fetch(
 			get(BACKEND_URL) + "/users/unblockUser/",
@@ -707,7 +691,9 @@
 	async function createDirectMessagesRoomForm(e) {
 		const formData = new FormData(e.target);
 		const participant = formData.get("participant");
-		console.log("createDirectMessagesRoomForm with " + participant);
+
+		if ($user.nickname === participant)
+			return alert("You can't create a room with yourself")
 
 		const rawresponse = await fetch(
 			get(BACKEND_URL) + "/chatrooms/directmessages",
@@ -744,17 +730,10 @@
 	<section style="background-color:darkcyan ; margin-top:50px">
 		<section style="background-color: darkcyan;">
 			<div class="container py-5">
-				{#key ready}
-					{#if ready === false}
+				{#key chatroom_socket}
+					{#if !chatroom_socket}
 						<div>Backend unavailable - chatroom_socket: {chatroom_socket}</div>
 					{:else}
-						{#if DEBUG === true}
-							<div>
-								<p style="color: white;">
-									Type: {type} - activeChatRoomId: {activeChatRoomId} - chatroom_socket: {chatroom_socket.id}
-								</p>
-							</div>
-						{/if}
 						<div class="row">
 							<div class="col-md-12">
 								<div
@@ -780,7 +759,7 @@
 														{#key chatRoomsList}
 															<ul
 																class="list-unstyled mb-0"
-																style="margin-left: 5%;"
+																style="margin-left: 5%; margin-right: 5%"
 															>
 																{#each chatRoomsList as chatroom (chatroom.id)}
 																	<div
@@ -794,7 +773,7 @@
 																				💬 {chatroom.name}
 																				</p>
 																				<button
-																					class="btn btn-primary"
+																					class="btn btn-primary Enter"
 																					on:click={() =>
 																						enterChatRoom(
 																							chatroom.id
@@ -802,7 +781,7 @@
 																					>Enter</button
 																				>
 																				<button
-																					class="btn btn-secondary"
+																					class="btn btn-secondary Enter"
 																					on:click={() =>
 																						leaveChatRoom(
 																							chatroom.id
@@ -842,7 +821,7 @@
 																				🔐 {chatroom.name}
 																				</p>
 																				<button
-																					class="btn btn-primary"
+																					class="btn btn-primary Enter"
 																					on:click={() =>
 																						enterChatRoom(
 																							chatroom.id
@@ -850,7 +829,7 @@
 																					>Enter</button
 																				>
 																				<button
-																					class="btn btn-secondary"
+																					class="btn btn-secondary Enter"
 																					on:click={() =>
 																						leaveChatRoom(
 																							chatroom.id
@@ -882,7 +861,7 @@
 																						name="password"
 																						minlength="3"
 																						placeholder="password"
-																						style="float: right; margin-right: 5%; width:45%"
+																						style="float: right; width:50%"
 																						required
 																					/>
 																					<input
@@ -900,7 +879,7 @@
 																				🤫 {chatroom.name}
 																				</p>
 																				<button
-																					class="btn btn-primary"
+																					class="btn btn-primary Enter"
 																					on:click={() =>
 																						enterChatRoom(
 																							chatroom.id
@@ -908,7 +887,7 @@
 																					>Enter</button
 																				>
 																				<button
-																					class="btn btn-secondary"
+																					class="btn btn-secondary Enter"
 																					on:click={() =>
 																						leaveChatRoom(
 																							chatroom.id
@@ -972,7 +951,7 @@
 													</div>
 													<form
 														on:submit|preventDefault={createDirectMessagesRoomForm}
-														style="width: 100%;"
+														style="width: 100%; margin-top: 10px"
 													>
 														<input
 															type="text"
@@ -1436,17 +1415,23 @@
 	}
 	.message {
 		background-color: rgba(0, 128, 0, 0.315);
+		min-height: 37px;
 		height: auto;
 	}
 	.ownmessage {
 		background-color: rgba(0, 162, 255, 0.26);
+		min-height: 37px;
 		height: auto;
 	}
 	.blockedmessage {
 		background-color: grey;
+		min-height: 37px;
 		height: auto;
 	}
 	.DMList {
 		border: solid rgba(0, 139, 139, 0.568);
+	}
+	.Enter {
+		width: 25%;
 	}
 </style>

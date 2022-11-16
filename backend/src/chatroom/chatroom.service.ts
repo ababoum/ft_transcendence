@@ -1,6 +1,6 @@
-import { HttpCode, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChatRoom, User, UsersMutedinChatRooms, Prisma, DirectMessagesRoom } from '@prisma/client';
+import { Prisma, DirectMessagesRoom } from '@prisma/client';
 import { CreateChatRoomDto } from './dto/create-chatroom.dto';
 import { UpdateChatRoomDto } from './dto/update-chatroom.dto ';
 import { MessageDto } from './dto/message.dto';
@@ -11,12 +11,25 @@ import { CreateDirectMessagesRoomDto } from './dto/create-directmessagesroom.dto
 export class ChatroomService {
 	constructor(private prisma: PrismaService) {}
 
+	private logger: Logger = new Logger('ChatService');
+
 	async chatRoom(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-	  ): Promise<ChatRoom | null> {
-		console.log("chatRoom() called")
+	  ){
 		return await this.prisma.chatRoom.findUniqueOrThrow({
 		  where: userWhereUniqueInput,
+		  select: {
+			id: true,
+			name: true,
+			creationDate: true,
+			mode: true,
+			ownerNickname: true,
+			password: false,
+			admin: {select: {id: true, nickname: true}},
+			participants: {select: {id: true, nickname: true}},
+			banList: {select: {id: true, nickname: true}},
+			muteList: {select: {user: {select: {id: true, nickname: true}}, mutedUntil: true}},
+		}
 		});
 	  }
 
@@ -26,7 +39,6 @@ export class ChatroomService {
 		cursor?: Prisma.UserWhereUniqueInput;
 		where?: Prisma.UserWhereInput;
 	  }){
-		console.log("chatRooms() called")
 		const { skip, take, cursor, where } = params;
 		return await this.prisma.chatRoom.findMany({
 		  skip,
@@ -178,7 +190,7 @@ export class ChatroomService {
 		if (res.banList[0])
 			throw new HttpException("You are banned from this chatroom", 401)
 		if(await bcrypt.compare(password, res.password) == false)
-			throw new HttpException("Wrong password", 401)
+			throw new HttpException("Wrong password", 409)
 		return await this.prisma.chatRoom.update({
 			where: { id: chatroomid },
 			data: {
@@ -227,11 +239,11 @@ export class ChatroomService {
 		const res = await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
 			select: { 
-				participants: {where: {login: userlogin}},
+				admin: {where: {login: userlogin}},
 				banList: {where: {nickname: nickname}}
 		}
 		})
-		if (res.participants[0]) {
+		if (res.admin[0]) {
 			if (res.banList[0])
 				throw new HttpException("This user is banned from this chatroom", 409)
 			try {
@@ -247,7 +259,7 @@ export class ChatroomService {
 				throw new HttpException("User not found", 404)
 			}
 		}
-		throw new HttpException("You are not participant of this chatroom", 401)
+		throw new HttpException("You are not admin of this chatroom", 401)
 	}
 
 	async kickUser(userlogin: string, chatroomid: number, nickname: string) {
@@ -481,7 +493,7 @@ export class ChatroomService {
 // DM //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	async DirectMessagesRoom(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-	): Promise<DirectMessagesRoom | null> {
+	) {
 		return await this.prisma.directMessagesRoom.findUniqueOrThrow({
 		  where: userWhereUniqueInput,
 		});
@@ -513,8 +525,6 @@ export class ChatroomService {
 			where: {login: userlogin},
 			select: {directRoomJoined: {select: {participants:{where:{nickname: CreateDirectMessagesRoomDto.nickname}}}}}
 		})
-		console.log("Found:")
-		console.log(found)
 		if (found.directRoomJoined[0] && found.directRoomJoined[0].participants[0])
 			throw new HttpException("This directMessagesRoom already exists", 409)
 		try {
@@ -559,7 +569,7 @@ export class ChatroomService {
 			})
 			return res.privateMessages
 		}
-		throw new HttpException("You are not participant of this chatroom", 401)
+		throw new HttpException("You are not participant of this directMessagesRoom", 401)
 	}
 
 	async postDirectMessage(userlogin: string, roomid: number, MessageDto: MessageDto) {

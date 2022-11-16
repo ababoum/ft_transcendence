@@ -302,7 +302,6 @@ export class UserController {
 	@UseGuards(JwtAuthGuard)
 	@Get('blockList')
 	async getMyBlockList(@Req() req) {
-		console.log("in getMyBlockList")
 		return await this.userService.getMyBlockList(req.user.login);
 	}
 
