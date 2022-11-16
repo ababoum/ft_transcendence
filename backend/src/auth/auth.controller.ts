@@ -87,13 +87,14 @@ export class AuthController {
 			// we update the user's status here because the frontend can't do it in this situation
 			await this.userService.updateStatus(usr.login, "online");
 			res.cookie('jwt', access_token + "; SameSite=None");
-			res.status(HttpStatus.FOUND).redirect(process.env.FRONTEND_URL);
+			const url = new URL(process.env.FRONTEND_URL);
+			url.port = process.env.FRONT_PORT;
+			res.status(HttpStatus.FOUND).redirect(url.href);
 		}
 		else {
 			const url = new URL(process.env.FRONTEND_URL + "/#/2FA");
 			url.port = process.env.FRONT_PORT;
 			url.searchParams.append('login', usr.login);
-			console.log(url.hash);
 			res.status(HttpStatus.FOUND).redirect(url.href);
 		}
 	}

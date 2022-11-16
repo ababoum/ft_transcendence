@@ -1,6 +1,7 @@
 <script>
     import { getCookie } from "../../stores/auth";
     import { BACKEND_URL } from "../../stores/store";
+	import { get } from "svelte/store";
 
 	let name;
 	let mode = "PUBLIC";

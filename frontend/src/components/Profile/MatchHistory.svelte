@@ -41,18 +41,13 @@
 		const dayNum = date.getDay();
 		const monthName = months[date.getMonth()];
 		const year = date.getFullYear();
-		const hour = date.getHours();
-		const min = date.getMinutes();
+		const hour = ('0' + date.getHours()).slice(-2);
+		const min = ('0' + date.getMinutes()).slice(-2);
 
 		const formatted = `${dayName}, ${dayNum} ${monthName} ${year} at ${hour}:${min}`;
 		return formatted;
 	}
 
-	// onMount(async () => {
-	// 	if (nickname_to_display) {
-	// 		matches = await get_matches(nickname_to_display);
-	// 	}
-	// });
 </script>
 
 <div class="p-4 w-100">
