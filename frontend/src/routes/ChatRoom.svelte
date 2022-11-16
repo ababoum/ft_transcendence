@@ -38,7 +38,7 @@
 		catch (e) { console.log("Backend unavailable") }
 		if (!$user.isLogged) await push("/login");
 		else {
-			chatroom_socket = await io("http://localhost:5678/chatroom", {
+			chatroom_socket = io("http://localhost:5678/chatroom", {
 				query: {
 					token: getCookie("jwt"),
 				},
@@ -48,6 +48,11 @@
 			await getBlockList();
 			while (chatroom_socket.id === undefined) {
 				console.log("Socket not connected: " + chatroom_socket.id);
+				chatroom_socket = io("http://localhost:5678/chatroom", {
+				query: {
+					token: getCookie("jwt"),
+				},
+			});
 				await new Promise((r) => setTimeout(r, 100));
 			}
 			console.log(
