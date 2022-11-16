@@ -4,8 +4,7 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient()
 async function main() {
 	const salt = await bcrypt.genSalt();
-	let hash = await bcrypt.hash("iamfirst", salt);
-	
+	let hash = await bcrypt.hash(String(process.env.ADAMPASSWORD), salt);
 	
 	const adam = await prisma.user.upsert({
 		where: {id: 1},

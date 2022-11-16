@@ -17,7 +17,6 @@ ISSUES:
 
 TO-DO Eliot:
 - Nettoyer l'interface Swagger
-- Mettre le password de Adam/Eve dans .env
 
 TO-DO M'hamed:
 - Seed avatars pour les users Seed ➔ **OK**
@@ -39,7 +38,7 @@ TESTS TO DO:
 
 TO DO
 - Update npm/prisma dans Dockerfile ➔ **Finalement non, il n'y a pas de version node avec la dernière version de npm**
-- Voir pour input field plein d'espaces, interdire les espaces comme caracteres 
+- Voir pour input field plein d'espaces, interdire les espaces comme caracteres **OK**
 - Apres changement d'avatar, cancel fait un probleme ➔ **OK**
 - Tester 42auth + 2FA ➔ **Normalement OK, cas d'usage standard**
 - Voir Modal Profile popup, l'avatar ne change pas quand on regarde des profils differents ➔ **OK**

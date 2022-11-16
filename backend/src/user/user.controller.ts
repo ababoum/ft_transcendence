@@ -51,7 +51,7 @@ export class UserController {
 	/////////////////////// ACCESS USER INFO ////////////////////////
 
 	@Get('id/:id')
-	async getUserById(@Param('id') id: string): Promise<UserModel> {
+	async getUserById(@Param('id') id: number): Promise<UserModel> {
 		const user = await this.userService.user({ id: Number(id) });
 
 		if (!user)
@@ -298,7 +298,6 @@ export class UserController {
 	@UseGuards(JwtAuthGuard)
 	@Get('blockList')
 	async getMyBlockList(@Req() req) {
-		console.log("in getMyBlockList")
 		return await this.userService.getMyBlockList(req.user.login);
 	}
 

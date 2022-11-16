@@ -9,7 +9,6 @@
 	import Avatar from "../components/Avatar.svelte";
 	import UserProfile from "../components/Profile/UserProfile.svelte";
 	import { io, Socket } from "socket.io-client";
-	import { xlink_attr } from "svelte/internal";
 
 	let tmp: boolean;
 	let chatRoomsList = [];
@@ -24,16 +23,12 @@
 	let currentTime;
 	let invite: boolean = true;
 	let chatroom_socket: Socket = undefined;
-	let variable;
 	let title;
-	let ready: boolean = false;
-	let DEBUG = true;
 
 	//Profile popup
 	let user_to_display_nickname;
 
 	onMount(async () => {
-		console.log("Mounting ChatRoom")
 		try { $user = await $user.upd(); } 
 		catch (e) { console.log("Backend unavailable") }
 		if (!$user.isLogged) await push("/login");
@@ -46,19 +41,6 @@
 			await getChatRoomsList();
 			await getDirectMessagesRoomsList();
 			await getBlockList();
-			while (chatroom_socket.id === undefined) {
-				console.log("Socket not connected: " + chatroom_socket.id);
-				chatroom_socket = io("http://localhost:5678/chatroom", {
-				query: {
-					token: getCookie("jwt"),
-				},
-			});
-				await new Promise((r) => setTimeout(r, 100));
-			}
-			console.log(
-				"All received and socket connected: " + chatroom_socket.id
-			);
-			ready = true;
 
 			const interval = setInterval(() => {
 				currentTime = new Date();
@@ -84,7 +66,7 @@
 
 			chatroom_socket.on("you-have-been-banned", (data) => {
 				console.log(data);
-				if ((data = activeChatRoomId)) {
+				if ((data === activeChatRoomId)) {
 					activeChatRoomId = undefined;
 					messagesList = [];
 					alert("You have been banned from this chatroom");
@@ -93,7 +75,7 @@
 
 			chatroom_socket.on("you-have-been-kicked", (data) => {
 				console.log(data);
-				if ((data = activeChatRoomId)) {
+				if ((data === activeChatRoomId)) {
 					activeChatRoomId = undefined;
 					messagesList = [];
 					alert("You have been kicked from this chatroom");
@@ -156,15 +138,15 @@
 		);
 		const res = await rawresponse.json();
 		console.log(res);
+
+		if (res.statusCode === 401) {alert("You are banned from this room")}
 	}
 
 	async function joinProtectedChatRoom(e) {
 		const formData = new FormData(e.target);
 		const chatRoomId = formData.get("chatroomId");
 		const password = formData.get("password");
-		console.log(
-			"In joinProtectedChatRoom: " + chatRoomId + " password: " + password
-		);
+		console.log("In joinProtectedChatRoom: " + chatRoomId + " password: " + password);
 
 		const rawresponse = await fetch(
 			"http://localhost:3000/chatrooms/" + chatRoomId + "/joinProtected",
@@ -180,6 +162,8 @@
 		const res = await rawresponse.json();
 		console.log(res);
 		e.target.reset();
+
+		if (res.statusCode === 401) {alert("You are banned from this room")}
 	}
 
 	async function leaveChatRoom(chatRoomId: number) {
@@ -680,8 +664,7 @@
 	async function unblockUser(nickname: string) {
 		console.log("In blockUser " + nickname);
 		if (nickname === undefined) return alert("Please provide a nickname");
-		if (nickname === $user.nickname)
-			return alert("You can't unblock yourself");
+		if (nickname === $user.nickname) return alert("You can't unblock yourself");
 
 		const rawresponse = await fetch(
 			"http://localhost:3000/users/unblockUser/",
@@ -706,7 +689,9 @@
 	async function createDirectMessagesRoomForm(e) {
 		const formData = new FormData(e.target);
 		const participant = formData.get("participant");
-		console.log("createDirectMessagesRoomForm with " + participant);
+
+		if ($user.nickname === participant)
+			return alert("You can't create a room with yourself")
 
 		const rawresponse = await fetch(
 			"http://localhost:3000/chatrooms/directmessages",
@@ -743,17 +728,10 @@
 	<section style="background-color:darkcyan ; margin-top:50px">
 		<section style="background-color: darkcyan;">
 			<div class="container py-5">
-				{#key ready}
-					{#if ready === false}
+				{#key chatroom_socket}
+					{#if !chatroom_socket}
 						<div>Backend unavailable - chatroom_socket: {chatroom_socket}</div>
 					{:else}
-						{#if DEBUG === true}
-							<div>
-								<p style="color: white;">
-									Type: {type} - activeChatRoomId: {activeChatRoomId} - chatroom_socket: {chatroom_socket.id}
-								</p>
-							</div>
-						{/if}
 						<div class="row">
 							<div class="col-md-12">
 								<div
