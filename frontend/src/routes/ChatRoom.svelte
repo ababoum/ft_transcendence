@@ -779,6 +779,7 @@
 														{#key chatRoomsList}
 															<ul
 																class="list-unstyled mb-0"
+																style="margin-left: 5%;"
 															>
 																{#each chatRoomsList as chatroom (chatroom.id)}
 																	<div

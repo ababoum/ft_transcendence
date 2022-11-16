@@ -23,6 +23,8 @@
 		name = undefined
 		mode = "PUBLIC"
 		password = undefined
+
+		if (res.statusCode === 400) {alert(res.message[0])}
 	}
 </script>
 
