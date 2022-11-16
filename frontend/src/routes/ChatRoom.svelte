@@ -93,7 +93,8 @@
 	});
 
 	onDestroy(() => {
-		chatroom_socket.disconnect();
+		if (chatroom_socket)
+			chatroom_socket.disconnect();
 	});
 
 	async function getChatRoomsList() {
@@ -727,7 +728,7 @@
 												>
 													<div
 														id="chatroomlist"
-														class="overflow-auto"
+														class="overflow-auto DMList rounded"
 														style="position: relative; height: 300px; width:auto; overflow-y: scroll"
 													>
 														{#key chatRoomsList}
@@ -743,7 +744,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				💬 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -775,7 +776,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				💬{chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -791,7 +792,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				🔐 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -813,7 +814,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				🔐 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-danger"
@@ -827,7 +828,7 @@
 																					<p
 																						class="chatroomname"
 																					>
-																						{chatroom.name}
+																					🔐 {chatroom.name}
 																					</p>
 																					<input
 																						type="text"
@@ -849,7 +850,7 @@
 																				<p
 																					class="chatroomname"
 																				>
-																					{chatroom.name}
+																				🤫 {chatroom.name}
 																				</p>
 																				<button
 																					class="btn btn-primary"
@@ -885,7 +886,7 @@
 													>
 													<div
 														id="DMList"
-														class="overflow-auto"
+														class="overflow-auto DMList rounded"
 														style="position: relative; height: 300px; width:auto; overflow-y: scroll"
 													>
 														{#each directMessagesRoomsList as DirectMessagesRoom}
@@ -1400,5 +1401,8 @@
 	.blockedmessage {
 		background-color: grey;
 		height: auto;
+	}
+	.DMList {
+		border: solid rgba(0, 139, 139, 0.568);
 	}
 </style>

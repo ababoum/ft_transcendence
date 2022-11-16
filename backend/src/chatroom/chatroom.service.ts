@@ -49,7 +49,7 @@ export class ChatroomService {
 		});
 	  }
 
-	async createChatRoom(userlogin: string, CreateChatRoomDto: CreateChatRoomDto): Promise<ChatRoom> {
+	async createChatRoom(userlogin: string, CreateChatRoomDto: CreateChatRoomDto){
 		let hash = null
 		if (CreateChatRoomDto.mode == "PROTECTED") {
 			const salt = await bcrypt.genSalt();
@@ -64,7 +64,13 @@ export class ChatroomService {
 				participants: {connect: {login: userlogin}},
 				password: hash
 			},
-			include :{
+			select :{
+				id: true,
+				name: true,
+				creationDate: true,
+				mode: true,
+				ownerNickname: true,
+				password: false,
 				admin: {select: {id: true, nickname: true}},
 				participants: {select: {id: true, nickname: true}},
 		 		banList: {select: {id: true, nickname: true}},

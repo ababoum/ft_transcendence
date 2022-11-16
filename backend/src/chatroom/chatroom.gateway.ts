@@ -53,7 +53,7 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		this.users.splice(this.users.findIndex(x => x.connectionId.id === client.id),1)
 	}
 
-	async createChatroom(chatRoom: ChatRoom) {
+	async createChatroom(chatRoom) {
 		// Update this.chatRoomsList to add this chatRoom
 		this.chatRoomsList.push(chatRoom)
 

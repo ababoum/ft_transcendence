@@ -18,12 +18,9 @@ ISSUES:
 TO-DO Eliot:
 - Gerer l'affichage si le socket n'est pas connecte
 - Nettoyer l'interface Swagger
-- Gerer onDestroy disconnect
-- Ne pas envoyer hashed password
-- Compartimenter DM et Chatroom
-- Logo pour mode des chatroom
 - Ajouter kick
 - Rendre le owner invulnerable
+- Mettre le password de Adam/Eve dans .env
 
 TO-DO M'hamed:
 - Seed avatars pour les users Seed ➔ **OK**
