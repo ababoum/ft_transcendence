@@ -17,7 +17,8 @@
 	const loading_imageSrc = "static/loading_icon.gif";
 
 	onMount(async () => {
-		$user = await $user.upd();
+		try { $user = await $user.upd(); } 
+		catch (e) { console.log("Backend unavailable") }
 
 		if (!$user.isLogged) {
 			full_profile = null;

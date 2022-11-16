@@ -14,7 +14,8 @@
 	let players_count;
 
 	onMount(async () => {
-        $user = await $user.upd()
+		try { $user = await $user.upd(); } 
+		catch (e) { console.log("Backend unavailable") }
 		$game_socket.on('get-games-list', (data, pc) => {
 			game_list = data;
 			players_count = pc;

@@ -5,7 +5,8 @@
 
 	let stats: any = undefined;
 	onMount(async () => {
-		stats = await get_top_10();
+		try {stats = await get_top_10()}
+		catch (e) {}
 	});
 
 </script>

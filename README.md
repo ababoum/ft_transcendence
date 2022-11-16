@@ -19,7 +19,7 @@ TO-DO Eliot:
 - Gerer l'affichage si le socket n'est pas connecte
 - Nettoyer l'interface Swagger
 - Ajouter kick
-- Rendre le owner invulnerable
+- Rendre le owner invulnerable **OK**
 - Mettre le password de Adam/Eve dans .env
 
 TO-DO M'hamed:

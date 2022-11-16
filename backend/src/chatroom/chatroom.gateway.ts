@@ -125,6 +125,21 @@ export class ChatRoomGateway implements OnGatewayInit, OnGatewayConnection, OnGa
 		this.wss.emit('chatrooms-list', this.chatRoomsList)
 	}
 
+	async kickUser(chatRoomId: number, nickname: string, res) {
+		//Update this.chatRoomsList with the new list of participants
+		const chatRoomIndex = await this.chatRoomsList.findIndex(x => x.id === chatRoomId)
+		this.chatRoomsList[chatRoomIndex].participants = res.participants
+
+		// Emit update to everyone
+		this.wss.emit('chatrooms-list', this.chatRoomsList)
+
+		const clients = await this.users.filter(x => x.nickname === nickname)
+		if (clients){
+			clients.forEach(x => x.connectionId.leave(String(chatRoomId)))
+			clients.forEach(x => x.connectionId.emit('you-have-been-kicked', chatRoomId))
+		}
+	}
+
 	async enterChatroom(user, chatRoomId: string, socketId: string) {
 		console.log("User " + user.login + " entering " + chatRoomId + " from connection " + socketId)
 		const found = await this.users.find(x => x.connectionId.id === socketId)

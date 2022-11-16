@@ -9,9 +9,10 @@
 	import { onMount } from "svelte";
 	import { link } from "svelte-spa-router";
 	import {getCookie, logout} from "../stores/auth";
-	import { update_status } from "../stores/requests";
 
-	onMount(async () => ($user = await $user.upd()));
+	onMount(async () => {
+		try { $user = await $user.upd(); } 
+		catch (e) {}});
 
 	async function call_logout() {
 		await logout();

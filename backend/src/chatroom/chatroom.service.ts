@@ -250,6 +250,28 @@ export class ChatroomService {
 		throw new HttpException("You are not participant of this chatroom", 401)
 	}
 
+	async kickUser(userlogin: string, chatroomid: number, nickname: string) {
+		const res = await this.prisma.chatRoom.findUniqueOrThrow({
+			where: { id: chatroomid },
+			select: { 
+				admin: {where: {login: userlogin}},
+				ownerNickname: true
+		}
+		})
+		if (res.ownerNickname === nickname)
+			throw new HttpException("You can't kick the owner", 409)
+		if (res.admin[0]) {
+			return await this.prisma.chatRoom.update({
+				where: { id: chatroomid },
+				data: {
+					participants: { disconnect: { nickname: nickname } },
+				},
+				select: { participants: { select: { id: true, nickname: true } } },
+			});
+		}
+		throw new HttpException("You are not admin of this chatroom", 401)
+	}
+
 // ADMIN //
 	async adminsByChatRoom(chatroomid: number) {
 		return await this.prisma.chatRoom.findUniqueOrThrow({
@@ -264,17 +286,22 @@ export class ChatroomService {
 			select: { owner: true }
 		})
 		if (res.owner.login == userlogin) {
-			return await this.prisma.chatRoom.update({
-			where: { id: chatroomid },
-			data: {
-				admin: { connect: { nickname: UpdateChatRoomDto.nickname } },
-				participants: {connect: {nickname: UpdateChatRoomDto.nickname}}
-			},
-			select: {
-				admin: {select: {id: true, nickname: true}},
-				participants: {select: {id: true, nickname: true}}
+			try {
+				return await this.prisma.chatRoom.update({
+				where: { id: chatroomid },
+				data: {
+					admin: { connect: { nickname: UpdateChatRoomDto.nickname } },
+					participants: {connect: {nickname: UpdateChatRoomDto.nickname}}
+				},
+				select: {
+					admin: {select: {id: true, nickname: true}},
+					participants: {select: {id: true, nickname: true}}
+				}
+				});
 			}
-			});
+			catch {
+				throw new HttpException("User not found", 404)
+			}
 		}
 		throw new HttpException("You are not the owner of this chatroom", 401)
 	}
@@ -307,8 +334,13 @@ export class ChatroomService {
 	async banUser(userlogin: string, chatroomid: number, UpdateChatRoomDto: UpdateChatRoomDto) {
 		const res = await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { admin: {where: {login: userlogin}} }
+			select: { 
+				admin: {where: {login: userlogin}},
+				ownerNickname: true
+			}
 		})
+		if (res.ownerNickname === UpdateChatRoomDto.nickname)
+			throw new HttpException("You can't ban the owner", 409)
 		if (res.admin[0]) {
 			try {
 				return await this.prisma.chatRoom.update({
@@ -358,8 +390,13 @@ export class ChatroomService {
 	async muteUser(userlogin: string, chatroomid: number, UpdateChatRoomDto: UpdateChatRoomDto) {
 		const res = await this.prisma.chatRoom.findUniqueOrThrow({
 			where: { id: chatroomid },
-			select: { admin: {where: {login: userlogin}} }
+			select: { 
+				admin: {where: {login: userlogin}},
+				ownerNickname: true
+			}
 		})
+		if (res.ownerNickname === UpdateChatRoomDto.nickname)
+			throw new HttpException("You can't mute the owner", 409)
 		if (res.admin[0]) {
 			let t = new Date()
 			t.setSeconds(t.getSeconds() + UpdateChatRoomDto.duration)
