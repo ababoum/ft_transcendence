@@ -17,6 +17,7 @@ import {
 	Patch,
 	HttpException,
 	Req,
+	HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
@@ -51,12 +52,20 @@ export class UserController {
 
 	@Get('id/:id')
 	async getUserById(@Param('id') id: string): Promise<UserModel> {
-		return await this.userService.user({ id: Number(id) });
+		const user = await this.userService.user({ id: Number(id) });
+
+		if (!user)
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+		return user;
 	}
 
 	@Get('profile/:nickname')
 	async getUserByLogin(@Param('nickname') nickname: string): Promise<UserModel> {
-		return await this.userService.user({ nickname: nickname });
+		const user = await this.userService.user({ nickname: nickname });
+
+		if (!user)
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+		return user;
 	}
 
 	@Get()
@@ -82,15 +91,15 @@ export class UserController {
 		return this.userService.createUser(userData);
 	}
 
-	@Delete('id/:id')
-	async deleteUserById(@Param('id') id: string): Promise<UserModel> {
-		return this.userService.deleteUser({ id: Number(id) });
-	}
+	// @Delete('id/:id')
+	// async deleteUserById(@Param('id') id: string): Promise<UserModel> {
+	// 	return this.userService.deleteUser({ id: Number(id) });
+	// }
 
-	@Delete('login/:login')
-	async deleteUserByLogin(@Param('login') login: string): Promise<UserModel> {
-		return this.userService.deleteUser({ login: login });
-	}
+	// @Delete('login/:login')
+	// async deleteUserByLogin(@Param('login') login: string): Promise<UserModel> {
+	// 	return this.userService.deleteUser({ login: login });
+	// }
 
 	///////////////////////   UPDATE USER INFO    ///////////////////////
 
@@ -177,7 +186,7 @@ export class UserController {
 	@Get('/myfriends')
 	async getMyFriendsList(@Req() req)
 		: Promise<UserModel[]> {
-		return this.userService.friendsbyLogin(req.user.login);
+		return await this.userService.friendsbyLogin(req.user.login);
 	}
 
 	@Delete('/friend')
@@ -186,7 +195,7 @@ export class UserController {
 		@Req() req: RequestWithUser,
 		@Body() body: NicknameDTO) {
 
-		return this.userService.deleteFriend(req.user.login, body.nickname);
+		return await this.userService.deleteFriend(req.user.login, body.nickname);
 	}
 
 	/////////////////////// MANAGE USER'S AVATAR ////////////////////////

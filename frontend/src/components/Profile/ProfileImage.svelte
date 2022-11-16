@@ -13,24 +13,32 @@
 	// avatar upload
 	let fileinput: any;
 	const onFileSelected = async (e) => {
-		let reload_required: boolean = false;
 		let image = e.target.files[0];
+		if (image === undefined) // cancel button
+			return ; 
 		let data = new FormData();
 		data.append("file", image);
 
-		const img_id = await fetch(get(BACKEND_URL) + "/users/upload_avatar", {
+		const resp = await fetch(get(BACKEND_URL) + "/users/upload_avatar", {
 			method: "POST",
 			body: data,
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
-		}).then( resp => resp.json());
-		$myavatar = get(BACKEND_URL) + "/users/image/" + img_id;
+		});
+		if (resp.ok) {
+			const img_id = await resp.json();
+			$myavatar = get(BACKEND_URL) + "/users/image/" + img_id;
+		} else {
+			alert(
+				"Upload failed!\nMake sure the uploaded file size is less then 2MB, and that the format is jpeg, jpg, or png."
+			);
+		}
 	};
 
 	onMount(async () => {});
 </script>
 
 <div class="avatar">
-	<Avatar nickname={$user.nickname} size="125" personal={true}/>
+	<Avatar nickname={$user.nickname} size="125" personal={true} />
 	<div class="avatar-content">
 		<span
 			class="avatar-text"

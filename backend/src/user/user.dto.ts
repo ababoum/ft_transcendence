@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { chatRoomType } from '@prisma/client';
 import {
+	IsAlphanumeric,
 	IsEmail,
 	IsNotEmpty,
 	IsString,
@@ -10,10 +11,12 @@ import {
 export class CreateUserDto {
 	@IsNotEmpty()
 	@ApiProperty()
+	@IsAlphanumeric()
 	login: string;
 
 	@IsNotEmpty()
 	@ApiProperty()
+	@IsAlphanumeric()
 	nickname: string;
 
 	@IsNotEmpty()
@@ -38,6 +41,7 @@ export class UpdateNicknameDto {
 	@IsNotEmpty()
 	@IsString()
 	@ApiProperty()
+	@IsAlphanumeric()
 	new_nickname: string;
 }
 
@@ -57,5 +61,6 @@ export class NicknameDTO {
 
 	@MinLength(1)
 	@ApiProperty()
+	@IsAlphanumeric()
 	nickname: string;
 }

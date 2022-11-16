@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma, Match } from '@prisma/client';
-import { createMatchDTO } from './dto';
+import { createMatchDTO } from './match.dto';
 import { UserService } from '../user/user.service';
 import { UserModule } from '../user/user.module';
 
