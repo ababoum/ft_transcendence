@@ -31,8 +31,6 @@
         <Header />
     {/if}
 
-
-
     <Statistics game_list="{game_list}" players_count="{players_count}"/>
 
     <div class="h-100 d-flex align-items-center justify-content-center mt-5">

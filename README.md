@@ -54,4 +54,4 @@ TO KNOW ABOUT THE PROJECT
 HOW TO LAUNCH ON THE CLOUD
 - prepare backend.env (DATABASE_URL + correct API KEY)
 - update domain.js with the right urls
-- update backend Dockerfile to launch the right CMD (with or without db reset)
+- update backend Dockerfile to launch the right CMD (with or without db reset: init vs prod)
