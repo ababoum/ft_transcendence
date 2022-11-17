@@ -10,7 +10,7 @@
         <li class="list-group-item">
             <div class="d-flex align-items-center">
                 <div>
-                    <Avatar classes="rounded-circle" size="40" nickname="{leftPlayer.nickname}"/>
+                    <Avatar classes="rounded-circle" size="40" nickname="{leftPlayer.nickname}" personal={false}/>
                 </div>
                 <div class="ms-3">{leftPlayer.nickname}</div>
             </div>
@@ -19,7 +19,7 @@
             <div class="d-flex align-items-center">
                 <div>{rightPlayer.nickname} </div>
                 <div class="ms-3">
-                    <Avatar classes="rounded-circle" size="40" nickname="{rightPlayer.nickname}"/>
+                    <Avatar classes="rounded-circle" size="40" nickname="{rightPlayer.nickname}" personal={false}/>
                 </div>
             </div>
         </li>
