@@ -15,7 +15,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "start:migrate:prod": "prisma migrate reset --force && node dist/main"
+    "start:migrate:init": "prisma migrate reset --force && node dist/main",
+	"start:migrate:prod": "prisma migrate deploy && node dist/main"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
