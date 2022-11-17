@@ -5,18 +5,19 @@ import {
 	IsEmail,
 	IsNotEmpty,
 	IsString,
+	Matches,
 	MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
 	@IsNotEmpty()
 	@ApiProperty()
-	@IsAlphanumeric()
+	@Matches(/^[ A-Za-z0-9_@.-]*$/)
 	login: string;
 
 	@IsNotEmpty()
 	@ApiProperty()
-	@IsAlphanumeric()
+	@Matches(/^[ A-Za-z0-9_@.-]*$/)
 	nickname: string;
 
 	@IsNotEmpty()
@@ -41,7 +42,7 @@ export class UpdateNicknameDto {
 	@IsNotEmpty()
 	@IsString()
 	@ApiProperty()
-	@IsAlphanumeric()
+	@Matches(/^[ A-Za-z0-9_@.-]*$/)
 	new_nickname: string;
 }
 
@@ -61,6 +62,6 @@ export class NicknameDTO {
 
 	@MinLength(1)
 	@ApiProperty()
-	@IsAlphanumeric()
+	@Matches(/^[ A-Za-z0-9_@.-]*$/)
 	nickname: string;
 }

@@ -6,6 +6,7 @@ import {
 	IsNotEmpty,
 	IsOptional,
 	IsString,
+	Matches,
 	MaxLength,
 	MinLength,
 } from 'class-validator';
@@ -15,7 +16,7 @@ export class CreateChatRoomDto {
   @MinLength(1)
   @MaxLength(100)
   @IsString()
-  @IsAlphanumeric()
+  @Matches(/^[ A-Za-z0-9_@.-]*$/)
   @ApiProperty()
   name: string;
  

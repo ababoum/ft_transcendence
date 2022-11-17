@@ -25,6 +25,7 @@
 
 		if (resp.ok) {
 			$friends = await get_friends(profile.login);
+			msg = "";
 		} else {
 			msg = `<p class="text-danger">${await resp
 				.json()

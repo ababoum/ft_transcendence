@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { IsAlphanumeric, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+	IsAlphanumeric,
+	IsNotEmpty,
+	IsNumber,
+	IsOptional,
+	IsString,
+	Matches,
+	MaxLength,
+	MinLength
+} from 'class-validator';
 import { CreateChatRoomDto } from './create-chatroom.dto';
 
 export class UpdateChatRoomDto extends PartialType(CreateChatRoomDto) {
@@ -7,12 +16,12 @@ export class UpdateChatRoomDto extends PartialType(CreateChatRoomDto) {
 	@MinLength(1)
 	@MaxLength(150)
 	@IsString()
-	@IsAlphanumeric()
+	@Matches(/^[ A-Za-z0-9_@.-]*$/)
 	@ApiProperty()
 	nickname: string;
 
 	@IsOptional()
 	@IsNumber()
-	@ApiPropertyOptional({default: "60" })
+	@ApiPropertyOptional({ default: "60" })
 	duration: number;
 }

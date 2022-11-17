@@ -25,7 +25,7 @@ export class Game {
 
 		constructor() {
 			this.radius = 5;
-			this.speed = 2.5;
+			this.speed = 2;
 			this.velocityX = 2;
 			this.velocityY = 2;
 		}
@@ -48,10 +48,11 @@ export class Game {
 		}
 
 		/* Reset ball position and speed */
-		public reset(): void {
+		public reset() {
+
 			this.x = Game.FIELD_WIDTH / 2;
 			this.y = Game.FIELD_HEIGHT / 2;
-			this.speed = 2.5;
+			this.speed = 2;
 			this.velocityX = -this.velocityX;
 		}
 	};
@@ -79,6 +80,7 @@ export class Game {
 
 	/*	Update element's positions */
 	public update(): void {
+		
 		//start
 		this.ball.x += this.ball.velocityX;
 		this.ball.y += this.ball.velocityY;
