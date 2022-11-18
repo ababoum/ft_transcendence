@@ -64,6 +64,7 @@
 				messagesList.push(data);
 				messagesList = [...messagesList];
 				console.log("Received message: " + data.content);
+				scrollToBottom()
 			});
 
 			chatroom_socket.on("you-have-been-banned", (data) => {
@@ -253,8 +254,7 @@
 		messagesList = res;
 		blockList = [...blockList];
 
-		var box = document.getElementById("messages");
-		box.scrollTop = await box.scrollHeight;
+		scrollToBottom()
 	}
 
 	async function enterDirectMessagesRoom(DMRoomId: number) {
@@ -310,8 +310,7 @@
 		messagesList = res;
 		blockList = [...blockList];
 
-		var box = document.getElementById("messages");
-		box.scrollTop = box.scrollHeight;
+		scrollToBottom()
 	}
 
 	async function banUser(chatRoomId: number, usernickname: string) {
@@ -722,6 +721,11 @@
 		user_to_display_nickname = nickname;
 
 		getModal("user_profile").open();
+	}
+
+	async function scrollToBottom() {
+		var box = document.getElementById("messages");
+		box.scrollTop = await box.scrollHeight + 10000;
 	}
 </script>
 
