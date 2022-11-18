@@ -12,7 +12,7 @@ export class CreateDirectMessagesRoomDto {
   @MinLength(1)
   @MaxLength(150)
   @IsString()
-  @Matches(/^[ A-Za-z0-9_@.-]*$/)
+  @Matches(/^[A-Za-z0-9_@.-]*$/)
   @ApiProperty()
   nickname: string;
 }

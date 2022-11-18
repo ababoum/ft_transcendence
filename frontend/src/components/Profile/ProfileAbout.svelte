@@ -151,6 +151,8 @@
 							id="new_nickname"
 							name="new_nickname"
 							placeholder="Your new nickname"
+							minlength="1" maxlength="150"
+							required
 						/>
 					</div>
 					<div class="form-group">
@@ -177,6 +179,8 @@
 							id="new_email"
 							name="new_email"
 							placeholder="Your new email address"
+							minlength="1" maxlength="150"
+							required
 						/>
 					</div>
 					<div class="form-group">
@@ -203,6 +207,7 @@
 								placeholder="Old password"
 								id="old_password"
 								name="old_password"
+								minlength="8" maxlength="150"
 								required
 							/>
 						{/if}
@@ -211,6 +216,7 @@
 							placeholder="New password"
 							id="password"
 							name="new_password"
+							minlength="8" maxlength="150"
 							required
 						/>
 						<input
@@ -218,6 +224,7 @@
 							placeholder="Confirm new password"
 							id="confirm_password"
 							name="confirm_new_password"
+							minlength="8" maxlength="150"
 							required
 						/>
 					</div>

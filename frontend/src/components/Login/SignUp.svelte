@@ -30,22 +30,22 @@
             <p class="text-white-50 mb-5">Please enter your login, email, nickname and password</p>
 
             <div class="form-outline form-white mb-4">
-                <input type="text" id="typeTextX" class="form-control form-control-lg"
+                <input type="text" id="typeTextX" class="form-control form-control-lg" minlength="1" maxlength="150"
                        required bind:value={login}/>
                 <label class="form-label" for="typeTextX">Login</label>
             </div>
             <div class="form-outline form-white mb-4">
-                <input type="text" id="typeNicknameX" class="form-control form-control-lg"
+                <input type="text" id="typeNicknameX" class="form-control form-control-lg" minlength="1" maxlength="150"
                        required bind:value={nickname}/>
                 <label class="form-label" for="typeNicknameX">Nickname <i>(visible to the other users)</i></label>
             </div>
             <div class="form-outline form-white mb-4">
-                <input type="email" id="typeEmailX" class="form-control form-control-lg"
+                <input type="email" id="typeEmailX" class="form-control form-control-lg" minlength="1" maxlength="150"
                        required bind:value={email}/>
                 <label class="form-label" for="typeEmailX">Email</label>
             </div>
             <div class="form-outline form-white mb-4">
-                <input type="password" id="typePasswordX" class="form-control form-control-lg"
+                <input type="password" id="typePasswordX" class="form-control form-control-lg" minlength="8" maxlength="150"
                        required bind:value={password}/>
                 <label class="form-label" for="typePasswordX">Password</label>
             </div>

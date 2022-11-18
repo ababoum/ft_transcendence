@@ -42,6 +42,8 @@
 			type="text"
 			name="nickname"
 			placeholder="Type a player's nickname"
+			minlength="1" 
+			maxlength="150"
 		/>
 		<button type="submit" class="btn btn-info">Add as friend</button>
 	</form>

@@ -15,14 +15,14 @@ export class CreateUserDto {
 	@ApiProperty()
 	@MinLength(1)
 	@MaxLength(150)
-	@Matches(/^[ A-Za-z0-9_@.-]*$/)
+	@Matches(/^[A-Za-z0-9_@.-]*$/)
 	login: string;
 
 	@IsNotEmpty()
 	@ApiProperty()
 	@MinLength(1)
 	@MaxLength(150)
-	@Matches(/^[ A-Za-z0-9_@.-]*$/)
+	@Matches(/^[A-Za-z0-9_@.-]*$/)
 	nickname: string;
 
 	@IsNotEmpty()
@@ -54,7 +54,7 @@ export class UpdateNicknameDto {
 	@MinLength(1)
 	@MaxLength(150)
 	@ApiProperty()
-	@Matches(/^[ A-Za-z0-9_@.-]*$/)
+	@Matches(/^[A-Za-z0-9_@.-]*$/)
 	new_nickname: string;
 }
 
@@ -77,6 +77,6 @@ export class NicknameDTO {
 	@MinLength(1)
 	@MaxLength(150)
 	@ApiProperty()
-	@Matches(/^[ A-Za-z0-9_@.-]*$/)
+	@Matches(/^[A-Za-z0-9_@.-]*$/)
 	nickname: string;
 }

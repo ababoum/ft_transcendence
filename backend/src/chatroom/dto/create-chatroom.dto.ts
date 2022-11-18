@@ -15,7 +15,7 @@ export class CreateChatRoomDto {
   @MinLength(1)
   @MaxLength(100)
   @IsString()
-  @Matches(/^[ A-Za-z0-9_@.-]*$/)
+  @Matches(/^[A-Za-z0-9_@.-]*$/)
   @ApiProperty()
   name: string;
  

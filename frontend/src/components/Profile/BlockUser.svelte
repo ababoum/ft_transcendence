@@ -67,6 +67,8 @@
 		type="text"
 		name="nickname"
 		placeholder="Type a player's nickname"
+		minlength="1" 
+		maxlength="150"
 	/>
 	<button on:click={blockUser} type="button" class="btn btn-danger mx-2"
 		>Block this user</button
