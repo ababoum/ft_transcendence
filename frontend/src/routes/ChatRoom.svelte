@@ -1341,13 +1341,14 @@
 																			class="form-control"
 																			placeholder="nickname"
 																			bind:value={muteNickname}
-																			style="width: 50%"
+																			style="width: 35%"
 																		/>
 																		<input
 																			type="range"
 																			min="1"
 																			max="60"
 																			bind:value={muteDuration}
+																			style="width: 15%"
 																		/>
 																		<button
 																			class="btn btn-success"
