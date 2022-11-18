@@ -128,7 +128,7 @@
 		const res = await rawresponse.json();
 
 		if (res.statusCode === 401) {alert("You are banned from this room")}
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 	}
 
 	async function joinProtectedChatRoom(e) {
@@ -149,9 +149,10 @@
 		);
 		const res = await rawresponse.json();
 		e.target.reset();
+		console.log(res)
 
 		if (res.statusCode === 401) {alert("You are banned from this room")}
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 	}
 
 	async function leaveChatRoom(chatRoomId: number) {
@@ -185,7 +186,7 @@
 		messagesList = [];
 		activeChatRoomId = undefined;
 
-		if (res.statusCode) alert(res.message[0])
+		if (res.statusCode) alert(res.message)
 	}
 
 	async function enterChatRoom(chatRoomId: number) {
@@ -238,7 +239,7 @@
 		messagesList = res;
 		blockList = [...blockList];
 
-		if (res.statusCode) alert(res.message[0])
+		if (res.statusCode) alert(res.message)
 
 		scrollToBottom()
 	}
@@ -294,7 +295,7 @@
 		messagesList = res;
 		blockList = [...blockList];
 
-		if (res.statusCode) alert(res.message[0])
+		if (res.statusCode) alert(res.message)
 
 		scrollToBottom()
 	}
@@ -322,7 +323,7 @@
 		if (res.statusCode === 401) alert("You are not admin");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("Can't ban the owner");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 	}
 
 	async function unbanUser(chatRoomId: number, usernickname: string) {
@@ -344,7 +345,7 @@
 		banNickname = undefined;
 
 		if (res.statusCode === 401) alert("You are not admin");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 	}
 
 	async function adminUser(chatRoomId: number, usernickname: string) {
@@ -369,7 +370,7 @@
 
 		if (res.statusCode === 401) alert("You are not owner");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 	}
 
 	async function unadminUser(chatRoomId: number, usernickname: string) {
@@ -425,7 +426,7 @@
 		if (res.statusCode == 401) alert("You are not admin in this chatroom");
 		else if (res.statusCode == 404) alert("This user doesn't exist");
 		else if (res.statusCode == 409) alert("Can't mute the owner");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 
 	}
 
@@ -449,7 +450,7 @@
 
 		if (res.statusCode === 401) alert("You are not admin in this chatroom");
 		else if (res.statusCode === 404) alert("This user is not muted");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 	}
 
 	async function postMessageForm(e) {
@@ -471,7 +472,7 @@
 				}
 			);
 			const res = await rawresponse.json();
-			if (res.statusCode) alert(res.message[0])
+			if (res.statusCode) alert(res.message)
 		} else {
 			const rawresponse = await fetch(
 				get(BACKEND_URL) + "/chatrooms/directmessages" +
@@ -487,7 +488,7 @@
 				}
 			);
 			const res = await rawresponse.json();
-			if (res.statusCode) alert(res.message[0])
+			if (res.statusCode) alert(res.message)
 		}
 		e.target.reset();
 	}
@@ -513,7 +514,7 @@
 		if (res.statusCode === 401) alert("You are not participant of this room");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("This user is banned from this room");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 
 	}
 
@@ -539,7 +540,7 @@
 
 		if (res.statusCode === 401) alert("You are not admin of this room");
 		else if (res.statusCode === 409) alert("Can't kick the owner");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 	}
 
 	async function addPassword(chatRoomId: number, password: string) {
@@ -560,7 +561,7 @@
 		);
 		const res = await rawresponse.json();
 		roomPassword = undefined
-		if (res.statusCode) alert(res.message[0])
+		if (res.statusCode) alert(res.message)
 	}
 
 	async function changePassword(chatRoomId: number, password: string) {
@@ -665,7 +666,7 @@
 		const res = await rawresponse.json();
 		if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("This DirectMessagesRoom already exist");
-		else if (res.statusCode) alert(res.message[0])
+		else if (res.statusCode) alert(res.message)
 		e.target.reset();
 	}
 

@@ -27,6 +27,7 @@ export class CreateChatRoomDto {
   @IsOptional()
   @MinLength(3)
   @MaxLength(100)
+  @Matches(/^[A-Za-z0-9_@.-]*$/)
   @ApiPropertyOptional()
   password?: string;
 }
