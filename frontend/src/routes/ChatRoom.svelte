@@ -9,7 +9,6 @@
 	import Avatar from "../components/Avatar.svelte";
 	import UserProfile from "../components/Profile/UserProfile.svelte";
 	import { io, Socket } from "socket.io-client";
-	import { xlink_attr } from "svelte/internal";
     import { get } from "svelte/store";
 
 	let tmp: boolean;
@@ -49,26 +48,21 @@
 			}, 1000);
 
 			chatroom_socket.on("chatrooms-list", (data) => {
-				console.log("Received chatrooms-list via emit()");
 				chatRoomsList = data;
-				console.log(chatRoomsList);
+				console.log(chatRoomsList)
 			});
 
 			chatroom_socket.on("directmessagesrooms-list", (data) => {
-				console.log("Received directmessagesrooms-list via emit()");
 				directMessagesRoomsList = data;
-				console.log(directMessagesRoomsList);
 			});
 
 			chatroom_socket.on("message", (data) => {
 				messagesList.push(data);
 				messagesList = [...messagesList];
-				console.log("Received message: " + data.content);
 				scrollToBottom()
 			});
 
 			chatroom_socket.on("you-have-been-banned", (data) => {
-				console.log(data);
 				if ((data === activeChatRoomId)) {
 					activeChatRoomId = undefined;
 					messagesList = [];
@@ -77,7 +71,6 @@
 			});
 
 			chatroom_socket.on("you-have-been-kicked", (data) => {
-				console.log(data);
 				if ((data === activeChatRoomId)) {
 					activeChatRoomId = undefined;
 					messagesList = [];
@@ -102,8 +95,6 @@
 			method: "GET",
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
 		}).then((chatrooms) => chatrooms.json());
-		console.log("Received chatRoomsList via fetch()");
-		console.log(chatRoomsList);
 	}
 
 	async function getDirectMessagesRoomsList() {
@@ -114,8 +105,6 @@
 				headers: { Authorization: "Bearer " + getCookie("jwt") },
 			}
 		).then((rooms) => rooms.json());
-		console.log("Received directMessagesRoomsList via fetch()");
-		console.log(directMessagesRoomsList);
 	}
 
 	async function getBlockList() {
@@ -123,12 +112,9 @@
 			method: "GET",
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
 		}).then((blockList) => blockList.json());
-		console.log("Received blocklist via fetch()");
-		console.log(blockList);
 	}
 
 	async function joinChatRoom(chatRoomId: number) {
-		console.log("In joinChatRoom " + chatRoomId);
 
 		const rawresponse = await fetch(
 			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/join",
@@ -140,7 +126,6 @@
 			}
 		);
 		const res = await rawresponse.json();
-		console.log(res);
 
 		if (res.statusCode === 401) {alert("You are banned from this room")}
 	}
@@ -149,7 +134,6 @@
 		const formData = new FormData(e.target);
 		const chatRoomId = formData.get("chatroomId");
 		const password = formData.get("password");
-		console.log("In joinProtectedChatRoom: " + chatRoomId + " password: " + password);
 
 		const rawresponse = await fetch(
 			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/joinProtected",
@@ -163,14 +147,12 @@
 			}
 		);
 		const res = await rawresponse.json();
-		console.log(res);
 		e.target.reset();
 
 		if (res.statusCode === 401) {alert("You are banned from this room")}
 	}
 
 	async function leaveChatRoom(chatRoomId: number) {
-		console.log("In leaveChatRoom " + chatRoomId);
 
 		if (activeChatRoomId) {
 			const test = await fetch(
@@ -198,13 +180,11 @@
 			}
 		);
 		const res = await rawresponse.json();
-		console.log(res);
 		messagesList = [];
 		activeChatRoomId = undefined;
 	}
 
 	async function enterChatRoom(chatRoomId: number) {
-		console.log("In enterChatRoom " + chatRoomId);
 
 		if (activeChatRoomId && type === "CHAT") {
 			const test = await fetch(
@@ -258,8 +238,6 @@
 	}
 
 	async function enterDirectMessagesRoom(DMRoomId: number) {
-		console.log("In enterChatRoom " + DMRoomId);
-
 		if (activeChatRoomId && type === "CHAT") {
 			const test = await fetch(
 				get(BACKEND_URL) + "/chatrooms/" + activeChatRoomId + "/exit",
@@ -314,7 +292,6 @@
 	}
 
 	async function banUser(chatRoomId: number, usernickname: string) {
-		console.log("In banUser " + usernickname + " room " + chatRoomId);
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
@@ -334,14 +311,12 @@
 		const res = await rawresponse.json();
 		banNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode === 401) alert("You are not admin");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("Can't ban the owner");
 	}
 
 	async function unbanUser(chatRoomId: number, usernickname: string) {
-		console.log("In banUser " + usernickname + " room " + chatRoomId);
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 
@@ -359,12 +334,10 @@
 		const res = await rawresponse.json();
 		banNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode === 401) alert("You are not admin");
 	}
 
 	async function adminUser(chatRoomId: number, usernickname: string) {
-		console.log("In adminUser " + usernickname + " room " + chatRoomId);
 		if ($user.nickname != chatRoomsList[chatRoomId - 1].ownerNickname)
 			return alert("You are not owner");
 		if (usernickname === undefined)
@@ -384,13 +357,11 @@
 		const res = await rawresponse.json();
 		adminNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode === 401) alert("You are not owner");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 	}
 
 	async function unadminUser(chatRoomId: number, usernickname: string) {
-		console.log("In unadminUser " + usernickname + " room " + chatRoomId);
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
@@ -410,7 +381,6 @@
 		const res = await rawresponse.json();
 		adminNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode) alert("This user doesn't exist");
 	}
 
@@ -419,7 +389,6 @@
 		usernickname: string,
 		duration: number
 	) {
-		console.log("In muteUser " + usernickname + " room " + chatRoomId);
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
@@ -442,7 +411,6 @@
 		const res = await rawresponse.json();
 		muteNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode == 401) alert("You are not admin in this chatroom");
 		if (res.statusCode == 404) alert("This user doesn't exist");
 		if (res.statusCode == 409) alert("Can't mute the owner");
@@ -450,7 +418,6 @@
 	}
 
 	async function unmuteUser(chatRoomId: number, usernickname: string) {
-		console.log("In unmuteUser " + usernickname + " room " + chatRoomId);
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 
@@ -468,7 +435,6 @@
 		const res = await rawresponse.json();
 		muteNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode === 401) alert("You are not admin in this chatroom");
 		if (res.statusCode === 404) alert("This user is not muted");
 	}
@@ -476,14 +442,6 @@
 	async function postMessageForm(e) {
 		const formData = new FormData(e.target);
 		const message = formData.get("message");
-		console.log(
-			"In postMessage " +
-				activeChatRoomId +
-				" - message: " +
-				message +
-				" type: " +
-				type
-		);
 
 		if (type === "CHAT") {
 			const rawresponse = await fetch(
@@ -500,7 +458,6 @@
 				}
 			);
 			const res = await rawresponse.json();
-			console.log(res);
 		} else {
 			const rawresponse = await fetch(
 				get(BACKEND_URL) + "/chatrooms/directmessages" +
@@ -516,14 +473,12 @@
 				}
 			);
 			const res = await rawresponse.json();
-			console.log(res);
 		}
 
 		e.target.reset();
 	}
 
 	async function inviteUser(chatRoomId: number, usernickname: string) {
-		console.log("In inviteUser " + usernickname + " room " + chatRoomId);
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 
@@ -541,14 +496,12 @@
 		const res = await rawresponse.json();
 		inviteNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode === 401) alert("You are not participant of this room");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("This user is banned from this room");
 	}
 
 	async function kickUser(chatRoomId: number, usernickname: string) {
-		console.log("In kickUser " + usernickname + " room " + chatRoomId);
 		if (usernickname === undefined)
 			return alert("Please provide a nickname");
 		if (usernickname === chatRoomsList[chatRoomId - 1].ownerNickname)
@@ -568,13 +521,11 @@
 		const res = await rawresponse.json();
 		inviteNickname = undefined;
 
-		console.log(res);
 		if (res.statusCode === 401) alert("You are not admin of this room");
 		else if (res.statusCode === 409) alert("Can't kick the owner");
 	}
 
 	async function addPassword(chatRoomId: number, password: string) {
-		console.log("In addPassword " + password + " room " + chatRoomId);
 		if (password === undefined) return alert("Please provide a password");
 		else if (password.length < 3) return alert("Password must be at least 3 characters long");
 		else if (password.length > 100) return alert("Password must be at most 100 characters long");
@@ -593,11 +544,9 @@
 		const res = await rawresponse.json();
 		roomPassword = undefined
 
-		console.log(res);
 	}
 
 	async function changePassword(chatRoomId: number, password: string) {
-		console.log("In changePassword " + password + " room " + chatRoomId);
 		if (password === undefined) return alert("Please provide a password");
 		else if (password.length < 3) return alert("Password must be at least 3 characters long");
 		else if (password.length > 100) return alert("Password must be at most 100 characters long");
@@ -616,11 +565,9 @@
 		const res = await rawresponse.json();
 		roomPassword = undefined
 
-		console.log(res);
 	}
 
 	async function removePassword(chatRoomId: number) {
-		console.log("In removePassword " + chatRoomId + " chatRoomId");
 
 		const rawresponse = await fetch(
 			get(BACKEND_URL) + "/chatrooms/" + chatRoomId + "/removePassword",
@@ -633,11 +580,9 @@
 		);
 		const res = await rawresponse.json();
 
-		console.log(res);
 	}
 
 	async function blockUser(nickname: string) {
-		// console.log("In blockUser " + nickname);
 		if (nickname === $user.nickname)
 			return alert("You can't block yourself");
 
@@ -658,12 +603,9 @@
 		else if (res.statusCode == 404) alert("User not found")
 		else if (res.statusCode) alert("Can't block this user");
 		else blockList = res;
-
-		console.log(blockList);
 	}
 
 	async function unblockUser(nickname: string) {
-		// console.log("In blockUser " + nickname);
 		if (nickname === undefined) return alert("Please provide a nickname");
 		if (nickname === $user.nickname) return alert("You can't unblock yourself");
 
@@ -683,8 +625,6 @@
 		if (res.statusCode === 404) alert("User not found in your blocklist");
 		else if (res.statusCode) alert("Can't unblock this user");
 		else blockList = res;
-
-		console.log(blockList);
 	}
 
 	async function createDirectMessagesRoomForm(e) {
@@ -706,7 +646,6 @@
 			}
 		);
 		const res = await rawresponse.json();
-		console.log(res);
 		if (res.statusCode === 404) alert("This user doesn't exist");
 		if (res.statusCode === 409)
 			alert("This DirectMessagesRoom already exist");
@@ -763,11 +702,12 @@
 														{#key chatRoomsList}
 															<ul
 																class="list-unstyled mb-0"
-																style="margin-left: 5%; margin-right: 5%"
 															>
+																<div class="p-2 rounded-3 topzone" style="position:relative; width: 100%;">Chatrooms</div>
 																{#each chatRoomsList as chatroom (chatroom.id)}
 																	<div
 																		class="pt-1 d-flex align-items-center"
+																		style="margin-left: 5%; margin-right: 5%"
 																	>
 																		{#if chatroom.mode === "PUBLIC"}
 																			{#if chatroom.participants.find((x) => x.nickname === $user.nickname) !== undefined}
@@ -908,7 +848,7 @@
 													<button
 														type="button"
 														style="margin-bottom: 10px; margin-top: 10px; width: 100%"
-														class="btn btn-info"
+														class="btn btn-success"
 														on:click={getModal(
 															"create_chatroom"
 														).open}
@@ -919,12 +859,13 @@
 														class="overflow-auto DMList rounded"
 														style="position: relative; height: 300px; width:auto; overflow-y: scroll"
 													>
+														<div class="p-2 rounded-3 topzone" style="position:relative; width: 100%;">Direct Messages</div>
 														{#each directMessagesRoomsList as DirectMessagesRoom}
 															{#if DirectMessagesRoom.participants[0].nickname === $user.nickname}
 																{#if blockList.find((x) => x.nickname === DirectMessagesRoom.participants[1].nickname) === undefined}
 																	<p
-																		class="btn btn-primary"
-																		style="width: 100%; margin-bottom: 5px; margin-top: 0px; overflow: hidden"
+																		class="btn btn-info DM"
+																		style="width: 90%; margin-top: 5px; margin-left:5%; margin-right:5%"
 																		on:click={() =>
 																			enterDirectMessagesRoom(
 																				DirectMessagesRoom.id
@@ -938,8 +879,8 @@
 															{:else if DirectMessagesRoom.participants[1].nickname === $user.nickname}
 																{#if blockList.find((x) => x.nickname === DirectMessagesRoom.participants[0].nickname) === undefined}
 																	<p
-																		class="btn btn-primary"
-																		style="width: 100%; margin-bottom: 5px; margin-top: 0px; overflow: hidden"
+																		class="btn btn-info"
+																		style="width: 90%; margin-top: 5px; margin-left:5%; margin-right:5%"
 																		on:click={() =>
 																			enterDirectMessagesRoom(
 																				DirectMessagesRoom.id
@@ -962,7 +903,7 @@
 															name="participant"
 															minlength="3"
 															placeholder="nickname"
-															style="float: left; width:100%"
+															style="float: left; width:100%;"
 															required
 														/>
 													</form>
@@ -984,16 +925,16 @@
 															{title}
 														</p>
 													</div>
-												{/if}
+												<div style="display: flex;">
 												<div
 													id="messages"
 													class="t-3 pe-3"
-													style="position: relative; height: 400px; overflow-y: scroll"
+													style="height: 400px; overflow-y: scroll; width: 70%"
 												>
 													{#each messagesList as message (message)}
 														<div
 															class="d-flex flex-row justify-content-start"
-															style="width: 60%"
+															style="width: 100%"
 														>
 															<Avatar
 																classes="rounded-circle"
@@ -1113,7 +1054,17 @@
 															</div>
 														</div>
 													{/each}
-												</div>
+													</div>
+													<div class="participants">
+														{#if activeChatRoomId}
+														<div class="p-2 rounded-3 topzone">Participants</div>
+														{#each chatRoomsList[activeChatRoomId - 1].participants as participant}
+														<div class="p-2 rounded-3 participant">{participant.nickname}</div>
+														{/each}
+														{/if}
+													</div>
+													</div>
+													{/if}
 
 												{#if activeChatRoomId != undefined}
 													<div
@@ -1403,7 +1354,7 @@
 	.chatroomname {
 		width: 50%;
 		display: inline-block;
-		font-family: "PT Sans", sans-serif;
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
@@ -1412,8 +1363,20 @@
 		height: auto;
 		width: 50%;
 		text-align: center;
-		font-family: "PT Sans", sans-serif;
-		background-color: rgba(0, 139, 139, 0.301);
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		background-color: darkcyan;
+		color: white;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.topzone {
+		height: auto;
+		width: 100%;
+		text-align: center;
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		color: white;
+		background-color: #0d6efd;
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
@@ -1436,7 +1399,35 @@
 	.DMList {
 		border: solid rgba(0, 139, 139, 0.568);
 	}
+	.DM {
+		max-height: 38px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
 	.Enter {
 		width: 25%;
+		max-height: 38px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.participants {
+		width: 30%;
+		overflow-y: auto;
+		height: 400px;
+	}
+	.participant {
+		width: 90%;
+		max-height: 38px;
+		margin-top: 2%;
+		text-align: center;
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		background-color:#0dcaf0;
+		margin-left: 5%;
+		margin-right: 5%;
 	}
 </style>
