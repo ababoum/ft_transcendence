@@ -214,7 +214,7 @@ export class ChatroomService {
 					admin: {select: {id: true, nickname: true}},
 				}
 			});
-			if (res.owner.login == userlogin) {
+			if (res.owner.login === userlogin) {
 				res = await this.prisma.chatRoom.update({
 					where: {id:chatroomid},
 					data: {

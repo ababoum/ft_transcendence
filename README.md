@@ -9,7 +9,6 @@ Pour un 1er lancement
 - cd ..
 - make
 
-
 ISSUES:
 - Les prisma.update renvoie la meme chose si update a eu un effet ou non.
 - UTILISER EXCEPTIONFILTER pour les FindUniqueorThrow
@@ -23,14 +22,9 @@ TO-DO M'hamed:
 - Add a stat component in the user profile (rating, wins, and losses) ➔ **OK**
 - Implement data validation for all user inputs and forms ➔ **OK**
 
-
 TO-DO Anton:
 - Optional customization
 	- Ball's speed
-
-BONUS:
-- Generer une <datalist> de nickname pour les suggestions dans les <input type="text">
-
 
 TESTS TO DO:
 - Run tests on each browser (Chrome, Firefox)
@@ -44,8 +38,6 @@ TO DO
 - Voir Modal Profile popup, l'avatar ne change pas quand on regarde des profils differents ➔ **OK**
 - Ajouter Match History dans Profile Modal ➔ **OK**
 - Refaire une passe sur les services prisma et les proteger avec Try catch si besoin
-
-
 
 
 TO KNOW ABOUT THE PROJECT

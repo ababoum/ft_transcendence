@@ -128,6 +128,7 @@
 		const res = await rawresponse.json();
 
 		if (res.statusCode === 401) {alert("You are banned from this room")}
+		else if (res.statusCode) alert(res.message[0])
 	}
 
 	async function joinProtectedChatRoom(e) {
@@ -150,6 +151,7 @@
 		e.target.reset();
 
 		if (res.statusCode === 401) {alert("You are banned from this room")}
+		else if (res.statusCode) alert(res.message[0])
 	}
 
 	async function leaveChatRoom(chatRoomId: number) {
@@ -182,6 +184,8 @@
 		const res = await rawresponse.json();
 		messagesList = [];
 		activeChatRoomId = undefined;
+
+		if (res.statusCode) alert(res.message[0])
 	}
 
 	async function enterChatRoom(chatRoomId: number) {
@@ -233,6 +237,8 @@
 
 		messagesList = res;
 		blockList = [...blockList];
+
+		if (res.statusCode) alert(res.message[0])
 
 		scrollToBottom()
 	}
@@ -288,6 +294,8 @@
 		messagesList = res;
 		blockList = [...blockList];
 
+		if (res.statusCode) alert(res.message[0])
+
 		scrollToBottom()
 	}
 
@@ -314,6 +322,7 @@
 		if (res.statusCode === 401) alert("You are not admin");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("Can't ban the owner");
+		else if (res.statusCode) alert(res.message[0])
 	}
 
 	async function unbanUser(chatRoomId: number, usernickname: string) {
@@ -335,6 +344,7 @@
 		banNickname = undefined;
 
 		if (res.statusCode === 401) alert("You are not admin");
+		else if (res.statusCode) alert(res.message[0])
 	}
 
 	async function adminUser(chatRoomId: number, usernickname: string) {
@@ -359,6 +369,7 @@
 
 		if (res.statusCode === 401) alert("You are not owner");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
+		else if (res.statusCode) alert(res.message[0])
 	}
 
 	async function unadminUser(chatRoomId: number, usernickname: string) {
@@ -412,8 +423,9 @@
 		muteNickname = undefined;
 
 		if (res.statusCode == 401) alert("You are not admin in this chatroom");
-		if (res.statusCode == 404) alert("This user doesn't exist");
-		if (res.statusCode == 409) alert("Can't mute the owner");
+		else if (res.statusCode == 404) alert("This user doesn't exist");
+		else if (res.statusCode == 409) alert("Can't mute the owner");
+		else if (res.statusCode) alert(res.message[0])
 
 	}
 
@@ -436,7 +448,8 @@
 		muteNickname = undefined;
 
 		if (res.statusCode === 401) alert("You are not admin in this chatroom");
-		if (res.statusCode === 404) alert("This user is not muted");
+		else if (res.statusCode === 404) alert("This user is not muted");
+		else if (res.statusCode) alert(res.message[0])
 	}
 
 	async function postMessageForm(e) {
@@ -458,6 +471,7 @@
 				}
 			);
 			const res = await rawresponse.json();
+			if (res.statusCode) alert(res.message[0])
 		} else {
 			const rawresponse = await fetch(
 				get(BACKEND_URL) + "/chatrooms/directmessages" +
@@ -473,8 +487,8 @@
 				}
 			);
 			const res = await rawresponse.json();
+			if (res.statusCode) alert(res.message[0])
 		}
-
 		e.target.reset();
 	}
 
@@ -499,6 +513,8 @@
 		if (res.statusCode === 401) alert("You are not participant of this room");
 		else if (res.statusCode === 404) alert("This user doesn't exist");
 		else if (res.statusCode === 409) alert("This user is banned from this room");
+		else if (res.statusCode) alert(res.message[0])
+
 	}
 
 	async function kickUser(chatRoomId: number, usernickname: string) {
@@ -523,6 +539,7 @@
 
 		if (res.statusCode === 401) alert("You are not admin of this room");
 		else if (res.statusCode === 409) alert("Can't kick the owner");
+		else if (res.statusCode) alert(res.message[0])
 	}
 
 	async function addPassword(chatRoomId: number, password: string) {
@@ -543,7 +560,7 @@
 		);
 		const res = await rawresponse.json();
 		roomPassword = undefined
-
+		if (res.statusCode) alert(res.message[0])
 	}
 
 	async function changePassword(chatRoomId: number, password: string) {
@@ -647,8 +664,8 @@
 		);
 		const res = await rawresponse.json();
 		if (res.statusCode === 404) alert("This user doesn't exist");
-		if (res.statusCode === 409)
-			alert("This DirectMessagesRoom already exist");
+		else if (res.statusCode === 409) alert("This DirectMessagesRoom already exist");
+		else if (res.statusCode) alert(res.message[0])
 		e.target.reset();
 	}
 
@@ -804,6 +821,7 @@
 																						type="text"
 																						name="password"
 																						minlength="3"
+																						maxlength="100"
 																						placeholder="password"
 																						style="float: right; width:50%"
 																						required
@@ -899,7 +917,8 @@
 														<input
 															type="text"
 															name="participant"
-															minlength="3"
+															minlength="1"
+															maxlength="150"
 															placeholder="nickname"
 															style="float: left; width:100%;"
 															required
@@ -1149,6 +1168,8 @@
 																	<input
 																		type="text"
 																		class="form-control"
+																		minlength="1"
+																		maxlength="150"
 																		placeholder="nickname"
 																		bind:value={inviteNickname}
 																		style="width: 50%"
@@ -1180,6 +1201,8 @@
 																		<input
 																			type="text"
 																			class="form-control"
+																			minlength="1"
+																			maxlength="150"
 																			placeholder="nickname"
 																			bind:value={adminNickname}
 																			style="width: 50%"
@@ -1212,7 +1235,7 @@
 																				class="form-control"
 																				placeholder="password"
 																				minlength="3"
-																				bind:value={roomPassword}
+																				maxlength="100"																				bind:value={roomPassword}
 																				style="width: 50%"
 																			/>
 																			<button
@@ -1232,6 +1255,8 @@
 																			<input
 																				type="text"
 																				class="form-control"
+																				minlength="3"
+																				maxlength="100"		
 																				placeholder="password"
 																				bind:value={roomPassword}
 																				style="width: 50%"
@@ -1263,6 +1288,8 @@
 																		<input
 																			type="text"
 																			class="form-control"
+																			minlength="1"
+																			maxlength="150"		
 																			placeholder="nickname"
 																			bind:value={banNickname}
 																			style="width: 50%"
@@ -1292,6 +1319,8 @@
 																		<input
 																			type="text"
 																			class="form-control"
+																			minlength="1"
+																			maxlength="150"		
 																			placeholder="nickname"
 																			bind:value={muteNickname}
 																			style="width: 35%"
