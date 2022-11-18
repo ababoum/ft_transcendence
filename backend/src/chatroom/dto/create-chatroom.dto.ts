@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { chatRoomType } from '@prisma/client';
 import {
-	IsAlphanumeric,
 	IsEnum,
 	IsNotEmpty,
 	IsOptional,

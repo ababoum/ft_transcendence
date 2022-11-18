@@ -220,6 +220,7 @@ export class ChatroomService {
 					data: {
 						owner: {connect: {id: 1}},
 						admin: {connect: {id: 1}},
+						participants: {connect: {id: 1}},
 					},
 					select: {
 						owner: true, 

@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
-	IsAlphanumeric,
 	IsNotEmpty,
 	IsNumber,
 	IsOptional,
@@ -22,6 +21,7 @@ export class UpdateChatRoomDto extends PartialType(CreateChatRoomDto) {
 
 	@IsOptional()
 	@IsNumber()
+	@IsNotEmpty()
 	@ApiPropertyOptional({ default: "60" })
 	duration: number;
 }

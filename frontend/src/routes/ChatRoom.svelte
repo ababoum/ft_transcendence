@@ -49,7 +49,6 @@
 
 			chatroom_socket.on("chatrooms-list", (data) => {
 				chatRoomsList = data;
-				console.log(chatRoomsList)
 			});
 
 			chatroom_socket.on("directmessagesrooms-list", (data) => {
@@ -95,6 +94,7 @@
 			method: "GET",
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
 		}).then((chatrooms) => chatrooms.json());
+		console.log(chatRoomsList)
 	}
 
 	async function getDirectMessagesRoomsList() {
@@ -706,8 +706,8 @@
 																<div class="p-2 rounded-3 topzone" style="position:relative; width: 100%;">Chatrooms</div>
 																{#each chatRoomsList as chatroom (chatroom.id)}
 																	<div
-																		class="pt-1 d-flex align-items-center"
-																		style="margin-left: 5%; margin-right: 5%"
+																		class="d-flex align-items-center"
+																		style="margin-left: 5%; margin-right: 5%; max-height: 44px"
 																	>
 																		{#if chatroom.mode === "PUBLIC"}
 																			{#if chatroom.participants.find((x) => x.nickname === $user.nickname) !== undefined}
@@ -847,7 +847,7 @@
 													</div>
 													<button
 														type="button"
-														style="margin-bottom: 10px; margin-top: 10px; width: 100%"
+														style="margin-bottom: 10px; margin-top: 5px; width: 100%"
 														class="btn btn-success"
 														on:click={getModal(
 															"create_chatroom"
@@ -865,7 +865,6 @@
 																{#if blockList.find((x) => x.nickname === DirectMessagesRoom.participants[1].nickname) === undefined}
 																	<p
 																		class="btn btn-info DM"
-																		style="width: 90%; margin-top: 5px; margin-left:5%; margin-right:5%"
 																		on:click={() =>
 																			enterDirectMessagesRoom(
 																				DirectMessagesRoom.id
@@ -879,8 +878,7 @@
 															{:else if DirectMessagesRoom.participants[1].nickname === $user.nickname}
 																{#if blockList.find((x) => x.nickname === DirectMessagesRoom.participants[0].nickname) === undefined}
 																	<p
-																		class="btn btn-info"
-																		style="width: 90%; margin-top: 5px; margin-left:5%; margin-right:5%"
+																		class="btn btn-info DM"
 																		on:click={() =>
 																			enterDirectMessagesRoom(
 																				DirectMessagesRoom.id
@@ -1397,13 +1395,18 @@
 		height: auto;
 	}
 	.DMList {
-		border: solid rgba(0, 139, 139, 0.568);
+		border: solid darkcyan;
 	}
 	.DM {
+		width: 90%;
 		max-height: 38px;
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
+		margin-top: 5px;
+		margin-bottom: 0px;
+		margin-left:5%; 
+		margin-right:5%
 	}
 	.Enter {
 		width: 25%;
