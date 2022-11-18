@@ -25,6 +25,7 @@ export class User {
 	rating: number;
 	email: string;
 	isTwoFAEnabled: boolean;
+	random_password: boolean;
 
 	public async upd() {
 		const resp: any = await get_current_user_data();
@@ -35,6 +36,7 @@ export class User {
 			nu.nickname = data.nickname;
 			nu.email = data.email;
 			nu.isTwoFAEnabled = data.isTwoFAEnabled;
+			nu.random_password = data.random_password;
 		} else
 			nu.isLogged = false;
 		if (nu.isLogged != this.isLogged || this.nickname != nu.nickname)

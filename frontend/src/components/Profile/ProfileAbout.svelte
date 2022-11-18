@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import {
 		disable_2fa,
 		update_email,
@@ -18,7 +17,6 @@
 	let updating_password = false;
 	$: profile = profile_data;
 
-	onMount(async () => {});
 
 	function focus_on_element(elem: any) {
 		elem.focus();
@@ -68,7 +66,7 @@
 		const formData = new FormData(e.target);
 		let old_password = "undefined";
 
-		if (!profile.random_password)
+		if (!$user.random_password)
 			old_password = formData.get("old_password").toString();
 
 		const new_password = formData.get("new_password").toString();
@@ -93,6 +91,8 @@
 
 		// close the 'prompt'
 		updating_password = false;
+		$user.random_password = false;
+
 	}
 
 	async function disable2FA() {
@@ -200,7 +200,7 @@
 			<div class="form-container">
 				<form on:submit|preventDefault={updatePassword}>
 					<div class="form-group">
-						{#if !profile.random_password}
+						{#if !$user.random_password}
 							<input
 								use:focus_on_element
 								type="password"
