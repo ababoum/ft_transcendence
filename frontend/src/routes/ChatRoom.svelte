@@ -1073,14 +1073,16 @@
 														</div>
 													{/each}
 													</div>
-													<div class="participants">
-														{#if activeChatRoomId}
-														<div class="p-2 rounded-3 topzone">Participants</div>
-														{#each chatRoomsList[activeChatRoomId - 1].participants as participant}
-														<div class="p-2 rounded-3 participant">{participant.nickname}</div>
-														{/each}
+														{#if type === "CHAT"}
+														<div class="participants">
+															{#if activeChatRoomId}
+															<div class="p-2 rounded-3 topzone">Participants</div>
+															{#each chatRoomsList[activeChatRoomId - 1].participants as participant}
+															<div class="p-2 rounded-3 participant">{participant.nickname}</div>
+															{/each}
+															{/if}
+														</div>
 														{/if}
-													</div>
 													</div>
 													{/if}
 
