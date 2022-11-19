@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {onDestroy, onMount} from 'svelte';
+	import {getContext, onDestroy, onMount} from 'svelte';
 	import {game_socket, user} from "../../stores/store";
 	import Field from "./Field.svelte";
 	import PlayersInfo from "./PlayersInfo.svelte";

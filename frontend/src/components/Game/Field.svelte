@@ -39,7 +39,8 @@
 		if (custom_interface) {
 			context.drawImage(document.getElementById("grass"), 0, 0, canvas.width, canvas.height);
 			paddle_color = "black";
-		}
+		} else
+			paddle_color = "white";
 		draw.rect(leftPlayer.x, leftPlayer.y, paddle.width, paddle.height, scaling, paddle_color);
 		draw.rect(rightPlayer.x, rightPlayer.y, paddle.width, paddle.height, scaling, paddle_color);
 		if (!custom_interface)

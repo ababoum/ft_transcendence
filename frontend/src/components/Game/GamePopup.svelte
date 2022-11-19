@@ -12,7 +12,10 @@
 			is_searching = false;
 			return;
 		}
+		$game_socket.emit("find-game", $user);
+	}
 
+	onMount(() => {
 		$game_socket.on("find-game", (data) => {
 			if (data["status"] == "searching") is_searching = true;
 			if (data["status"] == "found") {
@@ -26,12 +29,7 @@
 					}
 				);
 			}
-        });
-		$game_socket.emit("find-game", $user);
-	}
-
-	onMount(() => {
-
+		});
 	});
 
 	onDestroy(() => {

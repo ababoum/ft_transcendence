@@ -13,6 +13,7 @@ export class Game {
 	private readonly _leftPlayer: SiteUser;
 	private readonly _rightPlayer: SiteUser;
 	private _scoreWasChanged: boolean;
+	private _goalDelay: boolean;
 
 	/*** Nested BALL class ***/
 	private ball = new class {
@@ -49,7 +50,6 @@ export class Game {
 
 		/* Reset ball position and speed */
 		public reset() {
-
 			this.x = Game.FIELD_WIDTH / 2;
 			this.y = Game.FIELD_HEIGHT / 2;
 			this.speed = 2;
@@ -63,6 +63,7 @@ export class Game {
 		this.leftPlayer.is_playing = true;
 		this.rightPlayer.is_playing = true;
 		this.scoreWasChanged = false;
+		this._goalDelay = false;
 
 		this._leftPlayer.x = 0;
 		this._leftPlayer.y = Game.FIELD_HEIGHT / 2 - Game.PADDLE_HEIGHT / 2;
@@ -80,7 +81,10 @@ export class Game {
 
 	/*	Update element's positions */
 	public update(): void {
-		
+		Game.move_paddle(this.leftPlayer);
+		Game.move_paddle(this.rightPlayer);
+		if (this._goalDelay)
+			return;
 		//start
 		this.ball.x += this.ball.velocityX;
 		this.ball.y += this.ball.velocityY;
@@ -89,8 +93,6 @@ export class Game {
 			this.ball.velocityY = -this.ball.velocityY;
 		}
 		//collision check
-		Game.move_paddle(this.leftPlayer);
-		Game.move_paddle(this.rightPlayer);
 		let player: SiteUser = this.ball.x < Game.FIELD_WIDTH / 2 ? this._leftPlayer : this._rightPlayer;
 		if (this.collision(player)) {
 			//if collision, need check where exactly ball touched paddle to change ball direction
@@ -102,14 +104,15 @@ export class Game {
 			this.ball.velocityY = this.ball.speed * Math.sin(angleRad);
 			this.ball.speed += 0.1;
 		}
-		if (this.ball.x - this.ball.radius < 0) {
-			this.rightPlayer.score++;
+		if ((this.ball.x - this.ball.radius < 0) || (this.ball.x + this.ball.radius > Game.FIELD_WIDTH)) {
+			if (this.ball.x - this.ball.radius < 0)
+				this.rightPlayer.score++;
+			else if (this.ball.x + this.ball.radius > Game.FIELD_WIDTH)
+				this.leftPlayer.score++;
 			this.scoreWasChanged = true;
 			this.ball.reset();
-		} else if (this.ball.x + this.ball.radius > Game.FIELD_WIDTH) {
-			this.leftPlayer.score++;
-			this.scoreWasChanged = true;
-			this.ball.reset();
+			this._goalDelay = true;
+			setTimeout(()=> this._goalDelay = false, 1000);
 		}
 	}
 
