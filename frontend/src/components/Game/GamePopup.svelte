@@ -18,7 +18,7 @@
 	onMount(() => {
 		$game_socket.on("find-game", (data) => {
 			if (data["status"] == "searching") is_searching = true;
-			if (data["status"] == "found") {
+			if (data["status"] == "found" && is_searching) {
 				is_searching = false;
 				open(Game,
 					{},

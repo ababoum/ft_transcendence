@@ -15,7 +15,6 @@
 		});
 
 		$game_socket.on('game-invite-accept', () => {
-			console.log("CALLED")
 			open(Game, {}, {
 				styleWindow: {
 					width: '100%'
