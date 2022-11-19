@@ -140,9 +140,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('exit-game')
 	exitGame(@ConnectedSocket() client: Socket): void {
 		let leavedUser = this.getUserBySocket(client);
-		if (leavedUser.is_playing && client == leavedUser.game_socket)
-			this.getUserBySocket(client).is_leaved = true;
-		else
+		if (leavedUser.is_playing && client == leavedUser.game_socket) {
+			leavedUser.is_leaved = true;
+			leavedUser.is_playing = false;
+		} else
 			this.gameServer.deleteSpectator(client);
 		this.updateServerInfo();
 	}

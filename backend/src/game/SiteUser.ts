@@ -36,7 +36,7 @@ export class SiteUser {
 	public resetData(): void {
 		delete this._gameData;
 		this._gameData = new PlayerData();
-		this._is_playing = false;
+		//this._is_playing = false;
 		this._is_leaved = false;
 		this._is_waiting = false;
 		this._is_searching = false;
