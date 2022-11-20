@@ -7,6 +7,7 @@
 	import Statistics from "../components/Lobby/Statistics.svelte";
 	import {Modal} from "svelte-simple-modal";
 	import GamePopup from "../components/Game/GamePopup.svelte";
+    import { logged_once } from "../stores/requests";
 
 	//GAME STAT
 
@@ -21,6 +22,12 @@
 			players_count = pc;
 		});
 		$game_socket.emit('get-games-list');
+
+		if ($user.first_login) {
+			alert("Welcome to Ping me more!\n\nSince this is your first login, you can change \
+your nickname, your avatar, and your password from your profile page.\n\nEnjoy!");
+			await logged_once();
+		}
 	});
 
 	onDestroy(() => $game_socket.removeListener('get-games-list'));

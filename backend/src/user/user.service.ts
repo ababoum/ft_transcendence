@@ -43,7 +43,8 @@ export class UserService {
 				isTwoFAEnabled: true,
 				profile_picture: true,
 				random_password: true,
-				rating: true
+				rating: true,
+				first_login: true
 			}
 		});
 		if (!user)
@@ -141,7 +142,8 @@ export class UserService {
 					isTwoFAEnabled: true,
 					profile_picture: true,
 					random_password: true,
-					rating: true
+					rating: true,
+				first_login: true
 				}
 			});
 
@@ -182,7 +184,8 @@ export class UserService {
 					isTwoFAEnabled: true,
 					profile_picture: true,
 					random_password: true,
-					rating: true
+					rating: true,
+					first_login: true
 				}
 			});
 
@@ -199,13 +202,6 @@ export class UserService {
 		}
 	}
 
-	// async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
-
-	// 	const result = await this.prisma.user.delete({
-	// 		where,
-	// 	});
-	// 	return result;
-	// }
 
 	///////////////////////    UPDATE USER STATUS    ////////////////////////
 

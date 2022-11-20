@@ -18,6 +18,7 @@ export class loginBase {
 export class User {
 	constructor() {
 		this.isLogged = false;
+		this.first_login = false;
 	}
 
 	nickname: string;
@@ -26,6 +27,7 @@ export class User {
 	email: string;
 	isTwoFAEnabled: boolean;
 	random_password: boolean;
+	first_login: boolean;
 
 	public async upd() {
 		const resp: any = await get_current_user_data();
@@ -37,6 +39,7 @@ export class User {
 			nu.email = data.email;
 			nu.isTwoFAEnabled = data.isTwoFAEnabled;
 			nu.random_password = data.random_password;
+			nu.first_login = data.first_login;
 		} else
 			nu.isLogged = false;
 		if (nu.isLogged != this.isLogged || this.nickname != nu.nickname)

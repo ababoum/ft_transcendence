@@ -48,7 +48,8 @@ export class AuthService {
 				login: true,
 				imageId: true,
 				isTwoFAEnabled: true,
-				rating: true
+				rating: true,
+				first_login: true
 			}
 		});
 

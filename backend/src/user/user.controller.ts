@@ -72,11 +72,6 @@ export class UserController {
 		return user;
 	}
 
-	// @Get()
-	// async findUsersById(): Promise<UserModel[]> {
-	// 	return await this.userService.users({});
-	// }
-
 	// public data of a user
 	@Get('public/:nickname')
 	@UseGuards(JwtAuthGuard)
@@ -95,16 +90,6 @@ export class UserController {
 		const new_user = await this.userService.createUser(userData);
 		return new_user;
 	}
-
-	// @Delete('id/:id')
-	// async deleteUserById(@Param('id') id: string): Promise<UserModel> {
-	// 	return this.userService.deleteUser({ id: Number(id) });
-	// }
-
-	// @Delete('login/:login')
-	// async deleteUserByLogin(@Param('login') login: string): Promise<UserModel> {
-	// 	return this.userService.deleteUser({ login: login });
-	// }
 
 	///////////////////////   UPDATE USER INFO    ///////////////////////
 
@@ -164,6 +149,17 @@ export class UserController {
 		);
 
 		return update;
+	}
+
+	@Patch('logged_once')
+	@UseGuards(JwtAuthGuard)
+	async updateUserLoggedOnce(
+		@Req() req: RequestWithUser)
+	{
+		return await this.userService.updateUser({
+			where: { login: req.user.login },
+			data: { first_login: false }
+		});
 	}
 
 	/////////////////////// UPDATE USER STATUS ////////////////////////
@@ -301,7 +297,7 @@ export class UserController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('blockList')
-	async getMyBlockList(@Req() req) {
+	async getMyBlockList(@Req() req: RequestWithUser) {
 		return await this.userService.getMyBlockList(req.user.login);
 	}
 

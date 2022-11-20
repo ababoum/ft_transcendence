@@ -65,6 +65,13 @@ export async function is_authenticated() {
 	return false;
 }
 
+export async function logged_once() {
+	const r = await fetch(get(BACKEND_URL) + '/users/logged_once', {
+		method: 'PATCH',
+		headers: { "Authorization": "Bearer " + getCookie("jwt") }
+	});
+}
+
 
 ////////////////////////////// MANAGE USER INFO //////////////////////////////
 

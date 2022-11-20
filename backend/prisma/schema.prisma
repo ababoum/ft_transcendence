@@ -23,6 +23,7 @@ model User {
     // authentication
     isTwoFAEnabled  Boolean                 @default(false)
     TwoFA_secret    String?
+	first_login		Boolean					@default(true)
     // 42 login: id / profile_picture
     FT_id           Int?                    @unique
     profile_picture String?

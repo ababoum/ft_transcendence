@@ -15,6 +15,7 @@ CREATE TABLE "User" (
     "imageId" INTEGER,
     "isTwoFAEnabled" BOOLEAN NOT NULL DEFAULT false,
     "TwoFA_secret" TEXT,
+    "first_login" BOOLEAN NOT NULL DEFAULT true,
     "FT_id" INTEGER,
     "profile_picture" TEXT,
     "random_password" BOOLEAN NOT NULL DEFAULT false,
