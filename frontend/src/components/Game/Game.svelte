@@ -132,6 +132,8 @@
     {:else}
         <div class="mt-5"></div>
     {/if}
+	<br>
 	Play the game using the up ⬆️ and down ⬇️ arrows.
+	<br>
 	The game ends when a player reaches 12 points or leaves the game.
 {/if}
