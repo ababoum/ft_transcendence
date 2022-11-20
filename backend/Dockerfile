@@ -34,4 +34,4 @@ COPY --chown=node:node --from=build /usr/src/app/dist 			./dist
 
 
 EXPOSE 3000
-CMD [  "npm", "run", "start:migrate:prod" ]
+CMD [  "npm", "run", "start:migrate:init" ]
