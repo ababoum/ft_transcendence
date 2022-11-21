@@ -105,7 +105,6 @@
 			method: "GET",
 			headers: { Authorization: "Bearer " + getCookie("jwt") },
 		}).then((chatrooms) => chatrooms.json());
-		console.log(chatRoomsList)
 	}
 
 	async function getDirectMessagesRoomsList() {
@@ -160,7 +159,6 @@
 		);
 		const res = await rawresponse.json();
 		e.target.reset();
-		console.log(res)
 
 		if (res.statusCode === 401) {alert("You are banned from this room")}
 		else if (res.statusCode) alert(res.message)
