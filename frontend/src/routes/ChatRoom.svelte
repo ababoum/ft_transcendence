@@ -914,6 +914,10 @@
 																			enterDirectMessagesRoom(
 																				DirectMessagesRoom.id
 																			)}
+																		on:keypress={() =>
+																			enterDirectMessagesRoom(
+																				DirectMessagesRoom.id
+																			)}
 																	>
 																		{DirectMessagesRoom
 																			.participants[0]
@@ -1010,6 +1014,12 @@
 																						.author
 																						.nickname
 																				)}
+																			on:keypress={() =>
+																				displayUserProfile(
+																					message
+																						.author
+																						.nickname
+																				)}
 																		>
 																			Profile
 																		</p>
@@ -1018,6 +1028,12 @@
 																				<p
 																					class="dropdown-item"
 																					on:click={() =>
+																						findGame(
+																							message
+																								.author
+																								.nickname
+																						)}
+																					on:keypress={() =>
 																						findGame(
 																							message
 																								.author
@@ -1042,12 +1058,24 @@
 																							.author
 																							.nickname
 																					)}
+																				on:keypress={() =>
+																					blockUser(
+																						message
+																							.author
+																							.nickname
+																					)}
 																			>
 																				Block
 																			</p>
 																			<p
 																				class="dropdown-item"
 																				on:click={() =>
+																					unblockUser(
+																						message
+																							.author
+																							.nickname
+																					)}
+																				on:keypress={() =>
 																					unblockUser(
 																						message
 																							.author

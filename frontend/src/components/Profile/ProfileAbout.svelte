@@ -17,7 +17,6 @@
 	let updating_password = false;
 	$: profile = profile_data;
 
-
 	function focus_on_element(elem: any) {
 		elem.focus();
 	}
@@ -92,7 +91,6 @@
 		// close the 'prompt'
 		updating_password = false;
 		$user.random_password = false;
-
 	}
 
 	async function disable2FA() {
@@ -139,7 +137,11 @@
 		<div>
 			<strong>Nickname:</strong>
 			{$user.nickname}
-			<span class="update-btn" on:click={toggleNickname}>⚙️</span>
+			<span
+				class="update-btn"
+				on:click={toggleNickname}
+				on:keypress={toggleNickname}>⚙️</span
+			>
 		</div>
 		{#if updating_nickname}
 			<div class="form-container">
@@ -151,7 +153,8 @@
 							id="new_nickname"
 							name="new_nickname"
 							placeholder="Your new nickname"
-							minlength="1" maxlength="150"
+							minlength="1"
+							maxlength="150"
 							required
 						/>
 					</div>
@@ -167,7 +170,11 @@
 		<div>
 			<strong>Email:</strong>
 			{$user.email}
-			<span class="update-btn" on:click={toggleEmail}>⚙️</span>
+			<span
+				class="update-btn"
+				on:click={toggleEmail}
+				on:keypress={toggleEmail}>⚙️</span
+			>
 		</div>
 		{#if updating_email}
 			<div class="form-container">
@@ -179,7 +186,8 @@
 							id="new_email"
 							name="new_email"
 							placeholder="Your new email address"
-							minlength="1" maxlength="150"
+							minlength="1"
+							maxlength="150"
 							required
 						/>
 					</div>
@@ -194,7 +202,11 @@
 
 		<div>
 			<strong>Do you want to change your password?</strong>
-			<span class="update-btn" on:click={togglePassword}>⚙️</span>
+			<span
+				class="update-btn"
+				on:click={togglePassword}
+				on:keypress={togglePassword}>⚙️</span
+			>
 		</div>
 		{#if updating_password}
 			<div class="form-container">
@@ -207,7 +219,8 @@
 								placeholder="Old password"
 								id="old_password"
 								name="old_password"
-								minlength="8" maxlength="150"
+								minlength="8"
+								maxlength="150"
 								required
 							/>
 						{/if}
@@ -216,7 +229,8 @@
 							placeholder="New password"
 							id="password"
 							name="new_password"
-							minlength="8" maxlength="150"
+							minlength="8"
+							maxlength="150"
 							required
 						/>
 						<input
@@ -224,7 +238,8 @@
 							placeholder="Confirm new password"
 							id="confirm_password"
 							name="confirm_new_password"
-							minlength="8" maxlength="150"
+							minlength="8"
+							maxlength="150"
 							required
 						/>
 					</div>

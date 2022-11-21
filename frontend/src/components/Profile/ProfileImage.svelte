@@ -14,8 +14,9 @@
 	let fileinput: any;
 	const onFileSelected = async (e) => {
 		let image = e.target.files[0];
-		if (image === undefined) // cancel button
-			return ; 
+		if (image === undefined)
+			// cancel button
+			return;
 		let data = new FormData();
 		data.append("file", image);
 
@@ -44,7 +45,11 @@
 			class="avatar-text"
 			on:click={() => {
 				fileinput.click();
-			}}>Edit avatar</span
+			}}
+			on:keypress={() => {
+				fileinput.click();
+			}}
+			>Edit avatar</span
 		>
 	</div>
 	<input

@@ -27,5 +27,6 @@
 <span
 	class="badge bg-primary rounded-pill"
 	style="cursor: default"
-	on:click={run}>Spectate</span
+	on:click={run}
+	on:keypress={run}>Spectate</span
 >

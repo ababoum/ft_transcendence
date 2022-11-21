@@ -59,6 +59,8 @@
 									<span
 										on:click={() =>
 											displayUserProfile(nickname)}
+										on:keypress={() =>
+											displayUserProfile(nickname)}
 										class="profile-link">{nickname}</span
 									>
 								</h5>
