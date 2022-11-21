@@ -7,5 +7,8 @@
 	{#if $show_nav}
 		<Header />
 	{/if}
-	<p> 404 page not found </p>
+	<div class="mt-5">
+		<p style="font-size: 60px; text-align: center"> 404 page not found </p>
+	</div>
 </main>
+

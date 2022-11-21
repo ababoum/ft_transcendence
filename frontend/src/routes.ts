@@ -16,5 +16,4 @@ export const routes = {
 	"/chatroom": ChatRoom,
 	"/2FA": TwoFA,
 	"/": Lobby,
-	"*": Error_page
-}
+	"*": Error_page}
