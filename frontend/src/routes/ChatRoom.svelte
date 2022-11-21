@@ -47,13 +47,16 @@
 				currentTime = new Date();
 			}, 1000);
 
-			if (!chatroom_socket){
-				chatroom_socket = io(`${get(SOCKET_URL)}/chatroom`, {
-					query: {
-						token: getCookie("jwt"),
-					},
-				});
+			try {
+				if (!chatroom_socket.id){
+					chatroom_socket = io(`${get(SOCKET_URL)}/chatroom`, {
+						query: {
+							token: getCookie("jwt"),
+						},
+					});
+				}
 			}
+			catch (e) {console.log("Socket malfunction")}
 
 			chatroom_socket.on("chatrooms-list", (data) => {
 				chatRoomsList = data;
