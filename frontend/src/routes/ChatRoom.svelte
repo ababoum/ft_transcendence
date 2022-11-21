@@ -47,6 +47,14 @@
 				currentTime = new Date();
 			}, 1000);
 
+			if (!chatroom_socket){
+				chatroom_socket = io(`${get(SOCKET_URL)}/chatroom`, {
+					query: {
+						token: getCookie("jwt"),
+					},
+				});
+			}
+
 			chatroom_socket.on("chatrooms-list", (data) => {
 				chatRoomsList = data;
 			});
@@ -885,6 +893,10 @@
 																	<p
 																		class="btn btn-info DM"
 																		on:click={() =>
+																			enterDirectMessagesRoom(
+																				DirectMessagesRoom.id
+																			)}
+																		on:keypress={() =>
 																			enterDirectMessagesRoom(
 																				DirectMessagesRoom.id
 																			)}
