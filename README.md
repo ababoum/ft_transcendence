@@ -1,5 +1,3 @@
-Site deployé: http://34.163.229.134:8080/
-
 Pour un 1er lancement
 - C/C config/backend.env => backend/.env
 - DB_HOST='postgres' => DB_HOST='localhost'
