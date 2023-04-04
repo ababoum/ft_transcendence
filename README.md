@@ -1,28 +1,36 @@
-Pour un 1er lancement
-- C/C config/backend.env => backend/.env
+# FT_TRANSCENDENCE: A FULL-STACK WEB PROJECT
+
+FT_TRANSCENDENCE is a onepage full-stack website where you can play pong with online players. Features include JWT / 2FA authentication, a chat, private messages, friends list, profiles, a match-making system, a spectating system, and customizations to the pong game such as different backgrounds and colors.
+
+
+* Backend:
+    * NestJS
+    * Prisma for the Object Relational Mapping (ORM)
+* Frontend:
+    * SvelteJS
+* Database:
+    * PostgreSQL
+
+
+
+
+
+## HOW TO LAUNCH THE PROJECT
+
+For a 1st launch:
+- Copy/Paste config/backend.env => backend/.env
 - DB_HOST='postgres' => DB_HOST='localhost'
 - docker-compose up postgres -d
-- Supprimer les dossiers de migration dans backend/prisma/migrations
+- Delete migration folders in backend/prisma/migrations
 - cd backend/
 - npx prisma migrate dev
 - npx prisma generate
 - cd ..
 - make
 
-TESTS TO DO:
-- Run tests on each browser (Chrome, Firefox)
-- Monitor warnings and unhandled errors in the console
-
-TO DO
-- Voir pour input field plein d'espaces, interdire les espaces comme caracteres **OK**
-- Tester 42auth + 2FA ➔ **Normalement OK, cas d'usage standard**
-- SOCKET NE SE CONNECTE PAS APRES 1er LOGIN
 
 
-HOW TO LAUNCH ON THE CLOUD
-- prepare backend.env (DATABASE_URL + correct API KEY)
+## HOW TO LAUNCH ON THE CLOUD
+- prepare backend.env (DATABASE_URL + correct API KEY for 42 Auth)
 - update domain.js with the right urls
 - update backend Dockerfile to launch the right CMD (with or without db reset: init vs prod)]
-
-LAST TESTS:
-- ENLEVER LOGS
